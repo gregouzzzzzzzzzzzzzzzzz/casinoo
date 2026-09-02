@@ -1,0 +1,852 @@
+/* ============================================================
+   CASINO À BOIRE — Design System v2 (Stake.com aesthetic)
+   ============================================================ */
+
+:root {
+  /* ── Backgrounds ─────────────────────────────────────────── */
+  --bg-base:       #0f1923;   /* fond principal, signature Stake */
+  --bg-surface:    #172231;   /* surface légèrement surélevée   */
+  --bg-card:       #1d2d3e;   /* cartes / panneaux               */
+  --bg-card-hover: #243447;   /* hover sur cartes                */
+  --bg-elevated:   #243447;   /* modales, dropdowns              */
+  --bg-input:      #0c1620;   /* fond inputs                     */
+
+  /* ── Borders ─────────────────────────────────────────────── */
+  --border-default: rgba(45, 64, 84, 0.8);
+  --border-subtle:  rgba(45, 64, 84, 0.45);
+  --border-strong:  rgba(45, 64, 84, 1);
+  --border-focus:   #1fff1b;
+
+  /* ── Brand Green (Stake primary) ─────────────────────────── */
+  --green:          #1fff1b;
+  --green-dark:     #16c214;
+  --green-darker:   #0e8a0c;
+  --green-glow:     rgba(31, 255, 27, 0.18);
+  --green-subtle:   rgba(31, 255, 27, 0.10);
+  --green-muted:    rgba(31, 255, 27, 0.06);
+
+  /* ── Semantic Colors ─────────────────────────────────────── */
+  --red:            #e53935;
+  --red-glow:       rgba(229, 57, 53, 0.18);
+  --red-subtle:     rgba(229, 57, 53, 0.10);
+
+  --gold:           #f4c542;
+  --gold-subtle:    rgba(244, 197, 66, 0.12);
+  --gold-glow:      rgba(244, 197, 66, 0.20);
+
+  --blue:           #3b82f6;
+  --blue-subtle:    rgba(59, 130, 246, 0.12);
+
+  /* ── Text ────────────────────────────────────────────────── */
+  --text-primary:   #e2e8f0;
+  --text-secondary: #7c93a8;
+  --text-dim:       #4a6076;
+  --text-inverse:   #0f1923;
+
+  /* ── Typography ──────────────────────────────────────────── */
+  --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+  /* ── Radii ───────────────────────────────────────────────── */
+  --r-xs:   4px;
+  --r-sm:   6px;
+  --r-md:   8px;
+  --r-lg:   12px;
+  --r-xl:   16px;
+  --r-full: 9999px;
+
+  /* ── Shadows ─────────────────────────────────────────────── */
+  --shadow-sm:  0 1px 3px rgba(0,0,0,0.4);
+  --shadow-md:  0 4px 12px rgba(0,0,0,0.5);
+  --shadow-lg:  0 8px 24px rgba(0,0,0,0.6);
+  --shadow-green: 0 0 20px var(--green-glow);
+}
+
+/* ── Reset ─────────────────────────────────────────────────── */
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: var(--font);
+  font-size: 14px;
+  line-height: 1.5;
+  background-color: var(--bg-base);
+  color: var(--text-primary);
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Typography ────────────────────────────────────────────── */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+}
+
+.label-xs {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.label-sm {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+/* ── Stake-style Cards / Panels ────────────────────────────── */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-default);
+  border-radius: var(--r-lg);
+}
+
+.card-surface {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--r-lg);
+}
+
+.card-elevated {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-md);
+}
+
+/* ── Buttons ───────────────────────────────────────────────── */
+.btn {
+  font-family: var(--font);
+  font-weight: 700;
+  font-size: 14px;
+  padding: 10px 20px;
+  border-radius: var(--r-md);
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: background 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
+  text-decoration: none;
+  user-select: none;
+  white-space: nowrap;
+  letter-spacing: 0.01em;
+}
+
+/* Primary — Stake Green */
+.btn-primary {
+  background: var(--green);
+  color: var(--text-inverse);
+  box-shadow: none;
+}
+.btn-primary:hover:not(:disabled) {
+  background: var(--green-dark);
+  box-shadow: var(--shadow-green);
+}
+.btn-primary:active:not(:disabled) {
+  background: var(--green-darker);
+  transform: scale(0.98);
+}
+
+/* Secondary — Surface */
+.btn-secondary {
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+  border: 1px solid var(--border-default);
+}
+.btn-secondary:hover:not(:disabled) {
+  background: #2d4054;
+  border-color: #3d5470;
+}
+
+/* Danger — Red */
+.btn-danger {
+  background: var(--red);
+  color: #fff;
+}
+.btn-danger:hover:not(:disabled) {
+  background: #c62828;
+  box-shadow: 0 0 16px var(--red-glow);
+}
+
+/* Gold — Leader */
+.btn-gold {
+  background: var(--gold);
+  color: var(--text-inverse);
+}
+.btn-gold:hover:not(:disabled) {
+  background: #e6b82f;
+  box-shadow: 0 0 16px var(--gold-glow);
+}
+
+.btn:disabled {
+  opacity: 0.38;
+  cursor: not-allowed;
+}
+
+/* Sizes */
+.btn-lg {
+  font-size: 15px;
+  padding: 13px 24px;
+}
+
+.btn-sm {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 7px 12px;
+  border-radius: var(--r-sm);
+}
+
+.btn-full { width: 100%; }
+
+/* ── Form Inputs ───────────────────────────────────────────── */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.input {
+  width: 100%;
+  padding: 10px 14px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-default);
+  border-radius: var(--r-md);
+  color: var(--text-primary);
+  font-family: var(--font);
+  font-size: 15px;
+  font-weight: 500;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.input:focus {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 2px var(--green-glow);
+}
+
+.input::placeholder {
+  color: var(--text-dim);
+  font-weight: 400;
+}
+
+.input-code {
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-weight: 800;
+  font-size: 18px;
+  text-align: center;
+}
+
+.select {
+  width: 100%;
+  padding: 10px 14px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-default);
+  border-radius: var(--r-md);
+  color: var(--text-primary);
+  font-family: var(--font);
+  font-size: 14px;
+  font-weight: 500;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%237c93a8' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 36px;
+}
+
+.select:focus {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 2px var(--green-glow);
+}
+
+/* Range Slider Stake Style */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 4px;
+  background: var(--border-strong);
+  border-radius: var(--r-full);
+  outline: none;
+  cursor: pointer;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--green);
+  cursor: pointer;
+  border: 2px solid var(--bg-base);
+  box-shadow: 0 0 8px var(--green-glow);
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--green);
+  cursor: pointer;
+  border: 2px solid var(--bg-base);
+  box-shadow: 0 0 8px var(--green-glow);
+}
+
+/* ── Badges ────────────────────────────────────────────────── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: var(--r-xs);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.badge-green {
+  background: var(--green-subtle);
+  color: var(--green);
+  border: 1px solid rgba(31, 255, 27, 0.25);
+}
+
+.badge-red {
+  background: var(--red-subtle);
+  color: #ef5350;
+  border: 1px solid rgba(229, 57, 53, 0.25);
+}
+
+.badge-gold {
+  background: var(--gold-subtle);
+  color: var(--gold);
+  border: 1px solid rgba(244, 197, 66, 0.25);
+}
+
+.badge-blue {
+  background: var(--blue-subtle);
+  color: #60a5fa;
+  border: 1px solid rgba(59, 130, 246, 0.25);
+}
+
+.badge-surface {
+  background: var(--bg-elevated);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-default);
+}
+
+/* ── Stat / KPI Box ────────────────────────────────────────── */
+.stat-box {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--r-md);
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.stat-value {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+}
+
+.stat-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-secondary);
+}
+
+/* ── Player Row ────────────────────────────────────────────── */
+.player-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--r-md);
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.player-row:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--border-default);
+}
+
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--r-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 800;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+/* ── Progress Bar ───────────────────────────────────────────── */
+.progress-track {
+  width: 100%;
+  height: 6px;
+  background: var(--border-strong);
+  border-radius: var(--r-full);
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--green);
+  border-radius: var(--r-full);
+  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.progress-fill-gold {
+  background: var(--gold);
+}
+
+/* ── Room Code Display ─────────────────────────────────────── */
+.room-code {
+  background: var(--bg-input);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-lg);
+  padding: 16px 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+}
+
+.room-code-text {
+  font-size: 48px;
+  font-weight: 900;
+  letter-spacing: 0.2em;
+  text-indent: 0.2em;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Divider ───────────────────────────────────────────────── */
+.divider {
+  height: 1px;
+  background: var(--border-subtle);
+  margin: 0;
+}
+
+.divider-v {
+  width: 1px;
+  background: var(--border-subtle);
+  align-self: stretch;
+}
+
+/* ── Chip Buttons (Bet Quick Select) ────────────────────────── */
+.chip-row {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.chip {
+  padding: 5px 10px;
+  border-radius: var(--r-xs);
+  font-size: 12px;
+  font-weight: 700;
+  border: 1px solid var(--border-default);
+  background: var(--bg-elevated);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.12s ease;
+  user-select: none;
+}
+
+.chip:hover {
+  border-color: var(--green);
+  color: var(--green);
+  background: var(--green-muted);
+}
+
+.chip-active {
+  border-color: var(--green);
+  color: var(--green);
+  background: var(--green-subtle);
+}
+
+/* ── Roulette Color Picker ──────────────────────────────────── */
+.color-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.color-btn {
+  padding: 12px 8px;
+  border-radius: var(--r-md);
+  border: 1.5px solid transparent;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  user-select: none;
+}
+
+.color-btn-red {
+  background: rgba(229, 57, 53, 0.15);
+  color: #ef5350;
+  border-color: rgba(229, 57, 53, 0.3);
+}
+.color-btn-red:hover, .color-btn-red.active {
+  background: rgba(229, 57, 53, 0.25);
+  border-color: #e53935;
+  box-shadow: 0 0 12px rgba(229, 57, 53, 0.2);
+}
+
+.color-btn-black {
+  background: rgba(30, 41, 59, 0.6);
+  color: #94a3b8;
+  border-color: rgba(100, 116, 139, 0.3);
+}
+.color-btn-black:hover, .color-btn-black.active {
+  background: rgba(30, 41, 59, 0.9);
+  border-color: #94a3b8;
+  box-shadow: 0 0 12px rgba(100, 116, 139, 0.15);
+}
+
+.color-btn-green-roulette {
+  background: var(--green-muted);
+  color: var(--green);
+  border-color: rgba(31, 255, 27, 0.2);
+  grid-column: span 2;
+}
+.color-btn-green-roulette:hover, .color-btn-green-roulette.active {
+  background: var(--green-subtle);
+  border-color: var(--green);
+  box-shadow: 0 0 12px var(--green-glow);
+}
+
+/* ── Activity Feed Item ─────────────────────────────────────── */
+.feed-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  background: var(--bg-surface);
+  border-radius: var(--r-sm);
+  border: 1px solid var(--border-subtle);
+  font-size: 13px;
+  animation: slideIn 0.25s ease-out;
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(-8px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* ── Result Cards ───────────────────────────────────────────── */
+.result-win {
+  background: rgba(31, 255, 27, 0.06);
+  border: 1px solid rgba(31, 255, 27, 0.2);
+  border-radius: var(--r-md);
+}
+
+.result-lose {
+  background: rgba(229, 57, 53, 0.06);
+  border: 1px solid rgba(229, 57, 53, 0.2);
+  border-radius: var(--r-md);
+}
+
+/* ── Animations ─────────────────────────────────────────────── */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.5; }
+}
+
+@keyframes greenPulse {
+  0%, 100% { box-shadow: 0 0 0 0 var(--green-glow); }
+  50%       { box-shadow: 0 0 0 6px transparent; }
+}
+
+.animate-in {
+  animation: fadeIn 0.25s ease-out forwards;
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+.animate-pulse {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.animate-green-pulse {
+  animation: greenPulse 2s ease-in-out infinite;
+}
+
+/* ── Dot Status Indicator ───────────────────────────────────── */
+.dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.dot-green  { background: var(--green); }
+.dot-red    { background: var(--red); }
+.dot-gold   { background: var(--gold); }
+.dot-muted  { background: var(--text-dim); }
+
+/* ── Spinning Roulette Screen ───────────────────────────────── */
+.spin-ring {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  border: 3px solid var(--border-strong);
+  border-top-color: var(--green);
+  animation: spin 0.8s linear infinite;
+}
+
+/* ── Utilities ──────────────────────────────────────────────── */
+.text-green   { color: var(--green); }
+.text-red     { color: var(--red); }
+.text-gold    { color: var(--gold); }
+.text-primary { color: var(--text-primary); }
+.text-secondary { color: var(--text-secondary); }
+.text-dim     { color: var(--text-dim); }
+
+.font-mono {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+.w-full  { width: 100%; }
+.flex    { display: flex; }
+.flex-col { flex-direction: column; }
+.items-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.justify-center { justify-content: center; }
+.gap-1   { gap: 4px; }
+.gap-2   { gap: 8px; }
+.gap-3   { gap: 12px; }
+.gap-4   { gap: 16px; }
+.gap-5   { gap: 20px; }
+.gap-6   { gap: 24px; }
+
+.flex-1  { flex: 1; }
+.shrink-0 { flex-shrink: 0; }
+.text-center { text-align: center; }
+.text-right  { text-align: right; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: var(--bg-base); }
+::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: #3d5470; }
+
+/* ── BLACKJACK CASINO FELT & PLAYING CARDS ──────────────────── */
+.blackjack-table {
+  background: radial-gradient(ellipse at 50% 25%, #0e4828 0%, #082d18 55%, #04170d 100%);
+  border: 2px solid rgba(244, 197, 66, 0.3);
+  box-shadow: inset 0 0 80px rgba(0, 0, 0, 0.8), 0 10px 30px rgba(0, 0, 0, 0.6);
+  border-radius: var(--r-xl);
+  position: relative;
+  overflow: hidden;
+}
+
+.playing-card {
+  width: 52px;
+  height: 74px;
+  background: #ffffff;
+  border-radius: 6px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 4px 6px;
+  font-weight: 900;
+  user-select: none;
+  animation: cardDeal 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  flex-shrink: 0;
+  transition: transform 0.15s ease;
+}
+
+.playing-card-lg {
+  width: 68px;
+  height: 96px;
+  padding: 6px 8px;
+  border-radius: 8px;
+}
+
+.playing-card-sm {
+  width: 40px;
+  height: 56px;
+  padding: 3px 4px;
+  border-radius: 4px;
+}
+
+.playing-card-red {
+  color: #e53935;
+}
+
+.playing-card-black {
+  color: #1e293b;
+}
+
+.card-back {
+  background: repeating-linear-gradient(
+    45deg,
+    #1e3a8a,
+    #1e3a8a 5px,
+    #172554 5px,
+    #172554 10px
+  );
+  border: 2px solid #ffffff;
+}
+
+@keyframes cardDeal {
+  from {
+    opacity: 0;
+    transform: translateY(-12px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ── LES MINES (GRILLE COMMUNE 6x6) ────────────────────────── */
+.mines-grid-container {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+  width: 100%;
+  max-width: 520px;
+  margin: 0 auto;
+}
+
+.mines-grid-phone {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 6px;
+  width: 100%;
+  max-width: 360px;
+  margin: 0 auto;
+}
+
+.mines-cell {
+  aspect-ratio: 1 / 1;
+  background: var(--bg-card);
+  border: 1px solid var(--border-default);
+  border-radius: var(--r-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  user-select: none;
+  transition: all 0.15s ease;
+  position: relative;
+  box-shadow: var(--shadow-sm);
+}
+
+.mines-cell-interactive {
+  cursor: pointer;
+}
+
+.mines-cell-interactive:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--green);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px var(--green-glow);
+}
+
+.mines-cell-interactive:active {
+  transform: translateY(0);
+}
+
+.mines-cell-safe {
+  background: #0d3820;
+  border-color: var(--green);
+  box-shadow: inset 0 0 15px rgba(31, 255, 27, 0.3), 0 0 15px rgba(31, 255, 27, 0.2);
+  animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.mines-cell-bomb {
+  background: #3b0d0c;
+  border-color: #ef5350;
+  box-shadow: inset 0 0 15px rgba(229, 57, 53, 0.4), 0 0 20px rgba(229, 57, 53, 0.4);
+  animation: bombExplode 0.4s ease-out;
+}
+
+.mines-cell-disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+@keyframes popIn {
+  from {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes bombExplode {
+  0% { transform: scale(0.8); }
+  50% { transform: scale(1.15); }
+  100% { transform: scale(1); }
+}
+

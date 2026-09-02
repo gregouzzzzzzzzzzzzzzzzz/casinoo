@@ -1,0 +1,12 @@
+{
+  "name": "casino-a-boire-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev:server": "cd server && npm run dev",
+    "dev:client": "cd client && npm run dev",
+    "build:server": "cd server && npm run build",
+    "build:client": "cd client && npm run build",
+    "install:all": "npm --prefix server install && npm --prefix client install"
+  }
+}
