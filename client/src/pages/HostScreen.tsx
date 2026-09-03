@@ -1312,6 +1312,13 @@ export const HostScreen: React.FC = () => {
                   <div className="label-xs" style={{ marginBottom: 4 }}>LE DERBY · HIPPODROME DU CASINO</div>
                   <h2 style={{ fontSize: 22, fontWeight: 800 }}>Prise des Paris sur les Chevaux 🐎</h2>
                 </div>
+                <button
+                  onClick={() => socket.emit('start_derby_race', { roomId: room.id })}
+                  className="btn btn-primary animate-green-pulse"
+                  style={{ padding: '8px 16px', fontSize: 13, fontWeight: 800 }}
+                >
+                  Lancer la course 🏇
+                </button>
               </div>
 
               <div>
@@ -1380,88 +1387,224 @@ export const HostScreen: React.FC = () => {
         )}
 
         {/* ═══════════════════════════════════════════════════════ */}
-        {/* DERBY RACING (Live Race Track)                          */}
+        {/* DERBY RACING (Grand Steeplechase aux 4 Obstacles)        */}
         {/* ═══════════════════════════════════════════════════════ */}
-        {room?.state === 'derby_racing' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16, flex: 1 }}>
-            <div className="card animate-in" style={{
-              padding: '16px 24px',
-              border: '2px solid var(--gold)',
-              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            }}>
-              <div>
-                <div className="label-xs" style={{ color: 'var(--gold)', letterSpacing: '0.1em' }}>COURSE EN DIRECT</div>
-                <h1 style={{ fontSize: 26, fontWeight: 900, margin: 0, color: '#ffffff' }}>
-                  🏇 LE DERBY EST LANCÉ ! 🏁
-                </h1>
-              </div>
-              <span className="badge badge-gold animate-pulse" style={{ fontSize: 13, padding: '6px 14px' }}>
-                DIRECT LIVE
-              </span>
-            </div>
+        {room?.state === 'derby_racing' && (() => {
+          const horses = room.derbyHorses || [];
+          const leader = [...horses].sort((a, b) => b.progress - a.progress)[0];
+          const fallenHorses = horses.filter(h => h.status === 'fallen');
+          const OBSTACLE_POSITIONS = [20, 40, 60, 80];
 
-            {/* Race Track */}
-            <div className="card" style={{
-              padding: '24px 20px',
-              background: '#0d1520',
-              border: '1px solid var(--border-default)',
-              display: 'flex', flexDirection: 'column', gap: 14,
-            }}>
-              {(room.derbyHorses || []).map((horse, idx) => (
-                <div key={horse.id} style={{
-                  background: 'rgba(255,255,255,0.03)',
-                  border: `1px solid ${horse.color}33`,
-                  borderRadius: 8,
-                  padding: '8px 12px',
-                  position: 'relative',
-                  height: 64,
-                  display: 'flex',
-                  alignItems: 'center',
-                  overflow: 'hidden',
-                }}>
-                  {/* Lane Number & Horse Info */}
-                  <div style={{
-                    position: 'absolute', left: 12, top: 0, bottom: 0,
-                    display: 'flex', alignItems: 'center', gap: 8,
-                    zIndex: 2, pointerEvents: 'none',
-                  }}>
-                    <span style={{ fontSize: 12, fontWeight: 900, color: 'var(--text-dim)', opacity: 0.5 }}>#{idx + 1}</span>
-                    <span style={{ fontSize: 13, fontWeight: 800, color: horse.color }}>{horse.name}</span>
+          return (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16, flex: 1 }}>
+              {/* Header avec commentaires de course en direct */}
+              <div className="card animate-in" style={{
+                padding: '16px 24px',
+                border: '2px solid var(--gold)',
+                background: 'radial-gradient(ellipse at 50% 0%, rgba(244,197,66,0.15) 0%, var(--bg-card) 100%)',
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                boxShadow: '0 0 25px rgba(244,197,66,0.15)',
+              }}>
+                <div>
+                  <div className="label-xs" style={{ color: 'var(--gold)', letterSpacing: '0.12em' }}>
+                    GRAND STEEPLE-CHASE DU CASINO · 4 OBSTACLES & RIVIÈRES
                   </div>
-
-                  {/* Finish Line Marker */}
-                  <div style={{
-                    position: 'absolute', right: 30, top: 0, bottom: 0,
-                    width: 2, borderRight: '2px dashed rgba(255,255,255,0.2)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    zIndex: 1,
-                  }}>
-                    <span style={{ fontSize: 16, transform: 'translateY(-12px)' }}>🏁</span>
-                  </div>
-
-                  {/* Moving Horse Sprite */}
-                  <div style={{
-                    position: 'absolute',
-                    left: `calc(150px + (100% - 240px) * ${Math.min(100, horse.progress) / 100})`,
-                    transition: 'left 0.2s linear',
-                    display: 'flex', alignItems: 'center', gap: 6,
-                    background: horse.color,
-                    color: '#000',
-                    padding: '4px 10px',
-                    borderRadius: 20,
-                    fontWeight: 900,
-                    fontSize: 13,
-                    boxShadow: `0 0 14px ${horse.color}88`,
-                    zIndex: 3,
-                  }}>
-                    <span style={{ fontSize: 16 }}>🏇</span>
-                    <span>{Math.round(horse.progress)}%</span>
-                  </div>
+                  <h1 style={{ fontSize: 24, fontWeight: 900, margin: '2px 0 0', color: '#ffffff' }}>
+                    🏇 LA COURSE DU DERBY EST LANCÉE ! 🏁
+                  </h1>
                 </div>
-              ))}
+
+                {/* Live Race commentary badge */}
+                <div style={{ textAlign: 'right' }}>
+                  {fallenHorses.length > 0 ? (
+                    <div style={{
+                      background: 'rgba(239, 68, 68, 0.2)',
+                      border: '1px solid #ef4444',
+                      borderRadius: 20,
+                      padding: '6px 14px',
+                      color: '#f87171',
+                      fontWeight: 900,
+                      fontSize: 13,
+                      animation: 'pulse 1s infinite',
+                    }}>
+                      🚨 CHUTE ! {fallenHorses.map(h => h.name).join(', ')} dans la rivière (1.5s) !
+                    </div>
+                  ) : leader ? (
+                    <div style={{
+                      background: 'rgba(244, 197, 66, 0.15)',
+                      border: '1px solid var(--gold)',
+                      borderRadius: 20,
+                      padding: '6px 14px',
+                      color: 'var(--gold)',
+                      fontWeight: 800,
+                      fontSize: 13,
+                    }}>
+                      🏆 En tête : <strong style={{ color: leader.color }}>{leader.name}</strong> ({Math.round(leader.progress)}%)
+                    </div>
+                  ) : null}
+                </div>
+              </div>
+
+              {/* Hippodrome Turf Racetrack */}
+              <div className="card" style={{
+                padding: '24px 20px',
+                background: 'linear-gradient(180deg, #0e2314 0%, #08160c 100%)',
+                border: '2px solid #166534',
+                boxShadow: 'inset 0 0 40px rgba(0,0,0,0.7)',
+                borderRadius: 12,
+                display: 'flex', flexDirection: 'column', gap: 14,
+                position: 'relative',
+              }}>
+                {horses.map((horse, idx) => {
+                  const isFallen = horse.status === 'fallen';
+                  const isJumping = horse.status === 'jumping';
+
+                  return (
+                    <div key={horse.id} style={{
+                      background: 'rgba(255,255,255,0.025)',
+                      border: `1px solid ${isFallen ? '#0284c7' : horse.color + '44'}`,
+                      borderRadius: 10,
+                      padding: '8px 12px',
+                      position: 'relative',
+                      height: 72,
+                      display: 'flex',
+                      alignItems: 'center',
+                      overflow: 'hidden',
+                      boxShadow: isFallen ? '0 0 15px rgba(2, 132, 199, 0.4)' : undefined,
+                    }}>
+                      {/* Lane Number & Horse Tag */}
+                      <div style={{
+                        position: 'absolute', left: 12, top: 0, bottom: 0,
+                        display: 'flex', alignItems: 'center', gap: 8,
+                        zIndex: 10, pointerEvents: 'none',
+                      }}>
+                        <span style={{ fontSize: 13, fontWeight: 900, color: 'rgba(255,255,255,0.3)' }}>#{idx + 1}</span>
+                        <span style={{ fontSize: 14, fontWeight: 800, color: horse.color }}>{horse.name}</span>
+                      </div>
+
+                      {/* The 4 Obstacles (Haie de bois + Rivière d'eau) */}
+                      {OBSTACLE_POSITIONS.map((pos, oIdx) => (
+                        <div
+                          key={oIdx}
+                          style={{
+                            position: 'absolute',
+                            left: `calc(130px + (100% - 210px) * ${pos / 100})`,
+                            top: 0, bottom: 0,
+                            width: 32,
+                            display: 'flex',
+                            zIndex: 4,
+                            pointerEvents: 'none',
+                          }}
+                        >
+                          {/* Wooden hurdle barrier */}
+                          <div style={{
+                            width: 8,
+                            background: 'repeating-linear-gradient(45deg, #78350f, #78350f 4px, #f59e0b 4px, #f59e0b 8px)',
+                            border: '1px solid #451a03',
+                            height: '100%',
+                            boxShadow: '2px 0 6px rgba(0,0,0,0.5)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          }}>
+                            <span style={{ fontSize: 9, transform: 'rotate(-90deg)', color: '#fff', fontWeight: 900, whiteSpace: 'nowrap' }}>
+                              HAIE {oIdx + 1}
+                            </span>
+                          </div>
+
+                          {/* Water ditch / River behind the hurdle */}
+                          <div style={{
+                            flex: 1,
+                            background: 'linear-gradient(90deg, rgba(2, 132, 199, 0.65) 0%, rgba(14, 165, 233, 0.45) 100%)',
+                            borderRight: '1px solid #38bdf8',
+                            height: '100%',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          }}>
+                            <span style={{ fontSize: 11 }}>🌊</span>
+                          </div>
+                        </div>
+                      ))}
+
+                      {/* Finish Line Checkered Flag */}
+                      <div style={{
+                        position: 'absolute', right: 24, top: 0, bottom: 0,
+                        width: 4,
+                        background: 'repeating-linear-gradient(0deg, #ffffff, #ffffff 8px, #000000 8px, #000000 16px)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        zIndex: 5,
+                        boxShadow: '0 0 10px rgba(255,255,255,0.4)',
+                      }}>
+                        <span style={{ fontSize: 20, transform: 'translateY(-18px)' }}>🏁</span>
+                      </div>
+
+                      {/* Moving Horse Sprite */}
+                      <div style={{
+                        position: 'absolute',
+                        left: `calc(130px + (100% - 210px) * ${Math.min(100, horse.progress) / 100})`,
+                        transition: isFallen ? 'none' : 'left 0.2s linear, transform 0.2s ease',
+                        transform: isJumping ? 'translateY(-14px) scale(1.15)' : isFallen ? 'translateY(6px)' : 'translateY(0)',
+                        display: 'flex', alignItems: 'center', gap: 6,
+                        background: isFallen
+                          ? 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)'
+                          : isJumping
+                          ? 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)'
+                          : horse.color,
+                        color: isFallen || isJumping ? '#ffffff' : '#000000',
+                        padding: '6px 12px',
+                        borderRadius: 22,
+                        fontWeight: 900,
+                        fontSize: 13,
+                        boxShadow: isFallen
+                          ? '0 0 20px #0284c7'
+                          : isJumping
+                          ? '0 6px 20px rgba(245, 158, 11, 0.7)'
+                          : `0 0 14px ${horse.color}88`,
+                        zIndex: isJumping ? 20 : 6,
+                      }}>
+                        {isFallen ? (
+                          <>
+                            <span style={{ fontSize: 18, animation: 'spin 1.5s linear infinite' }}>💦</span>
+                            <span style={{ fontSize: 12, fontWeight: 900, color: '#e0f2fe' }}>
+                              PLOUF ! (1.5s)
+                            </span>
+                          </>
+                        ) : isJumping ? (
+                          <>
+                            <span style={{ fontSize: 18 }}>🐎💨</span>
+                            <span>SAUT !</span>
+                          </>
+                        ) : (
+                          <>
+                            <span style={{ fontSize: 17 }}>🏇</span>
+                            <span>{Math.round(horse.progress)}%</span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Legend bar */}
+              <div style={{
+                display: 'flex',
+                justifyContent: 'center',
+                gap: 24,
+                fontSize: 12,
+                color: 'var(--text-secondary)',
+                fontWeight: 600,
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <span>🪵 Haie de bois</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <span>🌊 Rivière d'eau (Risque de chute : 1,5s d'arrêt)</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <span>🏁 Ligne d'arrivée (100%)</span>
+                </div>
+              </div>
             </div>
-          </div>
-        )}
+          );
+        })()}
 
         {/* ═══════════════════════════════════════════════════════ */}
         {/* DERBY RESULT                                            */}

@@ -1447,35 +1447,93 @@ export class RoomManager {
 
     player.derbyBet = { horseId, amount: parsedAmount };
     if (!room.derbyBets) room.derbyBets = {};
-    room.derbyBets[socketId] = { horseId, amount: parsedAmount };
-
     const activePlayers = room.players.filter(p => p.balance > 0);
     const allDerbyBet = activePlayers.length > 0 && activePlayers.every(p => Boolean(p.derbyBet && p.derbyBet.amount > 0));
 
     return { success: true, room, allDerbyBet };
   }
 
-  public startDerbyRace(roomId: string): Room | undefined {
+  public transitionToDerbyRacing(roomId: string): Room | undefined {
     const room = this.getRoom(roomId);
     if (!room) return undefined;
     room.state = 'derby_racing';
-    if (!room.derbyHorses || room.derbyHorses.length === 0) {
-      room.derbyHorses = DEFAULT_DERBY_HORSES.map(h => ({ ...h, progress: 0 }));
-    } else {
-      room.derbyHorses.forEach(h => { h.progress = 0; });
-    }
+    room.derbyHorses = DEFAULT_DERBY_HORSES.map(h => ({
+      ...h,
+      progress: 0,
+      status: 'running' as const,
+      fallenTimerMs: 0,
+      lastObstaclePassed: 0,
+    }));
     room.winningHorseId = null;
     return room;
   }
 
-  public stepDerbyRace(roomId: string): { finished: boolean; winnerId: number | null; horses: DerbyHorse[] } {
+  public startDerbyRace(roomId: string): Room | undefined {
+    return this.transitionToDerbyRacing(roomId);
+  }
+
+  public stepDerbyRace(
+    roomId: string,
+    tickIntervalMs = 200
+  ): { finished: boolean; winnerId: number | null; horses: DerbyHorse[] } {
     const room = this.getRoom(roomId);
     if (!room || !room.derbyHorses) return { finished: false, winnerId: null, horses: [] };
 
+    const OBSTACLES = [20, 40, 60, 80]; // Les 4 obstacles le long de la piste
     let winner: DerbyHorse | null = null;
+
     room.derbyHorses.forEach(horse => {
-      const boost = (Math.random() * 4.5) + 1.0;
-      horse.progress = Math.min(100, Math.round((horse.progress + boost) * 10) / 10);
+      // 1. Si le cheval est tombé dans la rivière, il reste bloqué 1,5 seconde (1500 ms)
+      if (horse.status === 'fallen') {
+        const remaining = (horse.fallenTimerMs ?? 1500) - tickIntervalMs;
+        if (remaining <= 0) {
+          horse.status = 'running';
+          horse.fallenTimerMs = 0;
+        } else {
+          horse.fallenTimerMs = remaining;
+          return; // Ne bouge pas tant qu'il est tombé
+        }
+      }
+
+      // 2. Si le cheval était en train de sauter l'obstacle
+      if (horse.status === 'jumping') {
+        horse.status = 'running';
+      }
+
+      // 3. Vitesse de course modérée pour prolonger le suspense de la course
+      const boost = (Math.random() * 0.9) + 0.55;
+      const nextProgress = Math.round((horse.progress + boost) * 10) / 10;
+
+      // 4. Vérifier les 4 obstacles
+      const lastPassed = horse.lastObstaclePassed ?? 0;
+      let fellAtObstacle = false;
+
+      for (let i = 0; i < OBSTACLES.length; i++) {
+        const obsIndex = i + 1;
+        const obsPos = OBSTACLES[i];
+
+        if (lastPassed < obsIndex && nextProgress >= obsPos) {
+          // Le cheval atteint l'obstacle i : 28% de chance de tomber dans la rivière derrière la haie
+          const tripChance = Math.random();
+          if (tripChance < 0.28) {
+            horse.status = 'fallen';
+            horse.fallenTimerMs = 1500; // 1,5 seconde d'arrêt complet
+            horse.progress = obsPos;
+            horse.lastObstaclePassed = obsIndex;
+            fellAtObstacle = true;
+            break;
+          } else {
+            // Saut réussi avec brio
+            horse.status = 'jumping';
+            horse.lastObstaclePassed = obsIndex;
+          }
+        }
+      }
+
+      if (!fellAtObstacle) {
+        horse.progress = Math.min(100, nextProgress);
+      }
+
       if (horse.progress >= 100) {
         if (!winner || horse.progress > winner.progress) {
           winner = horse;

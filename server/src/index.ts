@@ -559,6 +559,16 @@ io.on('connection', (socket: Socket) => {
     }
   });
 
+  socket.on('start_derby_race', ({ roomId }: { roomId: string }) => {
+    const room = roomManager.getRoom(roomId);
+    if (!room || room.state !== 'playing_derby') return;
+    const started = roomManager.startDerbyRace(roomId);
+    if (started) {
+      io.to(roomId).emit('room_updated', { room: started });
+      startDerbyRaceLoop(roomId);
+    }
+  });
+
   /* =====================================================================
    * LE GRAND FINAL (TAXE, DISTRIBUTION FINALE, BILAN ULTIME)
    * ===================================================================== */

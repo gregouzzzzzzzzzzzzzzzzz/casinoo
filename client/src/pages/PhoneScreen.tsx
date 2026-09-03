@@ -1570,32 +1570,94 @@ export const PhoneScreen: React.FC = () => {
         )}
 
         {/* ═══════════════════════════════════════════════════════ */}
-        {/* DERBY RACING (Phone Live Cheering)                      */}
+        {/* DERBY RACING (Phone Live Cheering & Obstacles)          */}
         {/* ═══════════════════════════════════════════════════════ */}
         {joinedPlayer && currentRoom?.state === 'derby_racing' && (() => {
           const myBet = joinedPlayer.derbyBet || (currentRoom.derbyBets ? currentRoom.derbyBets[joinedPlayer.id] : null);
           const chosenHorse = myBet ? (currentRoom.derbyHorses || []).find(h => h.id === myBet.horseId) : null;
+          const isFallen = chosenHorse?.status === 'fallen';
+          const isJumping = chosenHorse?.status === 'jumping';
 
           return (
-            <div className="card animate-in" style={{ padding: '32px 20px', textAlign: 'center', display: 'flex', flexDirection: 'column', gap: 16 }}>
-              <div style={{ fontSize: 56 }} className="animate-bounce">🏇</div>
+            <div className="card animate-in" style={{
+              padding: '28px 18px',
+              textAlign: 'center',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 16,
+              border: isFallen ? '2px solid #0284c7' : isJumping ? '2px solid #f59e0b' : chosenHorse ? `2px solid ${chosenHorse.color}` : undefined,
+              background: isFallen ? 'radial-gradient(circle, rgba(2,132,199,0.15) 0%, var(--bg-card) 100%)' : undefined,
+            }}>
+              <div style={{ fontSize: 52 }}>
+                {isFallen ? '💦' : isJumping ? '🐎💨' : '🏇'}
+              </div>
+
               <div>
-                <div className="label-xs" style={{ color: 'var(--gold)', letterSpacing: '0.1em' }}>COURSE EN DIRECT</div>
+                <div className="label-xs" style={{ color: 'var(--gold)', letterSpacing: '0.12em' }}>
+                  STEEPLE-CHASE EN DIRECT · 4 OBSTACLES
+                </div>
                 <h2 style={{ fontSize: 24, fontWeight: 900, color: '#ffffff', marginTop: 4 }}>
-                  La course est lancée ! 🏁
+                  {isFallen ? 'CHUTE DANS LA RIVIÈRE !' : isJumping ? 'SAUT D\'OBSTACLE !' : 'La course bat son plein ! 🏁'}
                 </h2>
+
                 {chosenHorse ? (
-                  <p style={{ fontSize: 16, fontWeight: 800, color: chosenHorse.color, marginTop: 8 }}>
-                    Allez le {chosenHorse.name} ({chosenHorse.emoji}) !
-                  </p>
+                  <div style={{ marginTop: 10 }}>
+                    <div style={{ fontSize: 18, fontWeight: 900, color: chosenHorse.color }}>
+                      {chosenHorse.emoji} {chosenHorse.name}
+                    </div>
+
+                    {isFallen ? (
+                      <div style={{
+                        background: 'rgba(2,132,199,0.2)',
+                        border: '1px solid #38bdf8',
+                        borderRadius: 8,
+                        padding: '10px 14px',
+                        marginTop: 10,
+                        color: '#e0f2fe',
+                        fontWeight: 800,
+                        fontSize: 13,
+                      }}>
+                        💦 Votre cheval est tombé à l'eau ! Arrêt de 1,5 seconde avant de repartir...
+                      </div>
+                    ) : isJumping ? (
+                      <div style={{
+                        background: 'rgba(245,158,11,0.2)',
+                        border: '1px solid #f59e0b',
+                        borderRadius: 8,
+                        padding: '10px 14px',
+                        marginTop: 10,
+                        color: '#fef3c7',
+                        fontWeight: 800,
+                        fontSize: 13,
+                      }}>
+                        ✨ Superbe saut au-dessus de la rivière !
+                      </div>
+                    ) : (
+                      <div style={{ marginTop: 12 }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, fontWeight: 700, marginBottom: 4 }}>
+                          <span>Progression</span>
+                          <span style={{ color: chosenHorse.color }}>{Math.round(chosenHorse.progress)}%</span>
+                        </div>
+                        <div style={{ height: 8, background: 'var(--bg-input)', borderRadius: 4, overflow: 'hidden' }}>
+                          <div style={{
+                            height: '100%',
+                            width: `${Math.min(100, Math.round(chosenHorse.progress))}%`,
+                            background: chosenHorse.color,
+                            transition: 'width 0.2s linear',
+                          }} />
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 ) : (
                   <p style={{ fontSize: 14, color: 'var(--text-secondary)', marginTop: 8 }}>
-                    Regardez le grand écran pour suivre l'hippodrome !
+                    Regardez le grand écran pour voir qui franchira la rivière en tête !
                   </p>
                 )}
               </div>
-              <span className="badge badge-surface" style={{ margin: '0 auto', fontSize: 12 }}>
-                Regardez l'écran TV !
+
+              <span className="badge badge-surface" style={{ margin: '0 auto', fontSize: 11 }}>
+                4 Haies et Rivières à franchir !
               </span>
             </div>
           );

@@ -173,6 +173,9 @@ export interface DerbyHorse {
   color: string;
   emoji: string;
   progress: number; // 0 to 100
+  status?: 'running' | 'jumping' | 'fallen';
+  fallenTimerMs?: number;
+  lastObstaclePassed?: number;
 }
 
 export interface PlayerDerbyResult {
