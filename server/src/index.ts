@@ -69,7 +69,7 @@ function startDerbyRaceLoop(roomId: string) {
       return;
     }
 
-    const step = roomManager.stepDerbyRace(roomId);
+    const step = roomManager.stepDerbyRace(roomId, 100);
     io.to(roomId).emit('room_updated', { room: roomManager.getRoom(roomId) });
 
     if (step.finished) {
@@ -83,7 +83,7 @@ function startDerbyRaceLoop(roomId: string) {
         }
       }, 1000);
     }
-  }, 200);
+  }, 100);
 
   derbyIntervals.set(roomId, interval);
 }

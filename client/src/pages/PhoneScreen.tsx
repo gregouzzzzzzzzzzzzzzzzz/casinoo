@@ -1570,13 +1570,13 @@ export const PhoneScreen: React.FC = () => {
         )}
 
         {/* ═══════════════════════════════════════════════════════ */}
-        {/* DERBY RACING (Phone Live Cheering & Obstacles)          */}
+        {/* DERBY RACING (Phone Live Cheering & Laps)               */}
         {/* ═══════════════════════════════════════════════════════ */}
         {joinedPlayer && currentRoom?.state === 'derby_racing' && (() => {
           const myBet = joinedPlayer.derbyBet || (currentRoom.derbyBets ? currentRoom.derbyBets[joinedPlayer.id] : null);
           const chosenHorse = myBet ? (currentRoom.derbyHorses || []).find(h => h.id === myBet.horseId) : null;
-          const isFallen = chosenHorse?.status === 'fallen';
-          const isJumping = chosenHorse?.status === 'jumping';
+          const currentLap = chosenHorse ? Math.min(3, Math.floor(chosenHorse.progress / 360) + 1) : 1;
+          const percent = chosenHorse ? Math.min(100, Math.round((chosenHorse.progress / 1080) * 100)) : 0;
 
           return (
             <div className="card animate-in" style={{
@@ -1585,19 +1585,16 @@ export const PhoneScreen: React.FC = () => {
               display: 'flex',
               flexDirection: 'column',
               gap: 16,
-              border: isFallen ? '2px solid #0284c7' : isJumping ? '2px solid #f59e0b' : chosenHorse ? `2px solid ${chosenHorse.color}` : undefined,
-              background: isFallen ? 'radial-gradient(circle, rgba(2,132,199,0.15) 0%, var(--bg-card) 100%)' : undefined,
+              border: chosenHorse ? `2px solid ${chosenHorse.color}` : undefined,
             }}>
-              <div style={{ fontSize: 52 }}>
-                {isFallen ? '💦' : isJumping ? '🐎💨' : '🏇'}
-              </div>
+              <div style={{ fontSize: 52 }}>🏇</div>
 
               <div>
                 <div className="label-xs" style={{ color: 'var(--gold)', letterSpacing: '0.12em' }}>
-                  STEEPLE-CHASE EN DIRECT · 4 OBSTACLES
+                  HIPPODROME EN DIRECT · 3 TOURS (1080°)
                 </div>
                 <h2 style={{ fontSize: 24, fontWeight: 900, color: '#ffffff', marginTop: 4 }}>
-                  {isFallen ? 'CHUTE DANS LA RIVIÈRE !' : isJumping ? 'SAUT D\'OBSTACLE !' : 'La course bat son plein ! 🏁'}
+                  {currentLap === 3 ? '🔥 DERNIER TOUR !' : `Tour ${currentLap} / 3`}
                 </h2>
 
                 {chosenHorse ? (
@@ -1606,58 +1603,30 @@ export const PhoneScreen: React.FC = () => {
                       {chosenHorse.emoji} {chosenHorse.name}
                     </div>
 
-                    {isFallen ? (
-                      <div style={{
-                        background: 'rgba(2,132,199,0.2)',
-                        border: '1px solid #38bdf8',
-                        borderRadius: 8,
-                        padding: '10px 14px',
-                        marginTop: 10,
-                        color: '#e0f2fe',
-                        fontWeight: 800,
-                        fontSize: 13,
-                      }}>
-                        💦 Votre cheval est tombé à l'eau ! Arrêt de 1,5 seconde avant de repartir...
+                    <div style={{ marginTop: 14 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, fontWeight: 700, marginBottom: 4 }}>
+                        <span>Distance parcourue</span>
+                        <span style={{ color: chosenHorse.color }}>{percent}% ({Math.round(chosenHorse.progress)}° / 1080°)</span>
                       </div>
-                    ) : isJumping ? (
-                      <div style={{
-                        background: 'rgba(245,158,11,0.2)',
-                        border: '1px solid #f59e0b',
-                        borderRadius: 8,
-                        padding: '10px 14px',
-                        marginTop: 10,
-                        color: '#fef3c7',
-                        fontWeight: 800,
-                        fontSize: 13,
-                      }}>
-                        ✨ Superbe saut au-dessus de la rivière !
+                      <div style={{ height: 8, background: 'var(--bg-input)', borderRadius: 4, overflow: 'hidden' }}>
+                        <div style={{
+                          height: '100%',
+                          width: `${percent}%`,
+                          background: chosenHorse.color,
+                          transition: 'width 100ms linear',
+                        }} />
                       </div>
-                    ) : (
-                      <div style={{ marginTop: 12 }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, fontWeight: 700, marginBottom: 4 }}>
-                          <span>Progression</span>
-                          <span style={{ color: chosenHorse.color }}>{Math.round(chosenHorse.progress)}%</span>
-                        </div>
-                        <div style={{ height: 8, background: 'var(--bg-input)', borderRadius: 4, overflow: 'hidden' }}>
-                          <div style={{
-                            height: '100%',
-                            width: `${Math.min(100, Math.round(chosenHorse.progress))}%`,
-                            background: chosenHorse.color,
-                            transition: 'width 0.2s linear',
-                          }} />
-                        </div>
-                      </div>
-                    )}
+                    </div>
                   </div>
                 ) : (
                   <p style={{ fontSize: 14, color: 'var(--text-secondary)', marginTop: 8 }}>
-                    Regardez le grand écran pour voir qui franchira la rivière en tête !
+                    Regardez le grand écran pour suivre l'hippodrome circulaire !
                   </p>
                 )}
               </div>
 
               <span className="badge badge-surface" style={{ margin: '0 auto', fontSize: 11 }}>
-                4 Haies et Rivières à franchir !
+                Course rapide de 15 secondes max !
               </span>
             </div>
           );

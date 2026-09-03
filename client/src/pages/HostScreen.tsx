@@ -1387,19 +1387,19 @@ export const HostScreen: React.FC = () => {
         )}
 
         {/* ═══════════════════════════════════════════════════════ */}
-        {/* DERBY RACING (Grand Steeplechase aux 4 Obstacles)        */}
+        {/* DERBY RACING (Hippodrome Circulaire · 3 Tours de Piste) */}
         {/* ═══════════════════════════════════════════════════════ */}
         {room?.state === 'derby_racing' && (() => {
           const horses = room.derbyHorses || [];
           const leader = [...horses].sort((a, b) => b.progress - a.progress)[0];
-          const fallenHorses = horses.filter(h => h.status === 'fallen');
-          const OBSTACLE_POSITIONS = [20, 40, 60, 80];
+          const HORSE_RADII = [180, 205, 230, 255]; // Couloir dédié pour chaque cheval
 
           return (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 16, flex: 1 }}>
-              {/* Header avec commentaires de course en direct */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16, flex: 1, alignItems: 'center' }}>
+              {/* Header avec statut de la course */}
               <div className="card animate-in" style={{
-                padding: '16px 24px',
+                width: '100%',
+                padding: '14px 24px',
                 border: '2px solid var(--gold)',
                 background: 'radial-gradient(ellipse at 50% 0%, rgba(244,197,66,0.15) 0%, var(--bg-card) 100%)',
                 display: 'flex', alignItems: 'center', justifyContent: 'space-between',
@@ -1407,200 +1407,168 @@ export const HostScreen: React.FC = () => {
               }}>
                 <div>
                   <div className="label-xs" style={{ color: 'var(--gold)', letterSpacing: '0.12em' }}>
-                    GRAND STEEPLE-CHASE DU CASINO · 4 OBSTACLES & RIVIÈRES
+                    HIPPODROME CIRCULAIRE DU CASINO · 3 TOURS DE PISTE (1080°)
                   </div>
                   <h1 style={{ fontSize: 24, fontWeight: 900, margin: '2px 0 0', color: '#ffffff' }}>
                     🏇 LA COURSE DU DERBY EST LANCÉE ! 🏁
                   </h1>
                 </div>
 
-                {/* Live Race commentary badge */}
-                <div style={{ textAlign: 'right' }}>
-                  {fallenHorses.length > 0 ? (
-                    <div style={{
-                      background: 'rgba(239, 68, 68, 0.2)',
-                      border: '1px solid #ef4444',
-                      borderRadius: 20,
-                      padding: '6px 14px',
-                      color: '#f87171',
-                      fontWeight: 900,
-                      fontSize: 13,
-                      animation: 'pulse 1s infinite',
-                    }}>
-                      🚨 CHUTE ! {fallenHorses.map(h => h.name).join(', ')} dans la rivière (1.5s) !
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <span className="badge badge-gold animate-pulse" style={{ fontSize: 13, padding: '6px 14px' }}>
+                    DIRECT LIVE 🏁
+                  </span>
+                  {leader && (
+                    <div style={{ fontSize: 13, fontWeight: 800, color: leader.color }}>
+                      En tête : {leader.emoji} {leader.name} ({Math.min(100, Math.round((leader.progress / 1080) * 100))}%)
                     </div>
-                  ) : leader ? (
-                    <div style={{
-                      background: 'rgba(244, 197, 66, 0.15)',
-                      border: '1px solid var(--gold)',
-                      borderRadius: 20,
-                      padding: '6px 14px',
-                      color: 'var(--gold)',
-                      fontWeight: 800,
-                      fontSize: 13,
-                    }}>
-                      🏆 En tête : <strong style={{ color: leader.color }}>{leader.name}</strong> ({Math.round(leader.progress)}%)
-                    </div>
-                  ) : null}
+                  )}
                 </div>
               </div>
 
-              {/* Hippodrome Turf Racetrack */}
-              <div className="card" style={{
-                padding: '24px 20px',
-                background: 'linear-gradient(180deg, #0e2314 0%, #08160c 100%)',
-                border: '2px solid #166534',
-                boxShadow: 'inset 0 0 40px rgba(0,0,0,0.7)',
-                borderRadius: 12,
-                display: 'flex', flexDirection: 'column', gap: 14,
+              {/* Grand Cercle Hippodrome */}
+              <div style={{
                 position: 'relative',
+                width: 520,
+                height: 520,
+                borderRadius: '50%',
+                border: '45px solid #3e2723', // Piste en terre battue
+                background: 'radial-gradient(circle, #0b3d22 0%, #052e16 55%, #27272a 55%, #1c1917 100%)',
+                boxShadow: '0 20px 50px rgba(0,0,0,0.85), inset 0 0 40px rgba(0,0,0,0.8)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '10px 0',
               }}>
+                {/* Lignes blanches délimitant les couloirs de course */}
+                <div style={{ position: 'absolute', width: 450, height: 450, borderRadius: '50%', border: '1px dashed rgba(255,255,255,0.15)', pointerEvents: 'none' }} />
+                <div style={{ position: 'absolute', width: 400, height: 400, borderRadius: '50%', border: '1px dashed rgba(255,255,255,0.15)', pointerEvents: 'none' }} />
+                <div style={{ position: 'absolute', width: 350, height: 350, borderRadius: '50%', border: '1px dashed rgba(255,255,255,0.15)', pointerEvents: 'none' }} />
+
+                {/* Ligne d'arrivée à damier (en haut, à 12h) */}
+                <div style={{
+                  position: 'absolute',
+                  top: -45,
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  width: 8,
+                  height: 45,
+                  background: 'repeating-linear-gradient(0deg, #ffffff, #ffffff 6px, #000000 6px, #000000 12px)',
+                  zIndex: 8,
+                  boxShadow: '0 0 10px rgba(255,255,255,0.7)',
+                }}>
+                  <span style={{ position: 'absolute', top: -24, left: '50%', transform: 'translateX(-50%)', fontSize: 20 }}>🏁</span>
+                </div>
+
+                {/* Pelouse centrale avec statistiques de course */}
+                <div style={{
+                  width: 250,
+                  height: 250,
+                  borderRadius: '50%',
+                  background: 'radial-gradient(circle, #0e371f 0%, #062313 100%)',
+                  border: '3px solid #15803d',
+                  boxShadow: 'inset 0 0 25px rgba(0,0,0,0.7)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  textAlign: 'center',
+                  padding: 16,
+                  zIndex: 5,
+                }}>
+                  <div className="label-xs" style={{ color: '#86efac', letterSpacing: '0.1em' }}>
+                    TOUR DE PISTE
+                  </div>
+                  <div style={{ fontSize: 32, fontWeight: 900, color: '#ffffff', lineHeight: 1.1, marginTop: 2 }}>
+                    {leader ? (
+                      leader.progress >= 720 ? 'TOUR 3/3' : leader.progress >= 360 ? 'TOUR 2/3' : 'TOUR 1/3'
+                    ) : 'DÉPART'}
+                  </div>
+                  {leader && leader.progress >= 720 && (
+                    <span className="badge badge-red animate-pulse" style={{ fontSize: 10, marginTop: 4 }}>
+                      DERNIER TOUR !
+                    </span>
+                  )}
+
+                  {leader && (
+                    <div style={{ marginTop: 10, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                      <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)' }}>LEADER</div>
+                      <div style={{ fontSize: 15, fontWeight: 900, color: leader.color }}>
+                        {leader.emoji} {leader.name}
+                      </div>
+                      <div style={{ fontSize: 12, fontWeight: 800, color: 'var(--gold)', marginTop: 2 }}>
+                        {Math.min(1080, Math.round(leader.progress))}° / 1080°
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Les 4 chevaux positionnés au centre absolu et orbitant via transform */}
                 {horses.map((horse, idx) => {
-                  const isFallen = horse.status === 'fallen';
-                  const isJumping = horse.status === 'jumping';
+                  const radius = HORSE_RADII[idx] ?? (180 + idx * 25);
+                  // Décalage de -90 degrés pour que 0° soit situé à 12h (ligne d'arrivée en haut)
+                  const currentAngle = horse.progress - 90;
 
                   return (
-                    <div key={horse.id} style={{
-                      background: 'rgba(255,255,255,0.025)',
-                      border: `1px solid ${isFallen ? '#0284c7' : horse.color + '44'}`,
-                      borderRadius: 10,
-                      padding: '8px 12px',
-                      position: 'relative',
-                      height: 72,
-                      display: 'flex',
-                      alignItems: 'center',
-                      overflow: 'hidden',
-                      boxShadow: isFallen ? '0 0 15px rgba(2, 132, 199, 0.4)' : undefined,
-                    }}>
-                      {/* Lane Number & Horse Tag */}
-                      <div style={{
-                        position: 'absolute', left: 12, top: 0, bottom: 0,
-                        display: 'flex', alignItems: 'center', gap: 8,
-                        zIndex: 10, pointerEvents: 'none',
-                      }}>
-                        <span style={{ fontSize: 13, fontWeight: 900, color: 'rgba(255,255,255,0.3)' }}>#{idx + 1}</span>
-                        <span style={{ fontSize: 14, fontWeight: 800, color: horse.color }}>{horse.name}</span>
-                      </div>
-
-                      {/* The 4 Obstacles (Haie de bois + Rivière d'eau) */}
-                      {OBSTACLE_POSITIONS.map((pos, oIdx) => (
-                        <div
-                          key={oIdx}
-                          style={{
-                            position: 'absolute',
-                            left: `calc(130px + (100% - 210px) * ${pos / 100})`,
-                            top: 0, bottom: 0,
-                            width: 32,
-                            display: 'flex',
-                            zIndex: 4,
-                            pointerEvents: 'none',
-                          }}
-                        >
-                          {/* Wooden hurdle barrier */}
-                          <div style={{
-                            width: 8,
-                            background: 'repeating-linear-gradient(45deg, #78350f, #78350f 4px, #f59e0b 4px, #f59e0b 8px)',
-                            border: '1px solid #451a03',
-                            height: '100%',
-                            boxShadow: '2px 0 6px rgba(0,0,0,0.5)',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          }}>
-                            <span style={{ fontSize: 9, transform: 'rotate(-90deg)', color: '#fff', fontWeight: 900, whiteSpace: 'nowrap' }}>
-                              HAIE {oIdx + 1}
-                            </span>
-                          </div>
-
-                          {/* Water ditch / River behind the hurdle */}
-                          <div style={{
-                            flex: 1,
-                            background: 'linear-gradient(90deg, rgba(2, 132, 199, 0.65) 0%, rgba(14, 165, 233, 0.45) 100%)',
-                            borderRight: '1px solid #38bdf8',
-                            height: '100%',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          }}>
-                            <span style={{ fontSize: 11 }}>🌊</span>
-                          </div>
-                        </div>
-                      ))}
-
-                      {/* Finish Line Checkered Flag */}
-                      <div style={{
-                        position: 'absolute', right: 24, top: 0, bottom: 0,
-                        width: 4,
-                        background: 'repeating-linear-gradient(0deg, #ffffff, #ffffff 8px, #000000 8px, #000000 16px)',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        zIndex: 5,
-                        boxShadow: '0 0 10px rgba(255,255,255,0.4)',
-                      }}>
-                        <span style={{ fontSize: 20, transform: 'translateY(-18px)' }}>🏁</span>
-                      </div>
-
-                      {/* Moving Horse Sprite */}
-                      <div style={{
+                    <div
+                      key={horse.id}
+                      style={{
                         position: 'absolute',
-                        left: `calc(130px + (100% - 210px) * ${Math.min(100, horse.progress) / 100})`,
-                        transition: isFallen ? 'none' : 'left 0.2s linear, transform 0.2s ease',
-                        transform: isJumping ? 'translateY(-14px) scale(1.15)' : isFallen ? 'translateY(6px)' : 'translateY(0)',
-                        display: 'flex', alignItems: 'center', gap: 6,
-                        background: isFallen
-                          ? 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)'
-                          : isJumping
-                          ? 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)'
-                          : horse.color,
-                        color: isFallen || isJumping ? '#ffffff' : '#000000',
-                        padding: '6px 12px',
-                        borderRadius: 22,
+                        top: '50%',
+                        left: '50%',
+                        transform: `rotate(${currentAngle}deg) translateX(${radius}px) rotate(-${currentAngle}deg)`,
+                        transition: 'transform 100ms linear',
+                        zIndex: 10 + idx,
+                        pointerEvents: 'none',
+                        marginTop: -16,
+                        marginLeft: -20,
+                      }}
+                    >
+                      <div style={{
+                        background: horse.color,
+                        color: '#000000',
+                        padding: '4px 10px',
+                        borderRadius: 20,
                         fontWeight: 900,
-                        fontSize: 13,
-                        boxShadow: isFallen
-                          ? '0 0 20px #0284c7'
-                          : isJumping
-                          ? '0 6px 20px rgba(245, 158, 11, 0.7)'
-                          : `0 0 14px ${horse.color}88`,
-                        zIndex: isJumping ? 20 : 6,
+                        fontSize: 12,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 4,
+                        boxShadow: `0 0 14px ${horse.color}`,
+                        border: '2px solid #ffffff',
+                        whiteSpace: 'nowrap',
                       }}>
-                        {isFallen ? (
-                          <>
-                            <span style={{ fontSize: 18, animation: 'spin 1.5s linear infinite' }}>💦</span>
-                            <span style={{ fontSize: 12, fontWeight: 900, color: '#e0f2fe' }}>
-                              PLOUF ! (1.5s)
-                            </span>
-                          </>
-                        ) : isJumping ? (
-                          <>
-                            <span style={{ fontSize: 18 }}>🐎💨</span>
-                            <span>SAUT !</span>
-                          </>
-                        ) : (
-                          <>
-                            <span style={{ fontSize: 17 }}>🏇</span>
-                            <span>{Math.round(horse.progress)}%</span>
-                          </>
-                        )}
+                        <span style={{ fontSize: 16 }}>🏇</span>
+                        <span>#{horse.id}</span>
                       </div>
                     </div>
                   );
                 })}
               </div>
 
-              {/* Legend bar */}
-              <div style={{
-                display: 'flex',
-                justifyContent: 'center',
-                gap: 24,
-                fontSize: 12,
-                color: 'var(--text-secondary)',
-                fontWeight: 600,
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <span>🪵 Haie de bois</span>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <span>🌊 Rivière d'eau (Risque de chute : 1,5s d'arrêt)</span>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <span>🏁 Ligne d'arrivée (100%)</span>
-                </div>
+              {/* Classement en direct en dessous du circuit */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, width: '100%', maxWidth: 720 }}>
+                {[...horses].sort((a, b) => b.progress - a.progress).map((h, rank) => (
+                  <div key={h.id} style={{
+                    background: 'var(--bg-input)',
+                    borderLeft: `4px solid ${h.color}`,
+                    borderRadius: 8,
+                    padding: '8px 12px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                  }}>
+                    <div>
+                      <div style={{ fontSize: 11, color: 'var(--text-dim)' }}>#{rank + 1} {h.name}</div>
+                      <div style={{ fontSize: 13, fontWeight: 900, color: h.color }}>
+                        {Math.min(3, Math.floor(h.progress / 360) + 1)}/3 tours
+                      </div>
+                    </div>
+                    <span style={{ fontSize: 12, fontWeight: 800, color: 'var(--text-secondary)' }}>
+                      {Math.min(100, Math.round((h.progress / 1080) * 100))}%
+                    </span>
+                  </div>
+                ))}
               </div>
             </div>
           );

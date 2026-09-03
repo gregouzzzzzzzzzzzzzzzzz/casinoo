@@ -1474,67 +1474,20 @@ export class RoomManager {
 
   public stepDerbyRace(
     roomId: string,
-    tickIntervalMs = 200
+    tickIntervalMs = 100
   ): { finished: boolean; winnerId: number | null; horses: DerbyHorse[] } {
     const room = this.getRoom(roomId);
     if (!room || !room.derbyHorses) return { finished: false, winnerId: null, horses: [] };
 
-    const OBSTACLES = [20, 40, 60, 80]; // Les 4 obstacles le long de la piste
+    const WINNING_PROGRESS = 1080; // 3 tours complets de 360 degrés
     let winner: DerbyHorse | null = null;
 
     room.derbyHorses.forEach(horse => {
-      // 1. Si le cheval est tombé dans la rivière, il reste bloqué 1,5 seconde (1500 ms)
-      if (horse.status === 'fallen') {
-        const remaining = (horse.fallenTimerMs ?? 1500) - tickIntervalMs;
-        if (remaining <= 0) {
-          horse.status = 'running';
-          horse.fallenTimerMs = 0;
-        } else {
-          horse.fallenTimerMs = remaining;
-          return; // Ne bouge pas tant qu'il est tombé
-        }
-      }
+      // Vitesse en degrés par tick (100ms) calibrée pour que le vainqueur atteigne 1080° en ~14-15 secondes
+      const boost = (Math.random() * 3.6) + 5.4;
+      horse.progress = Math.min(WINNING_PROGRESS, Math.round((horse.progress + boost) * 10) / 10);
 
-      // 2. Si le cheval était en train de sauter l'obstacle
-      if (horse.status === 'jumping') {
-        horse.status = 'running';
-      }
-
-      // 3. Vitesse de course modérée pour prolonger le suspense de la course
-      const boost = (Math.random() * 0.9) + 0.55;
-      const nextProgress = Math.round((horse.progress + boost) * 10) / 10;
-
-      // 4. Vérifier les 4 obstacles
-      const lastPassed = horse.lastObstaclePassed ?? 0;
-      let fellAtObstacle = false;
-
-      for (let i = 0; i < OBSTACLES.length; i++) {
-        const obsIndex = i + 1;
-        const obsPos = OBSTACLES[i];
-
-        if (lastPassed < obsIndex && nextProgress >= obsPos) {
-          // Le cheval atteint l'obstacle i : 28% de chance de tomber dans la rivière derrière la haie
-          const tripChance = Math.random();
-          if (tripChance < 0.28) {
-            horse.status = 'fallen';
-            horse.fallenTimerMs = 1500; // 1,5 seconde d'arrêt complet
-            horse.progress = obsPos;
-            horse.lastObstaclePassed = obsIndex;
-            fellAtObstacle = true;
-            break;
-          } else {
-            // Saut réussi avec brio
-            horse.status = 'jumping';
-            horse.lastObstaclePassed = obsIndex;
-          }
-        }
-      }
-
-      if (!fellAtObstacle) {
-        horse.progress = Math.min(100, nextProgress);
-      }
-
-      if (horse.progress >= 100) {
+      if (horse.progress >= WINNING_PROGRESS) {
         if (!winner || horse.progress > winner.progress) {
           winner = horse;
         }
