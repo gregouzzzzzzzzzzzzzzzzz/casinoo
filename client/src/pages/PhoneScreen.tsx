@@ -1575,8 +1575,7 @@ export const PhoneScreen: React.FC = () => {
         {joinedPlayer && currentRoom?.state === 'derby_racing' && (() => {
           const myBet = joinedPlayer.derbyBet || (currentRoom.derbyBets ? currentRoom.derbyBets[joinedPlayer.id] : null);
           const chosenHorse = myBet ? (currentRoom.derbyHorses || []).find(h => h.id === myBet.horseId) : null;
-          const currentLap = chosenHorse ? Math.min(3, Math.floor(chosenHorse.progress / 360) + 1) : 1;
-          const percent = chosenHorse ? Math.min(100, Math.round((chosenHorse.progress / 1080) * 100)) : 0;
+          const percent = chosenHorse ? Math.min(100, Math.round((chosenHorse.progress / 360) * 100)) : 0;
 
           return (
             <div className="card animate-in" style={{
@@ -1591,10 +1590,10 @@ export const PhoneScreen: React.FC = () => {
 
               <div>
                 <div className="label-xs" style={{ color: 'var(--gold)', letterSpacing: '0.12em' }}>
-                  HIPPODROME EN DIRECT · 3 TOURS (1080°)
+                  HIPPODROME EN DIRECT · 1 TOUR UNIQUE (360°)
                 </div>
                 <h2 style={{ fontSize: 24, fontWeight: 900, color: '#ffffff', marginTop: 4 }}>
-                  {currentLap === 3 ? '🔥 DERNIER TOUR !' : `Tour ${currentLap} / 3`}
+                  {percent >= 80 ? '⚡ DERNIÈRE LIGNE DROITE !' : percent >= 45 ? 'Mi-course !' : 'La course est lancée ! 🏁'}
                 </h2>
 
                 {chosenHorse ? (
@@ -1636,7 +1635,7 @@ export const PhoneScreen: React.FC = () => {
                     <div style={{ marginTop: 14 }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, fontWeight: 700, marginBottom: 4 }}>
                         <span>Distance parcourue</span>
-                        <span style={{ color: chosenHorse.color }}>{percent}% ({Math.round(chosenHorse.progress)}° / 1080°)</span>
+                        <span style={{ color: chosenHorse.color }}>{percent}% ({Math.round(chosenHorse.progress)}° / 360°)</span>
                       </div>
                       <div style={{ height: 8, background: 'var(--bg-input)', borderRadius: 4, overflow: 'hidden' }}>
                         <div style={{

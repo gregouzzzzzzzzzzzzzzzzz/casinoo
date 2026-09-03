@@ -1418,7 +1418,7 @@ export const HostScreen: React.FC = () => {
               }}>
                 <div>
                   <div className="label-xs" style={{ color: 'var(--gold)', letterSpacing: '0.12em' }}>
-                    HIPPODROME OVALE DU CASINO · 3 TOURS DE PISTE (1080°)
+                    HIPPODROME OVALE DU CASINO · 1 TOUR UNIQUE (360°)
                   </div>
                   <h1 style={{ fontSize: 24, fontWeight: 900, margin: '2px 0 0', color: '#ffffff' }}>
                     🏇 LA COURSE DU DERBY EST LANCÉE ! 🏁
@@ -1431,7 +1431,7 @@ export const HostScreen: React.FC = () => {
                   </span>
                   {leader && (
                     <div style={{ fontSize: 13, fontWeight: 800, color: leader.color }}>
-                      En tête : {leader.emoji} {leader.name} ({Math.min(100, Math.round((leader.progress / 1080) * 100))}%)
+                      En tête : {leader.emoji} {leader.name} ({Math.min(100, Math.round((leader.progress / 360) * 100))}%)
                     </div>
                   )}
                 </div>
@@ -1557,7 +1557,7 @@ export const HostScreen: React.FC = () => {
                       <span style={{ fontSize: 13 }}>🏁</span>
                       <span style={{ fontSize: 13, fontWeight: 900, color: '#ffffff', letterSpacing: '0.05em' }}>
                         {leader ? (
-                          leader.progress >= 720 ? '⚡ TOUR 3/3 (FINAL) ⚡' : leader.progress >= 360 ? 'TOUR 2/3' : 'TOUR 1/3'
+                          leader.progress >= 260 ? '⚡ DERNIÈRE LIGNE DROITE ! ⚡' : leader.progress >= 160 ? 'MI-COURSE' : 'DÉPART LANCÉ'
                         ) : 'DÉPART'}
                       </span>
                     </div>
@@ -1610,7 +1610,7 @@ export const HostScreen: React.FC = () => {
                             fontWeight: 900,
                             color: isFirst ? 'var(--gold)' : 'rgba(255,255,255,0.85)',
                           }}>
-                            {Math.min(100, Math.round((h.progress / 1080) * 100))}%
+                            {Math.min(100, Math.round((h.progress / 360) * 100))}%
                           </span>
                         </div>
                       </div>
@@ -1707,11 +1707,11 @@ export const HostScreen: React.FC = () => {
                     <div>
                       <div style={{ fontSize: 11, color: 'var(--text-dim)' }}>#{rank + 1} {h.name}</div>
                       <div style={{ fontSize: 13, fontWeight: 900, color: h.color }}>
-                        {Math.min(3, Math.floor(h.progress / 360) + 1)}/3 tours
+                        {h.momentum === 'boosted' ? '🔥 En Sprint' : h.momentum === 'fatigued' ? '💨 Fatigue' : 'En course'}
                       </div>
                     </div>
                     <span style={{ fontSize: 12, fontWeight: 800, color: 'var(--text-secondary)' }}>
-                      {Math.min(100, Math.round((h.progress / 1080) * 100))}%
+                      {Math.min(100, Math.round((h.progress / 360) * 100))}%
                     </span>
                   </div>
                 ))}

@@ -1479,7 +1479,7 @@ export class RoomManager {
     const room = this.getRoom(roomId);
     if (!room || !room.derbyHorses) return { finished: false, winnerId: null, horses: [] };
 
-    const WINNING_PROGRESS = 1080; // 3 tours complets de 360 degrés
+    const WINNING_PROGRESS = 360; // 1 seul tour complet de l'hippodrome (360°)
 
     // 1. Repérer les positions relatives dynamiques des chevaux normaux pour le Rubber-banding
     const normalHorses = room.derbyHorses.filter(h => !h.isTocard);
@@ -1492,8 +1492,8 @@ export class RoomManager {
 
     room.derbyHorses.forEach(horse => {
       if (horse.isTocard) {
-        // Le Tocard avance à vitesse très réduite (quasiment pas)
-        const tocardSpeed = Math.random() * 1.5 + 1.2;
+        // Le Tocard avance à vitesse très réduite (quasiment pas, ~50° sur tout le tour)
+        const tocardSpeed = Math.random() * 0.4 + 0.35;
         speeds.set(horse.id, tocardSpeed);
         return;
       }
@@ -1515,24 +1515,24 @@ export class RoomManager {
 
         const roll = Math.random();
 
-        // Effet Mario Kart (Rubber-banding)
-        if (isLeading && leadGap > 25 && roll < 0.16) {
+        // Effet Mario Kart (Rubber-banding calibré sur 1 tour)
+        if (isLeading && leadGap > 8 && roll < 0.16) {
           // Le 1er avec de l'avance s'essouffle (fatigue)
           horse.momentum = 'fatigued';
-          horse.momentumTimerTicks = Math.floor(Math.random() * 7) + 6; // ~0.6s à 1.3s
-        } else if (isTrailing && trailGap > 20 && roll < 0.18) {
+          horse.momentumTimerTicks = Math.floor(Math.random() * 6) + 6; // ~0.6s à 1.2s
+        } else if (isTrailing && trailGap > 6 && roll < 0.18) {
           // Le dernier normal à la traîne a un sursaut d'énergie (boost sprint !)
           horse.momentum = 'boosted';
-          horse.momentumTimerTicks = Math.floor(Math.random() * 8) + 8; // ~0.8s à 1.6s
+          horse.momentumTimerTicks = Math.floor(Math.random() * 7) + 6; // ~0.6s à 1.3s
         } else if (roll < 0.06) {
           // Aléatoire naturel indépendant
           horse.momentum = Math.random() < 0.5 ? 'boosted' : 'fatigued';
-          horse.momentumTimerTicks = Math.floor(Math.random() * 7) + 6;
+          horse.momentumTimerTicks = Math.floor(Math.random() * 6) + 6;
         }
       }
 
-      // Vitesse de base indépendante
-      let speed = Math.random() * 3.5 + 4.8;
+      // Vitesse de base indépendante calibrée pour 1 tour (360°) en ~14 secondes (140 ticks)
+      let speed = Math.random() * 1.0 + 1.5;
       if (horse.momentum === 'boosted') {
         speed *= 2.5; // Multiplié par 2.5 pendant un instant
       } else if (horse.momentum === 'fatigued') {
