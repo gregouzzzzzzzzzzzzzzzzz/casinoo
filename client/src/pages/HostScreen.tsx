@@ -87,6 +87,18 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ value, max, color = 'green' }
   </div>
 );
 
+// Hippodrome Ovale : trajectoire SVG fermée pour les 4 couloirs
+function getDerbyLanePath(idx: number): string {
+  const radii = [95, 120, 145, 170];
+  const R = radii[idx] ?? (95 + idx * 25);
+  const cx1 = 230;
+  const cx2 = 550;
+  const cy = 215;
+  const startX = 390;
+  const startY = cy + R;
+  return `M ${startX} ${startY} L ${cx2} ${startY} A ${R} ${R} 0 0 0 ${cx2} ${cy - R} L ${cx1} ${cy - R} A ${R} ${R} 0 0 0 ${cx1} ${startY} Z`;
+}
+
 interface PlayingCardProps {
   card: Card;
   size?: 'sm' | 'md' | 'lg';
@@ -1387,12 +1399,11 @@ export const HostScreen: React.FC = () => {
         )}
 
         {/* ═══════════════════════════════════════════════════════ */}
-        {/* DERBY RACING (Hippodrome Circulaire · 3 Tours de Piste) */}
+        {/* DERBY RACING (Hippodrome Ovale SVG & Motion Path)        */}
         {/* ═══════════════════════════════════════════════════════ */}
         {room?.state === 'derby_racing' && (() => {
           const horses = room.derbyHorses || [];
           const leader = [...horses].sort((a, b) => b.progress - a.progress)[0];
-          const HORSE_RADII = [180, 205, 230, 255]; // Couloir dédié pour chaque cheval
 
           return (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16, flex: 1, alignItems: 'center' }}>
@@ -1407,7 +1418,7 @@ export const HostScreen: React.FC = () => {
               }}>
                 <div>
                   <div className="label-xs" style={{ color: 'var(--gold)', letterSpacing: '0.12em' }}>
-                    HIPPODROME CIRCULAIRE DU CASINO · 3 TOURS DE PISTE (1080°)
+                    HIPPODROME OVALE DU CASINO · 3 TOURS DE PISTE (1080°)
                   </div>
                   <h1 style={{ fontSize: 24, fontWeight: 900, margin: '2px 0 0', color: '#ffffff' }}>
                     🏇 LA COURSE DU DERBY EST LANCÉE ! 🏁
@@ -1426,128 +1437,240 @@ export const HostScreen: React.FC = () => {
                 </div>
               </div>
 
-              {/* Grand Cercle Hippodrome */}
+              {/* Grand Conteneur de la Piste Ovale (SVG + Chevaux CSS Motion Path) */}
               <div style={{
                 position: 'relative',
-                width: 520,
-                height: 520,
-                borderRadius: '50%',
-                border: '45px solid #3e2723', // Piste en terre battue
-                background: 'radial-gradient(circle, #0b3d22 0%, #052e16 55%, #27272a 55%, #1c1917 100%)',
+                width: 780,
+                height: 430,
+                borderRadius: 24,
+                overflow: 'hidden',
+                background: '#09100d',
                 boxShadow: '0 20px 50px rgba(0,0,0,0.85), inset 0 0 40px rgba(0,0,0,0.8)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                margin: '10px 0',
+                border: '2px solid #1f3323',
+                margin: '6px 0',
               }}>
-                {/* Lignes blanches délimitant les couloirs de course */}
-                <div style={{ position: 'absolute', width: 450, height: 450, borderRadius: '50%', border: '1px dashed rgba(255,255,255,0.15)', pointerEvents: 'none' }} />
-                <div style={{ position: 'absolute', width: 400, height: 400, borderRadius: '50%', border: '1px dashed rgba(255,255,255,0.15)', pointerEvents: 'none' }} />
-                <div style={{ position: 'absolute', width: 350, height: 350, borderRadius: '50%', border: '1px dashed rgba(255,255,255,0.15)', pointerEvents: 'none' }} />
-
-                {/* Ligne d'arrivée à damier (en haut, à 12h) */}
+                {/* HUD Classement en direct dans le coin supérieur droit */}
                 <div style={{
                   position: 'absolute',
-                  top: -45,
-                  left: '50%',
-                  transform: 'translateX(-50%)',
-                  width: 8,
-                  height: 45,
-                  background: 'repeating-linear-gradient(0deg, #ffffff, #ffffff 6px, #000000 6px, #000000 12px)',
-                  zIndex: 8,
-                  boxShadow: '0 0 10px rgba(255,255,255,0.7)',
+                  top: 14,
+                  right: 14,
+                  background: 'rgba(13, 21, 32, 0.92)',
+                  border: '1.5px solid var(--gold)',
+                  borderRadius: 12,
+                  padding: '10px 14px',
+                  boxShadow: '0 8px 30px rgba(0,0,0,0.75)',
+                  width: 210,
+                  zIndex: 35,
+                  backdropFilter: 'blur(8px)',
                 }}>
-                  <span style={{ position: 'absolute', top: -24, left: '50%', transform: 'translateX(-50%)', fontSize: 20 }}>🏁</span>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    borderBottom: '1px solid rgba(255,255,255,0.1)',
+                    paddingBottom: 6,
+                    marginBottom: 8,
+                  }}>
+                    <span className="label-xs" style={{ color: 'var(--gold)', letterSpacing: '0.1em' }}>
+                      CLASSEMENT LIVE
+                    </span>
+                    <span className="badge badge-gold" style={{ fontSize: 9, padding: '2px 6px' }}>
+                      HUD 🏆
+                    </span>
+                  </div>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    {[...horses].sort((a, b) => b.progress - a.progress).map((h, rank) => {
+                      const lap = Math.min(3, Math.floor(h.progress / 360) + 1);
+                      const medals = ['🥇', '🥈', '🥉', '4e'];
+                      return (
+                        <div key={h.id} style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          background: rank === 0 ? 'rgba(244,197,66,0.15)' : 'rgba(255,255,255,0.03)',
+                          borderLeft: `3px solid ${h.color}`,
+                          borderRadius: 6,
+                          padding: '4px 8px',
+                        }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                            <span style={{ fontSize: 11 }}>{medals[rank]}</span>
+                            <span style={{ fontSize: 12, fontWeight: 800, color: h.color }}>
+                              {h.name.split(' ')[0]}
+                            </span>
+                          </div>
+
+                          <div style={{ textAlign: 'right' }}>
+                            <span style={{
+                              fontSize: 11,
+                              fontWeight: 900,
+                              color: rank === 0 ? 'var(--gold)' : 'var(--text-secondary)',
+                            }}>
+                              T{lap} · {Math.min(100, Math.round((h.progress / 1080) * 100))}%
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
 
-                {/* Pelouse centrale avec statistiques de course */}
-                <div style={{
-                  width: 250,
-                  height: 250,
-                  borderRadius: '50%',
-                  background: 'radial-gradient(circle, #0e371f 0%, #062313 100%)',
-                  border: '3px solid #15803d',
-                  boxShadow: 'inset 0 0 25px rgba(0,0,0,0.7)',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  textAlign: 'center',
-                  padding: 16,
-                  zIndex: 5,
-                }}>
-                  <div className="label-xs" style={{ color: '#86efac', letterSpacing: '0.1em' }}>
-                    TOUR DE PISTE
-                  </div>
-                  <div style={{ fontSize: 32, fontWeight: 900, color: '#ffffff', lineHeight: 1.1, marginTop: 2 }}>
+                {/* SVG de la Piste Ovale (Terre battue, couloirs, pelouse, ligne de départ/arrivée) */}
+                <svg
+                  viewBox="0 0 780 430"
+                  style={{ width: '100%', height: '100%', display: 'block' }}
+                >
+                  <defs>
+                    <radialGradient id="derbyTurfGradient" cx="50%" cy="50%" r="50%">
+                      <stop offset="0%" stopColor="#0f4523" />
+                      <stop offset="100%" stopColor="#082814" />
+                    </radialGradient>
+                    <pattern id="checkeredFinish" width="10" height="10" patternUnits="userSpaceOnUse">
+                      <rect width="5" height="5" fill="#ffffff" />
+                      <rect x="5" width="5" height="5" fill="#000000" />
+                      <rect y="5" width="5" height="5" fill="#000000" />
+                      <rect x="5" y="5" width="5" height="5" fill="#ffffff" />
+                    </pattern>
+                  </defs>
+
+                  {/* Surface globale de la piste ovale en terre battue (Anneau extérieur) */}
+                  <path
+                    d="M 390 400 L 550 400 A 185 185 0 0 0 550 30 L 230 30 A 185 185 0 0 0 230 400 Z"
+                    fill="#3a2216"
+                    stroke="#5c3826"
+                    strokeWidth="6"
+                  />
+
+                  {/* Pelouse intérieure (Infield Turf) */}
+                  <path
+                    d="M 390 295 L 550 295 A 80 80 0 0 0 550 135 L 230 135 A 80 80 0 0 0 230 295 Z"
+                    fill="url(#derbyTurfGradient)"
+                    stroke="#166534"
+                    strokeWidth="4"
+                  />
+
+                  {/* Séparateurs en pointillés des 4 couloirs */}
+                  {/* Couloir 1/2 (R=107.5) */}
+                  <path
+                    d="M 390 322.5 L 550 322.5 A 107.5 107.5 0 0 0 550 107.5 L 230 107.5 A 107.5 107.5 0 0 0 230 322.5 Z"
+                    fill="none"
+                    stroke="rgba(255,255,255,0.2)"
+                    strokeWidth="1.5"
+                    strokeDasharray="8 8"
+                  />
+                  {/* Couloir 2/3 (R=132.5) */}
+                  <path
+                    d="M 390 347.5 L 550 347.5 A 132.5 132.5 0 0 0 550 82.5 L 230 82.5 A 132.5 132.5 0 0 0 230 347.5 Z"
+                    fill="none"
+                    stroke="rgba(255,255,255,0.2)"
+                    strokeWidth="1.5"
+                    strokeDasharray="8 8"
+                  />
+                  {/* Couloir 3/4 (R=157.5) */}
+                  <path
+                    d="M 390 372.5 L 550 372.5 A 157.5 157.5 0 0 0 550 57.5 L 230 57.5 A 157.5 157.5 0 0 0 230 372.5 Z"
+                    fill="none"
+                    stroke="rgba(255,255,255,0.2)"
+                    strokeWidth="1.5"
+                    strokeDasharray="8 8"
+                  />
+
+                  {/* Vraie Ligne de Départ / Arrivée à damier (traversant les 4 couloirs) */}
+                  <rect
+                    x="386"
+                    y="295"
+                    width="8"
+                    height="105"
+                    fill="url(#checkeredFinish)"
+                    stroke="#ffffff"
+                    strokeWidth="1"
+                  />
+                  <text x="390" y="420" textAnchor="middle" fontSize="18">🏁</text>
+                  <text x="390" y="286" textAnchor="middle" fill="#f4c542" fontSize="10" fontWeight="900" letterSpacing="0.1em">
+                    LIGNE D'ARRIVÉE
+                  </text>
+
+                  {/* Décoration et affichage central sur la pelouse */}
+                  <text x="390" y="195" textAnchor="middle" fill="#86efac" fontSize="11" fontWeight="800" letterSpacing="0.12em">
+                    HIPPODROME OVALE · 3 TOURS
+                  </text>
+                  <text x="390" y="225" textAnchor="middle" fill="#ffffff" fontSize="26" fontWeight="900">
                     {leader ? (
                       leader.progress >= 720 ? 'TOUR 3/3' : leader.progress >= 360 ? 'TOUR 2/3' : 'TOUR 1/3'
                     ) : 'DÉPART'}
-                  </div>
+                  </text>
                   {leader && leader.progress >= 720 && (
-                    <span className="badge badge-red animate-pulse" style={{ fontSize: 10, marginTop: 4 }}>
-                      DERNIER TOUR !
-                    </span>
+                    <text x="390" y="246" textAnchor="middle" fill="#ef4444" fontSize="11" fontWeight="900">
+                      ⚡ DERNIER TOUR ! ⚡
+                    </text>
                   )}
+                </svg>
 
-                  {leader && (
-                    <div style={{ marginTop: 10, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                      <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)' }}>LEADER</div>
-                      <div style={{ fontSize: 15, fontWeight: 900, color: leader.color }}>
-                        {leader.emoji} {leader.name}
-                      </div>
-                      <div style={{ fontSize: 12, fontWeight: 800, color: 'var(--gold)', marginTop: 2 }}>
-                        {Math.min(1080, Math.round(leader.progress))}° / 1080°
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* Les 4 chevaux positionnés au centre absolu et orbitant via transform */}
+                {/* Les 4 Chevaux animés via CSS Motion Path (offset-path) */}
                 {horses.map((horse, idx) => {
-                  const radius = HORSE_RADII[idx] ?? (180 + idx * 25);
-                  // Décalage de -90 degrés pour que 0° soit situé à 12h (ligne d'arrivée en haut)
-                  const currentAngle = horse.progress - 90;
+                  const lanePath = getDerbyLanePath(idx);
+                  const percentDistance = (horse.progress / 360) * 100;
 
                   return (
                     <div
                       key={horse.id}
                       style={{
                         position: 'absolute',
-                        top: '50%',
-                        left: '50%',
-                        transform: `rotate(${currentAngle}deg) translateX(${radius}px) rotate(-${currentAngle}deg)`,
-                        transition: 'transform 100ms linear',
-                        zIndex: 10 + idx,
+                        top: 0,
+                        left: 0,
+                        offsetPath: `path('${lanePath}')`,
+                        WebkitOffsetPath: `path('${lanePath}')`,
+                        offsetDistance: `${percentDistance}%`,
+                        WebkitOffsetDistance: `${percentDistance}%`,
+                        offsetRotate: '0deg',
+                        WebkitOffsetRotate: '0deg',
+                        transition: 'offset-distance 100ms linear, -webkit-offset-distance 100ms linear',
+                        transform: 'translate(-50%, -50%)',
+                        zIndex: 20 + idx,
                         pointerEvents: 'none',
-                        marginTop: -16,
-                        marginLeft: -20,
-                      }}
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                      } as any}
                     >
+                      {/* Pastille Nom/ID bien visible */}
                       <div style={{
-                        background: horse.color,
-                        color: '#000000',
-                        padding: '4px 10px',
-                        borderRadius: 20,
+                        fontSize: 10,
                         fontWeight: 900,
-                        fontSize: 12,
+                        color: '#ffffff',
+                        background: 'rgba(0, 0, 0, 0.85)',
+                        border: `1.5px solid ${horse.color}`,
+                        borderRadius: 8,
+                        padding: '1px 6px',
+                        whiteSpace: 'nowrap',
+                        marginBottom: 2,
+                        boxShadow: '0 2px 5px rgba(0,0,0,0.8)',
+                      }}>
+                        #{horse.id} {horse.name.split(' ')[0]}
+                      </div>
+
+                      {/* Icône de cheval avec pastille de couleur */}
+                      <div style={{
+                        width: 38,
+                        height: 38,
+                        borderRadius: '50%',
+                        background: horse.color,
                         display: 'flex',
                         alignItems: 'center',
-                        gap: 4,
-                        boxShadow: `0 0 14px ${horse.color}`,
-                        border: '2px solid #ffffff',
-                        whiteSpace: 'nowrap',
+                        justifyContent: 'center',
+                        fontSize: 22,
+                        boxShadow: `0 0 16px ${horse.color}, 0 4px 10px rgba(0,0,0,0.7)`,
+                        border: '2.5px solid #ffffff',
                       }}>
-                        <span style={{ fontSize: 16 }}>🏇</span>
-                        <span>#{horse.id}</span>
+                        🐎
                       </div>
                     </div>
                   );
                 })}
               </div>
 
-              {/* Classement en direct en dessous du circuit */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, width: '100%', maxWidth: 720 }}>
+              {/* Barre de récapitulatif sous la piste */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, width: '100%', maxWidth: 780 }}>
                 {[...horses].sort((a, b) => b.progress - a.progress).map((h, rank) => (
                   <div key={h.id} style={{
                     background: 'var(--bg-input)',
