@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { socket } from '../socket';
 import {
   Room,
@@ -23,8 +23,8 @@ import confetti from 'canvas-confetti';
 
 // ── Helpers ──────────────────────────────────────────────────
 const AVATAR_COLORS = [
-  '#e53935', '#f4c542', '#1fff1b', '#3b82f6',
-  '#a855f7', '#ec4899', '#f97316', '#06b6d4',
+  '#e5484d', '#ffb629', '#5cc963', '#4d9de0',
+  '#a855f7', '#ec4899', '#ef8511', '#06b6d4',
 ];
 
 function avatarColor(name: string): string {
@@ -137,12 +137,29 @@ export const HostScreen: React.FC = () => {
     }
   }, [room?.state, room?.crashRound]);
 
+  const roomIdRef = useRef<string | null>(null);
+  const createdRef = useRef(false);
+
   useEffect(() => {
-    socket.on('connect', () => setIsConnected(true));
+    // The shared socket often connects before this component mounts.
+    setIsConnected(socket.connected);
+    socket.on('connect', () => {
+      setIsConnected(true);
+      // After a reconnection the socket lost its room membership: re-subscribe.
+      if (roomIdRef.current) {
+        socket.emit('watch_room', { roomId: roomIdRef.current });
+      }
+    });
     socket.on('disconnect', () => setIsConnected(false));
-    socket.emit('create_room');
+
+    // Guard against React StrictMode double-effect creating two rooms.
+    if (!createdRef.current) {
+      createdRef.current = true;
+      socket.emit('create_room');
+    }
 
     socket.on('room_created', ({ room }: { room: Room }) => {
+      roomIdRef.current = room.id;
       setRoom(room);
     });
 
@@ -160,40 +177,40 @@ export const HostScreen: React.FC = () => {
     socket.on('room_updated', ({ room: updatedRoom }: { room: Room }) => {
       setRoom(prev => {
         if (prev && updatedRoom.state === 'lobby' && updatedRoom.players.length > prev.players.length) {
-          confetti({ particleCount: 30, spread: 55, origin: { y: 0.8 }, colors: ['#1fff1b', '#f4c542'] });
+          confetti({ particleCount: 30, spread: 55, origin: { y: 0.8 }, colors: ['#5cc963', '#ffb629'] });
         }
         if (prev?.state === 'roulette_spinning' && updatedRoom.state === 'roulette_result') {
-          confetti({ particleCount: 100, spread: 80, origin: { y: 0.5 }, colors: ['#1fff1b', '#f4c542', '#e53935'] });
+          confetti({ particleCount: 100, spread: 80, origin: { y: 0.5 }, colors: ['#5cc963', '#ffb629', '#e53935'] });
         }
         if (prev?.state === 'crash_flying' && updatedRoom.state === 'crash_result') {
           const hasWinners = updatedRoom.currentCrashResult?.results.some(r => r.won);
           if (hasWinners) {
-            confetti({ particleCount: 80, spread: 70, origin: { y: 0.5 }, colors: ['#1fff1b', '#3b82f6'] });
+            confetti({ particleCount: 80, spread: 70, origin: { y: 0.5 }, colors: ['#5cc963', '#4d9de0'] });
           }
         }
         if (prev?.state === 'blackjack_dealer_turn' && updatedRoom.state === 'blackjack_result') {
           const hasWinners = updatedRoom.currentBlackjackResult?.results.some(r => r.status === 'won');
           if (hasWinners) {
-            confetti({ particleCount: 90, spread: 75, origin: { y: 0.5 }, colors: ['#1fff1b', '#f4c542'] });
+            confetti({ particleCount: 90, spread: 75, origin: { y: 0.5 }, colors: ['#5cc963', '#ffb629'] });
           }
         }
         if (prev?.state === 'mines_playing' && updatedRoom.state === 'mines_result') {
           const hasWinners = updatedRoom.currentMinesResult?.results.some(r => r.status === 'cashed_out');
           if (hasWinners) {
-            confetti({ particleCount: 90, spread: 80, origin: { y: 0.5 }, colors: ['#1fff1b', '#f4c542'] });
+            confetti({ particleCount: 90, spread: 80, origin: { y: 0.5 }, colors: ['#5cc963', '#ffb629'] });
           }
         }
         if (prev?.state === 'derby_racing' && updatedRoom.state === 'derby_result') {
           const hasWinners = updatedRoom.currentDerbyResult?.results.some(r => r.won);
           if (hasWinners) {
-            confetti({ particleCount: 110, spread: 85, origin: { y: 0.5 }, colors: ['#f4c542', '#1fff1b', '#3b82f6'] });
+            confetti({ particleCount: 110, spread: 85, origin: { y: 0.5 }, colors: ['#ffb629', '#5cc963', '#4d9de0'] });
           }
         }
         if (prev?.state !== 'final_tax' && updatedRoom.state === 'final_tax') {
-          confetti({ particleCount: 120, spread: 90, origin: { y: 0.4 }, colors: ['#ef5350', '#f4c542'] });
+          confetti({ particleCount: 120, spread: 90, origin: { y: 0.4 }, colors: ['#f2696d', '#ffb629'] });
         }
         if (prev?.state !== 'final_drinking' && updatedRoom.state === 'final_drinking') {
-          confetti({ particleCount: 150, spread: 100, origin: { y: 0.5 }, colors: ['#1fff1b', '#f4c542', '#3b82f6'] });
+          confetti({ particleCount: 150, spread: 100, origin: { y: 0.5 }, colors: ['#5cc963', '#ffb629', '#4d9de0'] });
         }
         return updatedRoom;
       });
@@ -285,14 +302,15 @@ export const HostScreen: React.FC = () => {
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <div style={{
-            width: 32, height: 32, borderRadius: 6,
-            background: 'var(--green)', display: 'flex',
+            width: 32, height: 32, borderRadius: 10,
+            background: 'var(--yellow)', boxShadow: '0 3px 0 var(--orange-deep)',
+            display: 'flex',
             alignItems: 'center', justifyContent: 'center', flexShrink: 0,
           }}>
             <span style={{ fontSize: 16 }}>🎲</span>
           </div>
-          <span style={{ fontWeight: 800, fontSize: 16, color: 'var(--text-primary)', letterSpacing: '-0.01em' }}>
-            Casino à Boire
+          <span style={{ fontFamily: 'var(--font-display)', fontSize: 17, color: 'var(--yellow)', textShadow: '0 2px 0 var(--orange-deep)', letterSpacing: '0.02em' }}>
+            CASINO À BOIRE
           </span>
           {room?.state && (
             <>
@@ -461,7 +479,7 @@ export const HostScreen: React.FC = () => {
 
                 <div style={{ background: 'var(--bg-input)', padding: '10px 12px', borderRadius: 6, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Bombes aux Mines</span>
-                  <span style={{ fontSize: 13, fontWeight: 800, color: '#ef5350' }}>
+                  <span style={{ fontSize: 13, fontWeight: 800, color: '#f2696d' }}>
                     {room?.settings?.minesBombCount ?? 7} 💣
                   </span>
                 </div>
@@ -518,9 +536,14 @@ export const HostScreen: React.FC = () => {
                   <div className="label-xs" style={{ marginBottom: 4 }}>PHASE DE VOTE · MANCHE {room.currentRound || 1}</div>
                   <h2 style={{ fontSize: 22, fontWeight: 800 }}>Choisissez le prochain jeu</h2>
                 </div>
-                <div style={{ textAlign: 'right' }}>
-                  <span style={{ fontSize: 28, fontWeight: 900, color: 'var(--green)' }}>{votedCount}</span>
-                  <span style={{ fontSize: 14, color: 'var(--text-secondary)' }}>/{totalPlayers}</span>
+                <div style={{ textAlign: 'right', display: 'flex', alignItems: 'center', gap: 14 }}>
+                  <span className="badge badge-gold animate-pulse" style={{ fontSize: 13, padding: '6px 12px' }}>
+                    ⏱ {Math.max(0, 10 - phaseSeconds)}s
+                  </span>
+                  <div>
+                    <span style={{ fontSize: 28, fontWeight: 900, color: 'var(--green)' }}>{votedCount}</span>
+                    <span style={{ fontSize: 14, color: 'var(--text-secondary)' }}>/{totalPlayers}</span>
+                  </div>
                 </div>
               </div>
 
@@ -533,7 +556,7 @@ export const HostScreen: React.FC = () => {
                   const hasVoted = room.votes && room.votes[player.id] !== undefined;
                   return (
                     <div key={player.id} className="player-row" style={{
-                      borderColor: hasVoted ? 'rgba(31,255,27,0.3)' : 'var(--border-subtle)',
+                      borderColor: hasVoted ? 'rgba(92,201,99,0.3)' : 'var(--border-subtle)',
                     }}>
                       <Avatar name={player.name} size={28} />
                       <div style={{ flex: 1, fontSize: 13, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
@@ -575,8 +598,8 @@ export const HostScreen: React.FC = () => {
                   <h2 style={{ fontSize: 22, fontWeight: 800 }}>Faites vos jeux !</h2>
                 </div>
                 <div style={{ display: 'flex', gap: 10, alignItems: 'center', fontSize: 13, fontWeight: 700 }}>
-                  <span style={{ color: '#ef5350' }}>🔴 x2</span>
-                  <span style={{ color: '#94a3b8' }}>⚫ x2</span>
+                  <span style={{ color: '#f2696d' }}>🔴 x2</span>
+                  <span style={{ color: '#cfc4b0' }}>⚫ x2</span>
                   <span style={{ color: 'var(--green)' }}>🟢 x36</span>
                 </div>
               </div>
@@ -590,8 +613,8 @@ export const HostScreen: React.FC = () => {
                   const bet = player.currentBet ?? (room.bets ? room.bets[player.id] : null);
                   const hasBet = Boolean(bet);
                   const COLOR_STYLES: Record<string, { color: string; emoji: string }> = {
-                    red:   { color: '#ef5350', emoji: '🔴' },
-                    black: { color: '#94a3b8', emoji: '⚫' },
+                    red:   { color: '#f2696d', emoji: '🔴' },
+                    black: { color: '#cfc4b0', emoji: '⚫' },
                     green: { color: 'var(--green)', emoji: '🟢' },
                   };
                   const cs = bet ? COLOR_STYLES[bet.color] : null;
@@ -652,9 +675,9 @@ export const HostScreen: React.FC = () => {
 
         {room?.state === 'roulette_result' && room.currentResult && (() => {
           const wc = room.currentResult.winningColor;
-          const winColorStyle = wc === 'red' ? { bg: 'rgba(229,57,53,0.12)', border: 'rgba(229,57,53,0.3)', text: '#ef5350', emoji: '🔴' }
-            : wc === 'black' ? { bg: 'rgba(30,41,59,0.6)', border: 'rgba(100,116,139,0.3)', text: '#94a3b8', emoji: '⚫' }
-            : { bg: 'var(--green-muted)', border: 'rgba(31,255,27,0.3)', text: 'var(--green)', emoji: '🟢' };
+          const winColorStyle = wc === 'red' ? { bg: 'rgba(229,72,77,0.12)', border: 'rgba(229,72,77,0.3)', text: '#f2696d', emoji: '🔴' }
+            : wc === 'black' ? { bg: 'rgba(246,235,216,0.08)', border: 'rgba(246,235,216,0.2)', text: '#cfc4b0', emoji: '⚫' }
+            : { bg: 'var(--green-muted)', border: 'rgba(92,201,99,0.3)', text: 'var(--green)', emoji: '🟢' };
           return (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16, flex: 1 }}>
               <div style={{
@@ -787,20 +810,110 @@ export const HostScreen: React.FC = () => {
         )}
 
         {room?.state === 'crash_flying' && (
-          <div className="card" style={{ padding: '40px 24px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
-            <div style={{ fontSize: 72, fontWeight: 900, color: trend === 'up' ? 'var(--green)' : '#ef5350' }}>
-              {currentMultiplier.toFixed(2)}x
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16, flex: 1 }}>
+            <div className="card" style={{ padding: '48px 24px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
+              <div style={{ fontSize: 40 }} className={trend === 'up' ? 'animate-bounce' : ''}>
+                {trend === 'down' ? '📉' : '🚀'}
+              </div>
+              <div style={{
+                fontFamily: 'var(--font-display)',
+                fontSize: 88,
+                lineHeight: 1,
+                color: trend === 'up' ? 'var(--green)' : trend === 'down' ? '#f2696d' : 'var(--yellow)',
+                textShadow: '0 4px 0 rgba(0,0,0,0.4)',
+              }}>
+                {currentMultiplier.toFixed(2)}x
+              </div>
+              <div className="label-xs" style={{ color: 'var(--text-secondary)' }}>
+                SESSION {room.crashRound || 1}/3 · VENDEZ AVANT LE KRACH !
+              </div>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 8 }}>
+              {room.players.filter(p => room.crashBets && room.crashBets[p.id]).map(player => {
+                const sold = player.cashOutMultiplier !== null && player.cashOutMultiplier !== undefined;
+                return (
+                  <div key={player.id} className={sold ? 'result-win' : 'player-row'} style={{ padding: '10px 12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <Avatar name={player.name} size={26} />
+                      <span style={{ fontWeight: 700, fontSize: 13 }}>{player.name}</span>
+                    </div>
+                    {sold
+                      ? <span className="badge badge-green">Vendu à {player.cashOutMultiplier!.toFixed(2)}x</span>
+                      : <span className="badge badge-gold animate-pulse">En jeu 📈</span>}
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}
 
-        {room?.state === 'crash_result' && room.currentCrashResult && (
-          <div className="card" style={{ padding: 24, textAlign: 'center' }}>
-            <h2 style={{ fontSize: 32, fontWeight: 900, color: '#ef5350' }}>
-              📉 KRACH BOURSIER à {room.currentCrashResult.crashPoint.toFixed(2)}x !
-            </h2>
-          </div>
-        )}
+        {room?.state === 'crash_result' && room.currentCrashResult && (() => {
+          const crashWinners = room.currentCrashResult.results.filter(r => r.won);
+          const crashLosers = room.currentCrashResult.results.filter(r => !r.won && r.betAmount > 0);
+          return (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16, flex: 1 }}>
+              <div className="card animate-in" style={{
+                padding: '24px 32px',
+                background: 'radial-gradient(ellipse at 50% 50%, rgba(229, 72, 77, 0.15) 0%, var(--bg-card) 100%)',
+                border: '2px solid #f2696d',
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              }}>
+                <div>
+                  <div className="label-xs" style={{ color: '#f2696d' }}>SESSION {room.crashRound || 1}/3</div>
+                  <h1 style={{ fontSize: 36, margin: 0 }}>
+                    📉 KRACH à <span style={{ color: '#f2696d' }}>{room.currentCrashResult.crashPoint.toFixed(2)}x</span> !
+                  </h1>
+                </div>
+                <span className="badge badge-red" style={{ fontSize: 14, padding: '8px 18px' }}>
+                  Marché effondré
+                </span>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, flex: 1 }}>
+                <div className="card" style={{ padding: 16 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+                    <TrendingUp size={16} color="var(--green)" />
+                    <span style={{ fontWeight: 700, fontSize: 13 }}>Ont vendu à temps</span>
+                    <span className="badge badge-green">{crashWinners.length}</span>
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    {crashWinners.map(r => (
+                      <div key={r.playerId} className="result-win" style={{ padding: '8px 12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <Avatar name={r.playerName} size={24} />
+                          <span style={{ fontSize: 13, fontWeight: 700 }}>{r.playerName}</span>
+                        </div>
+                        <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--green)' }}>
+                          {r.cashOutMultiplier?.toFixed(2)}x · {r.netGain >= 0 ? '+' : ''}{r.netGain} 💰
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="card" style={{ padding: 16 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+                    <TrendingDown size={16} color="var(--red)" />
+                    <span style={{ fontWeight: 700, fontSize: 13 }}>Ruinés — Gorgées</span>
+                    <span className="badge badge-red">{crashLosers.length}</span>
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    {crashLosers.map(r => (
+                      <div key={r.playerId} className="result-lose" style={{ padding: '8px 12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <Avatar name={r.playerName} size={24} />
+                          <span style={{ fontSize: 13, fontWeight: 700 }}>{r.playerName}</span>
+                        </div>
+                        <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--red)' }}>+{r.sipsToDrink} 🍺</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        })()}
 
         {/* ═══════════════════════════════════════════════════════ */}
         {/* PLAYING BLACKJACK (Mises)                               */}
@@ -891,6 +1004,82 @@ export const HostScreen: React.FC = () => {
             </div>
           </div>
         )}
+
+        {/* ═══════════════════════════════════════════════════════ */}
+        {/* BLACKJACK RESULT                                        */}
+        {/* ═══════════════════════════════════════════════════════ */}
+        {room?.state === 'blackjack_result' && room.currentBlackjackResult && (() => {
+          const bj = room.currentBlackjackResult;
+          const bjWinners = bj.results.filter(r => r.status === 'won' && r.betAmount > 0);
+          const bjPush = bj.results.filter(r => r.status === 'push' && r.betAmount > 0);
+          const bjLosers = bj.results.filter(r => (r.status === 'lost' || r.status === 'busted') && r.betAmount > 0);
+          return (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16, flex: 1 }}>
+              <div className="card animate-in" style={{ padding: '20px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div>
+                  <div className="label-xs" style={{ marginBottom: 4 }}>RÉSULTATS BLACKJACK ♠</div>
+                  <h2 style={{ fontSize: 26, margin: 0 }}>
+                    Croupier : {bj.dealerScore} pts {bj.dealerBusted && <span style={{ color: '#f2696d' }}>· SAUTÉ ! 💥</span>}
+                  </h2>
+                </div>
+                <div style={{ display: 'flex', gap: 6 }}>
+                  {bj.dealerHand.map((c, i) => <PlayingCard key={i} card={c} size="md" />)}
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, flex: 1 }}>
+                <div className="card" style={{ padding: 16 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+                    <TrendingUp size={16} color="var(--green)" />
+                    <span style={{ fontWeight: 700, fontSize: 13 }}>Gagnants</span>
+                    <span className="badge badge-green">{bjWinners.length}</span>
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    {bjWinners.map(r => (
+                      <div key={r.playerId} className="result-win" style={{ padding: '8px 12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <Avatar name={r.playerName} size={24} />
+                          <span style={{ fontSize: 13, fontWeight: 700 }}>{r.playerName} ({r.score} pts)</span>
+                        </div>
+                        <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--green)' }}>+{r.netGain} 💰</div>
+                      </div>
+                    ))}
+                    {bjPush.map(r => (
+                      <div key={r.playerId} className="player-row" style={{ padding: '8px 12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <Avatar name={r.playerName} size={24} />
+                          <span style={{ fontSize: 13, fontWeight: 700 }}>{r.playerName} ({r.score} pts)</span>
+                        </div>
+                        <span className="badge badge-surface">Égalité</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="card" style={{ padding: 16 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+                    <TrendingDown size={16} color="var(--red)" />
+                    <span style={{ fontWeight: 700, fontSize: 13 }}>Perdants — Gorgées</span>
+                    <span className="badge badge-red">{bjLosers.length}</span>
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    {bjLosers.map(r => (
+                      <div key={r.playerId} className="result-lose" style={{ padding: '8px 12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <Avatar name={r.playerName} size={24} />
+                          <span style={{ fontSize: 13, fontWeight: 700 }}>
+                            {r.playerName} ({r.status === 'busted' ? 'Sauté 💥' : `${r.score} pts`})
+                          </span>
+                        </div>
+                        <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--red)' }}>+{r.sipsToDrink} 🍺</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        })()}
 
         {/* ═══════════════════════════════════════════════════════ */}
         {/* PLAYING MINES (Mises)                                   */}
@@ -988,6 +1177,84 @@ export const HostScreen: React.FC = () => {
         )}
 
         {/* ═══════════════════════════════════════════════════════ */}
+        {/* MINES RESULT                                            */}
+        {/* ═══════════════════════════════════════════════════════ */}
+        {room?.state === 'mines_result' && room.currentMinesResult && (() => {
+          const mr = room.currentMinesResult;
+          const survivors = mr.results.filter(r => r.status === 'cashed_out' && r.betAmount > 0);
+          const busted = mr.results.filter(r => r.status === 'busted' && r.betAmount > 0);
+          return (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16, flex: 1 }}>
+              <div className="card animate-in" style={{ padding: '20px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div>
+                  <div className="label-xs" style={{ marginBottom: 4 }}>RÉSULTATS DES MINES 💣</div>
+                  <h2 style={{ fontSize: 26, margin: 0 }}>Le champ de mines est révélé !</h2>
+                </div>
+                <span className="badge badge-red" style={{ fontSize: 13, padding: '6px 14px' }}>
+                  {mr.minesGrid.length} bombes
+                </span>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: 16, flex: 1, alignItems: 'start' }}>
+                <div className="card" style={{ padding: 20 }}>
+                  <div className="mines-grid-container" style={{ maxWidth: 380 }}>
+                    {Array.from({ length: 36 }).map((_, index) => {
+                      const isBomb = mr.minesGrid.includes(index);
+                      const wasRevealed = mr.revealedCells.includes(index);
+                      return (
+                        <div key={index} className={`mines-cell ${isBomb ? 'mines-cell-bomb' : wasRevealed ? 'mines-cell-safe' : 'mines-cell-disabled'}`} style={{ fontSize: 18 }}>
+                          {isBomb ? '💣' : wasRevealed ? '💎' : ''}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                  <div className="card" style={{ padding: 16 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+                      <TrendingUp size={16} color="var(--green)" />
+                      <span style={{ fontWeight: 700, fontSize: 13 }}>Gains sécurisés</span>
+                      <span className="badge badge-green">{survivors.length}</span>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                      {survivors.map(r => (
+                        <div key={r.playerId} className="result-win" style={{ padding: '8px 12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <Avatar name={r.playerName} size={24} />
+                            <span style={{ fontSize: 13, fontWeight: 700 }}>{r.playerName} · {r.safeClicks} 💎</span>
+                          </div>
+                          <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--green)' }}>+{r.netGain} 💰</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="card" style={{ padding: 16 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+                      <TrendingDown size={16} color="var(--red)" />
+                      <span style={{ fontWeight: 700, fontSize: 13 }}>Explosés — Gorgées</span>
+                      <span className="badge badge-red">{busted.length}</span>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                      {busted.map(r => (
+                        <div key={r.playerId} className="result-lose" style={{ padding: '8px 12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <Avatar name={r.playerName} size={24} />
+                            <span style={{ fontSize: 13, fontWeight: 700 }}>{r.playerName} 💥</span>
+                          </div>
+                          <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--red)' }}>+{r.sipsToDrink} 🍺</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        })()}
+
+        {/* ═══════════════════════════════════════════════════════ */}
         {/* PLAYING DERBY (Mises)                                   */}
         {/* ═══════════════════════════════════════════════════════ */}
         {room?.state === 'playing_derby' && (
@@ -1022,10 +1289,10 @@ export const HostScreen: React.FC = () => {
               {/* 4 Starting Stalls */}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10 }}>
                 {(room.derbyHorses || [
-                  { id: 1, name: 'Éclair Rouge', color: '#ef5350', emoji: '🔴' },
-                  { id: 2, name: 'Tornade Bleue', color: '#3b82f6', emoji: '🔵' },
-                  { id: 3, name: 'Galop Vert', color: '#1fff1b', emoji: '🟢' },
-                  { id: 4, name: 'Pégase Jaune', color: '#f4c542', emoji: '🟡' },
+                  { id: 1, name: 'Éclair Rouge', color: '#f2696d', emoji: '🔴' },
+                  { id: 2, name: 'Tornade Bleue', color: '#4d9de0', emoji: '🔵' },
+                  { id: 3, name: 'Galop Vert', color: '#5cc963', emoji: '🟢' },
+                  { id: 4, name: 'Pégase Jaune', color: '#ffb629', emoji: '🟡' },
                 ]).map((horse) => (
                   <div key={horse.id} style={{
                     background: 'var(--bg-input)',
@@ -1104,7 +1371,7 @@ export const HostScreen: React.FC = () => {
             {/* Race Track */}
             <div className="card" style={{
               padding: '24px 20px',
-              background: '#0d1520',
+              background: '#0c0906',
               border: '1px solid var(--border-default)',
               display: 'flex', flexDirection: 'column', gap: 14,
             }}>
@@ -1256,15 +1523,15 @@ export const HostScreen: React.FC = () => {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16, flex: 1 }}>
             <div className="card animate-in" style={{
               padding: '24px',
-              background: 'radial-gradient(ellipse at 50% 50%, rgba(229, 57, 53, 0.15) 0%, var(--bg-card) 100%)',
-              border: '2px solid #ef5350',
+              background: 'radial-gradient(ellipse at 50% 50%, rgba(229, 72, 77, 0.15) 0%, var(--bg-card) 100%)',
+              border: '2px solid #f2696d',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              boxShadow: '0 0 30px rgba(229, 57, 53, 0.3)',
+              boxShadow: '0 0 30px rgba(229, 72, 77, 0.3)',
             }}>
               <div>
-                <div className="label-xs" style={{ color: '#ef5350', letterSpacing: '0.1em' }}>LE GRAND FINAL</div>
+                <div className="label-xs" style={{ color: '#f2696d', letterSpacing: '0.1em' }}>LE GRAND FINAL</div>
                 <h1 style={{ fontSize: 36, fontWeight: 900, color: '#ffffff', letterSpacing: '-0.02em', margin: 0 }}>
                   💸 LA TAXE FINALE ! 💥
                 </h1>
@@ -1298,8 +1565,8 @@ export const HostScreen: React.FC = () => {
 
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
                     <div style={{ background: 'var(--bg-input)', padding: '8px 10px', borderRadius: 6 }}>
-                      <div className="label-xs" style={{ color: '#ef5350' }}>Taxe (À boire)</div>
-                      <div style={{ fontSize: 18, fontWeight: 900, color: '#ef5350' }}>
+                      <div className="label-xs" style={{ color: '#f2696d' }}>Taxe (À boire)</div>
+                      <div style={{ fontSize: 18, fontWeight: 900, color: '#f2696d' }}>
                         {player.personalTaxSips || 0} 🍺
                       </div>
                     </div>
@@ -1317,7 +1584,7 @@ export const HostScreen: React.FC = () => {
 
             <div style={{
               background: 'var(--gold-subtle)',
-              border: '1px solid rgba(244,197,66,0.25)',
+              border: '1px solid rgba(255,182,41,0.25)',
               borderRadius: 'var(--r-md)',
               padding: '12px 18px',
               display: 'flex', alignItems: 'center', gap: 10,
@@ -1392,12 +1659,12 @@ export const HostScreen: React.FC = () => {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16, flex: 1 }}>
             <div className="card animate-in" style={{
               padding: '28px 24px',
-              background: 'radial-gradient(ellipse at 50% 50%, rgba(31, 255, 27, 0.15) 0%, var(--bg-card) 100%)',
+              background: 'radial-gradient(ellipse at 50% 50%, rgba(92, 201, 99, 0.15) 0%, var(--bg-card) 100%)',
               border: '2px solid var(--green)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              boxShadow: '0 0 35px rgba(31, 255, 27, 0.3)',
+              boxShadow: '0 0 35px rgba(92, 201, 99, 0.3)',
             }}>
               <div>
                 <div className="label-xs" style={{ color: 'var(--green)', letterSpacing: '0.1em' }}>LE GRAND BILAN</div>
@@ -1439,7 +1706,7 @@ export const HostScreen: React.FC = () => {
                       </div>
 
                       <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4 }}>
-                        <div style={{ color: sips > 0 ? '#ef5350' : 'var(--green)', fontWeight: 900, fontSize: 18 }}>
+                        <div style={{ color: sips > 0 ? '#f2696d' : 'var(--green)', fontWeight: 900, fontSize: 18 }}>
                           {sips} 🍺
                         </div>
                         {hasFinished ? (
@@ -1456,7 +1723,7 @@ export const HostScreen: React.FC = () => {
 
             <div style={{
               background: allPlayersDrank ? 'var(--green-subtle)' : 'var(--gold-subtle)',
-              border: `1px solid ${allPlayersDrank ? 'rgba(31,255,27,0.3)' : 'rgba(244,197,66,0.25)'}`,
+              border: `1px solid ${allPlayersDrank ? 'rgba(92,201,99,0.3)' : 'rgba(255,182,41,0.25)'}`,
               borderRadius: 'var(--r-md)',
               padding: '12px 18px',
               display: 'flex', alignItems: 'center', gap: 10,
@@ -1467,6 +1734,68 @@ export const HostScreen: React.FC = () => {
                   ? `${leaderPlayer?.name ?? 'Le Chef'} peut maintenant réinitialiser la table et retourner au Lobby !`
                   : `En attente que tous les joueurs aient bu (${drankPlayersCount}/${totalPlayers})...`}
               </span>
+            </div>
+          </div>
+        )}
+
+        {/* ═══════════════════════════════════════════════════════ */}
+        {/* DISTRIBUTION (Standard)                                 */}
+        {/* ═══════════════════════════════════════════════════════ */}
+        {room?.state === 'distribution' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16, flex: 1 }}>
+            <div className="card animate-in" style={{ padding: '20px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div>
+                <div className="label-xs" style={{ marginBottom: 4, color: 'var(--yellow)' }}>PHASE DE DISTRIBUTION</div>
+                <h2 style={{ fontSize: 26, margin: 0 }}>Offrez des gorgées ! 🍻</h2>
+                <p style={{ color: 'var(--text-secondary)', fontSize: 13, marginTop: 4 }}>
+                  Chaque joueur peut dépenser jusqu'à 20% de son solde pour arroser un adversaire.
+                </p>
+              </div>
+              <span className="badge badge-gold" style={{ fontSize: 13, padding: '6px 14px' }}>
+                {(room.distributions || []).length} envoi{(room.distributions || []).length > 1 ? 's' : ''}
+              </span>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, flex: 1, alignItems: 'start' }}>
+              <div className="card" style={{ padding: 16 }}>
+                <div style={{ fontWeight: 700, fontSize: 13, marginBottom: 12 }}>🍺 Gorgées en attente</div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  {room.players.map(player => (
+                    <div key={player.id} className={(player.sipsToDrink || 0) > 0 ? 'result-lose' : 'player-row'} style={{ padding: '8px 12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <Avatar name={player.name} size={24} />
+                        <span style={{ fontSize: 13, fontWeight: 700 }}>{player.name}</span>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                        <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>💰 {player.balance}</span>
+                        <span style={{ fontSize: 13, fontWeight: 700, color: (player.sipsToDrink || 0) > 0 ? 'var(--red)' : 'var(--text-dim)' }}>
+                          {player.sipsToDrink || 0} 🍺
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="card" style={{ padding: 16 }}>
+                <div style={{ fontWeight: 700, fontSize: 13, marginBottom: 12 }}>📣 Cadeaux envoyés</div>
+                {(room.distributions || []).length === 0 ? (
+                  <div style={{ color: 'var(--text-dim)', fontSize: 13, textAlign: 'center', padding: '24px 0' }}>
+                    Personne n'a encore offert de gorgées...
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    {(room.distributions || []).map((d, i) => (
+                      <div key={i} className="feed-item">
+                        <span style={{ fontWeight: 700 }}>{d.fromPlayerName}</span>
+                        <ChevronRight size={13} color="var(--text-dim)" />
+                        <span style={{ fontWeight: 700 }}>{d.toPlayerName}</span>
+                        <span style={{ marginLeft: 'auto', fontWeight: 700, color: 'var(--red)' }}>+{d.amount} 🍺</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         )}
@@ -1501,7 +1830,7 @@ export const HostScreen: React.FC = () => {
                       <div style={{ fontWeight: 700 }}>{player.name}</div>
                     </div>
                     <div style={{ textAlign: 'right' }}>
-                      <div style={{ fontWeight: 800, color: (player.sipsToDrink || 0) > 0 ? '#ef5350' : 'var(--green)' }}>
+                      <div style={{ fontWeight: 800, color: (player.sipsToDrink || 0) > 0 ? '#f2696d' : 'var(--green)' }}>
                         {player.sipsToDrink || 0} 🍺
                       </div>
                       {player.hasDrank ? <span className="badge badge-green">A bu</span> : <span className="badge badge-red">En train de boire</span>}

@@ -87,22 +87,16 @@ async function runGameLoopTest() {
 
   // 3. Lancement de la partie par l'Hôte
   console.log('\n--- 1. Lancement de la partie ---');
-  const votingStatePromise = waitForRoomState(hostSocket, 'voting');
-  hostSocket.emit('start_game', { roomId });
-  const votingRoom = await votingStatePromise;
-  console.log(`✔ État de la room après lancement: ${votingRoom.state}`);
-
-  // 4. Phase de Vote
-  console.log('\n--- 2. Phase de vote (Choix du jeu) ---');
+  // Fast-track : seule la Roulette est activée, pas de phase de vote.
+  aliceSocket.emit('update_settings', { roomId, settings: { enabledGames: ['roulette'] } });
   const rouletteStatePromise = waitForRoomState(hostSocket, 'playing_roulette');
-  aliceSocket.emit('submit_vote', { roomId, vote: 'roulette' });
-  bobSocket.emit('submit_vote', { roomId, vote: 'dice' });
+  hostSocket.emit('start_game', { roomId });
   const rouletteRoom = await rouletteStatePromise;
-  console.log(`✔ 100% des joueurs ont voté -> Transition vers l'état: ${rouletteRoom.state}`);
+  console.log(`✔ Fast-track (1 seul jeu activé) -> Transition vers l'état: ${rouletteRoom.state}`);
 
   // 5. Mini-Jeu Roulette (Prise des mises)
   console.log('\n--- 3. Mini-jeu Roulette (Prise des paris) ---');
-  const resultStatePromise = waitForRoomState(hostSocket, 'round_result');
+  const resultStatePromise = waitForRoomState(hostSocket, 'roulette_result');
 
   // Alice mise 5 jetons sur Rouge (🔴)
   aliceSocket.emit('submit_bet', { roomId, amount: 5, color: 'red' });
@@ -134,10 +128,11 @@ async function runGameLoopTest() {
 
   // 7. Passage à la Manche Suivante par l'Hôte
   console.log('\n--- 5. Manche Suivante ---');
-  const nextVotingPromise = waitForRoomState(hostSocket, 'voting');
-  hostSocket.emit('next_round', { roomId });
-  const nextRoundRoom = await nextVotingPromise;
-  console.log(`✔ Hôte a cliqué sur 'Manche Suivante' -> Retour à l'état: ${nextRoundRoom.state}`);
+  const nextRoundPromise = waitForRoomState(hostSocket, 'playing_roulette');
+  hostSocket.emit('end_turn', { roomId });
+  const nextRoundRoom = await nextRoundPromise;
+  console.log(`✔ 'Manche Suivante' (end_turn) -> État: ${nextRoundRoom.state} (Manche ${nextRoundRoom.currentRound})`);
+  if (nextRoundRoom.currentRound !== 2) throw new Error('La manche aurait dû passer à 2 !');
   console.log(`  - Votes réinitialisés: ${Object.keys(nextRoundRoom.votes || {}).length === 0}`);
   console.log(`  - Mises réinitialisées: ${Object.keys(nextRoundRoom.bets || {}).length === 0}`);
 

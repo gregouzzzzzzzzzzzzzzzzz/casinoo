@@ -49,7 +49,7 @@ import {
 
 // ── Helpers ──────────────────────────────────────────────────
 const AVATAR_COLORS = [
-  '#e53935', '#f4c542', '#1fff1b', '#3b82f6',
+  '#e53935', '#ffb629', '#5cc963', '#4d9de0',
   '#a855f7', '#ec4899', '#f97316', '#06b6d4',
 ];
 
@@ -398,25 +398,9 @@ export const PhoneScreen: React.FC = () => {
 
   const handleUpdateSettings = (partial: Partial<RoomSettings>) => {
     if (!currentRoom) return;
-    const current = currentRoom.settings || {
-      startingBalance: 20,
-      minRounds: 3,
-      maxRounds: 10,
-      maxPlayers: 8,
-      minesBombCount: 7,
-      sipMultiplier: 1,
-      enabledGames: ['mines', 'blackjack', 'crash', 'roulette'],
-    };
-    const nextSettings: RoomSettings = {
-      startingBalance: partial.startingBalance ?? current.startingBalance,
-      minRounds: partial.minRounds ?? current.minRounds,
-      maxRounds: partial.maxRounds ?? current.maxRounds,
-      maxPlayers: partial.maxPlayers ?? current.maxPlayers,
-      minesBombCount: partial.minesBombCount ?? current.minesBombCount,
-      sipMultiplier: partial.sipMultiplier ?? current.sipMultiplier,
-      enabledGames: partial.enabledGames ?? current.enabledGames,
-    };
-    socket.emit('update_settings', { roomId: currentRoom.id, settings: nextSettings } as UpdateSettingsPayload);
+    // Only send the changed fields: the server merges them with the current
+    // settings, which avoids racing stale client state on rapid clicks.
+    socket.emit('update_settings', { roomId: currentRoom.id, settings: partial } as UpdateSettingsPayload);
   };
 
   // Computed
@@ -480,8 +464,9 @@ export const PhoneScreen: React.FC = () => {
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <div style={{
-              width: 26, height: 26, borderRadius: 4,
-              background: 'var(--green)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              width: 26, height: 26, borderRadius: 8,
+              background: 'var(--yellow)', boxShadow: '0 2px 0 var(--orange-deep)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}>
               <span style={{ fontSize: 13 }}>🎲</span>
             </div>
@@ -515,7 +500,7 @@ export const PhoneScreen: React.FC = () => {
         {isLeader && currentRoom && (currentRoom.state === 'lobby' || currentRoom.state === 'roulette_result' || currentRoom.state === 'crash_result' || currentRoom.state === 'blackjack_result' || currentRoom.state === 'mines_result' || currentRoom.state === 'derby_result' || currentRoom.state === 'distribution' || currentRoom.state === 'drinking_phase' || currentRoom.state === 'final_tax' || currentRoom.state === 'final_drinking') && (
           <div className="animate-in" style={{
             background: 'var(--gold-subtle)',
-            border: '1px solid rgba(244,197,66,0.25)',
+            border: '1px solid rgba(255,182,41,0.25)',
             borderRadius: 'var(--r-lg)',
             padding: '12px 16px',
             display: 'flex',
@@ -651,13 +636,13 @@ export const PhoneScreen: React.FC = () => {
         {error && (
           <div style={{
             background: 'var(--red-subtle)',
-            border: '1px solid rgba(229,57,53,0.3)',
+            border: '1px solid rgba(229,72,77,0.3)',
             borderRadius: 'var(--r-md)',
             padding: '10px 14px',
             display: 'flex', alignItems: 'center', gap: 8, fontSize: 13,
           }}>
             <AlertCircle size={15} color="var(--red)" style={{ flexShrink: 0 }} />
-            <span style={{ color: '#ef5350' }}>{error}</span>
+            <span style={{ color: '#f2696d' }}>{error}</span>
           </div>
         )}
 
@@ -668,18 +653,19 @@ export const PhoneScreen: React.FC = () => {
           <form onSubmit={handleJoin} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             <div style={{ textAlign: 'center', marginBottom: 8 }}>
               <div style={{
-                width: 48, height: 48, borderRadius: 10,
-                background: 'var(--green)', display: 'inline-flex',
+                width: 52, height: 52, borderRadius: 14,
+                background: 'var(--yellow)', boxShadow: '0 4px 0 var(--orange-deep)',
+                display: 'inline-flex',
                 alignItems: 'center', justifyContent: 'center',
-                fontSize: 24, marginBottom: 12,
+                fontSize: 26, marginBottom: 14,
               }}>
                 🎲
               </div>
-              <h1 style={{ fontSize: 22, fontWeight: 900, letterSpacing: '-0.02em', color: 'var(--text-primary)' }}>
-                Casino à Boire
+              <h1 style={{ fontSize: 26, color: 'var(--text-primary)' }}>
+                Casino <span className="bubble">à&nbsp;Boire</span>
               </h1>
-              <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 4 }}>
-                Rejoignez une table pour commencer
+              <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 6 }}>
+                Un écran, vos téléphones, zéro excuse. 🍻
               </p>
             </div>
 
@@ -848,7 +834,7 @@ export const PhoneScreen: React.FC = () => {
                       >
                         <Minus size={13} />
                       </button>
-                      <span style={{ fontSize: 15, fontWeight: 900, minWidth: 42, textAlign: 'center', color: '#ef5350' }}>
+                      <span style={{ fontSize: 15, fontWeight: 900, minWidth: 42, textAlign: 'center', color: '#f2696d' }}>
                         {s.minesBombCount} 💣
                       </span>
                       <button
@@ -972,7 +958,7 @@ export const PhoneScreen: React.FC = () => {
             {myVote ? (
               <div style={{
                 background: 'var(--green-subtle)',
-                border: '1px solid rgba(31,255,27,0.25)',
+                border: '1px solid rgba(92,201,99,0.25)',
                 borderRadius: 'var(--r-md)',
                 padding: '16px',
                 display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, textAlign: 'center',
@@ -1041,7 +1027,7 @@ export const PhoneScreen: React.FC = () => {
             <h2 style={{ fontSize: 20, fontWeight: 800, marginBottom: 16 }}>Placez votre mise</h2>
 
             {hasBet ? (
-              <div style={{ background: 'var(--green-subtle)', border: '1px solid rgba(31,255,27,0.25)', borderRadius: 'var(--r-md)', padding: '16px', textAlign: 'center' }}>
+              <div style={{ background: 'var(--green-subtle)', border: '1px solid rgba(92,201,99,0.25)', borderRadius: 'var(--r-md)', padding: '16px', textAlign: 'center' }}>
                 <CheckCircle2 size={28} color="var(--green)" style={{ margin: '0 auto 6px' }} />
                 <div style={{ fontWeight: 700, color: 'var(--green)' }}>Mise validée ({betAmount} 💰)</div>
               </div>
@@ -1062,6 +1048,55 @@ export const PhoneScreen: React.FC = () => {
             )}
           </div>
         )}
+
+        {/* ROULETTE SPINNING */}
+        {joinedPlayer && currentRoom?.state === 'roulette_spinning' && (
+          <div className="card animate-in" style={{ padding: '32px 20px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14 }}>
+            <div className="spin-ring" style={{ width: 64, height: 64 }} />
+            <div>
+              <div className="label-xs" style={{ color: 'var(--yellow)' }}>TIRAGE EN COURS</div>
+              <h2 style={{ fontSize: 22, marginTop: 4 }}>La roulette tourne... 🎡</h2>
+            </div>
+            <span className="badge badge-surface" style={{ fontSize: 12 }}>Regardez l'écran TV !</span>
+          </div>
+        )}
+
+        {/* ROULETTE RESULT (perso) */}
+        {joinedPlayer && currentRoom?.state === 'roulette_result' && currentRoom.currentResult && (() => {
+          const myResult = currentRoom.currentResult.results.find(r => r.playerId === joinedPlayer.id);
+          const wc = currentRoom.currentResult.winningColor;
+          const wcLabel = wc === 'red' ? '🔴 ROUGE' : wc === 'black' ? '⚫ NOIR' : '🟢 VERT';
+          const won = Boolean(myResult?.won && myResult.betAmount > 0);
+          return (
+            <div className="card animate-in" style={{ padding: '24px 18px', textAlign: 'center', display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <div className="label-xs">RÉSULTAT · {wcLabel} · N°{currentRoom.currentResult.winningNumber}</div>
+              <div style={{ fontSize: 44 }}>{won ? '🏆' : (myResult?.betAmount ?? 0) > 0 ? '🍺' : '👀'}</div>
+              <h2 style={{ fontSize: 22, color: won ? 'var(--green)' : '#f2696d' }}>
+                {won ? 'MISE GAGNÉE ! 🎉' : (myResult?.betAmount ?? 0) > 0 ? 'MISE PERDUE...' : 'Pas de mise'}
+              </h2>
+              {myResult && myResult.betAmount > 0 && (
+                <div style={{ background: 'var(--bg-input)', borderRadius: 14, padding: 14 }}>
+                  {won ? (
+                    <>
+                      <span className="label-xs" style={{ color: 'var(--green)' }}>Gains crédités</span>
+                      <div style={{ fontSize: 26, fontWeight: 700, color: 'var(--green)', marginTop: 2 }}>+{myResult.netGain} 💰</div>
+                    </>
+                  ) : (
+                    <>
+                      <span className="label-xs" style={{ color: '#f2696d' }}>Pénalité à boire</span>
+                      <div style={{ fontSize: 26, fontWeight: 700, color: '#f2696d', marginTop: 2 }}>+{myResult.betAmount} 🍺</div>
+                    </>
+                  )}
+                </div>
+              )}
+              {!isLeader && (
+                <div style={{ fontSize: 12, color: 'var(--text-dim)' }}>
+                  En attente que le Chef de Groupe passe à la suite...
+                </div>
+              )}
+            </div>
+          );
+        })()}
 
         {/* ═══════════════════════════════════════════════════════ */}
         {/* PLAYING CRASH                                           */}
@@ -1085,7 +1120,7 @@ export const PhoneScreen: React.FC = () => {
 
         {joinedPlayer && currentRoom?.state === 'crash_flying' && (
           <div className="card animate-in" style={{ padding: '24px 18px', textAlign: 'center', display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <div style={{ fontSize: 56, fontWeight: 900, color: crashTrend === 'up' ? 'var(--green)' : crashTrend === 'down' ? '#ef5350' : 'var(--text-primary)' }}>
+            <div style={{ fontSize: 56, fontWeight: 900, color: crashTrend === 'up' ? 'var(--green)' : crashTrend === 'down' ? '#f2696d' : 'var(--text-primary)' }}>
               {(currentRoom.crashMultiplier || liveCrashMultiplier || 1.00).toFixed(2)}x
             </div>
             {joinedPlayer.cashOutMultiplier ? (
@@ -1100,6 +1135,46 @@ export const PhoneScreen: React.FC = () => {
             ) : null}
           </div>
         )}
+
+        {/* CRASH RESULT (perso) */}
+        {joinedPlayer && currentRoom?.state === 'crash_result' && currentRoom.currentCrashResult && (() => {
+          const myResult = currentRoom.currentCrashResult.results.find(r => r.playerId === joinedPlayer.id);
+          const won = Boolean(myResult?.won);
+          const played = (myResult?.betAmount ?? 0) > 0;
+          return (
+            <div className="card animate-in" style={{ padding: '24px 18px', textAlign: 'center', display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <div className="label-xs" style={{ color: '#f2696d' }}>
+                KRACH À {currentRoom.currentCrashResult.crashPoint.toFixed(2)}x · SESSION {currentRoom.crashRound || 1}/3
+              </div>
+              <div style={{ fontSize: 44 }}>{won ? '💼' : played ? '📉' : '👀'}</div>
+              <h2 style={{ fontSize: 22, color: won ? 'var(--green)' : '#f2696d' }}>
+                {won ? `Vendu à ${myResult?.cashOutMultiplier?.toFixed(2)}x ! 🎉` : played ? 'Trop tard, tout est perdu...' : 'Pas d\'investissement'}
+              </h2>
+              {myResult && played && (
+                <div style={{ background: 'var(--bg-input)', borderRadius: 14, padding: 14 }}>
+                  {won ? (
+                    <>
+                      <span className="label-xs" style={{ color: myResult.netGain >= 0 ? 'var(--green)' : '#f2696d' }}>Plus-value</span>
+                      <div style={{ fontSize: 26, fontWeight: 700, color: myResult.netGain >= 0 ? 'var(--green)' : '#f2696d', marginTop: 2 }}>
+                        {myResult.netGain >= 0 ? '+' : ''}{myResult.netGain} 💰
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <span className="label-xs" style={{ color: '#f2696d' }}>Pénalité à boire</span>
+                      <div style={{ fontSize: 26, fontWeight: 700, color: '#f2696d', marginTop: 2 }}>+{myResult.sipsToDrink} 🍺</div>
+                    </>
+                  )}
+                </div>
+              )}
+              {!isLeader && (
+                <div style={{ fontSize: 12, color: 'var(--text-dim)' }}>
+                  En attente que le Chef de Groupe passe à la suite...
+                </div>
+              )}
+            </div>
+          );
+        })()}
 
         {/* ═══════════════════════════════════════════════════════ */}
         {/* PLAYING BLACKJACK                                       */}
@@ -1135,6 +1210,52 @@ export const PhoneScreen: React.FC = () => {
             )}
           </div>
         )}
+
+        {/* BLACKJACK RESULT (perso) */}
+        {joinedPlayer && currentRoom?.state === 'blackjack_result' && currentRoom.currentBlackjackResult && (() => {
+          const bj = currentRoom.currentBlackjackResult;
+          const myResult = bj.results.find(r => r.playerId === joinedPlayer.id);
+          const played = (myResult?.betAmount ?? 0) > 0;
+          const won = myResult?.status === 'won';
+          const push = myResult?.status === 'push';
+          return (
+            <div className="card animate-in" style={{ padding: '24px 18px', textAlign: 'center', display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <div className="label-xs">BLACKJACK ♠ · CROUPIER : {bj.dealerScore} pts{bj.dealerBusted ? ' (SAUTÉ 💥)' : ''}</div>
+              {myResult && played && (
+                <div style={{ display: 'flex', gap: 6, justifyContent: 'center' }}>
+                  {myResult.hand.map((c, i) => <PlayingCard key={i} card={c} size="md" />)}
+                </div>
+              )}
+              <h2 style={{ fontSize: 22, color: won ? 'var(--green)' : push ? 'var(--yellow)' : '#f2696d' }}>
+                {!played ? 'Pas de mise'
+                  : won ? `Gagné avec ${myResult!.score} pts ! 🎉`
+                  : push ? `Égalité à ${myResult!.score} pts 🤝`
+                  : myResult!.status === 'busted' ? 'Sauté ! 💥'
+                  : `Perdu avec ${myResult!.score} pts...`}
+              </h2>
+              {myResult && played && !push && (
+                <div style={{ background: 'var(--bg-input)', borderRadius: 14, padding: 14 }}>
+                  {won ? (
+                    <>
+                      <span className="label-xs" style={{ color: 'var(--green)' }}>Gains crédités</span>
+                      <div style={{ fontSize: 26, fontWeight: 700, color: 'var(--green)', marginTop: 2 }}>+{myResult.netGain} 💰</div>
+                    </>
+                  ) : (
+                    <>
+                      <span className="label-xs" style={{ color: '#f2696d' }}>Pénalité à boire</span>
+                      <div style={{ fontSize: 26, fontWeight: 700, color: '#f2696d', marginTop: 2 }}>+{myResult.sipsToDrink} 🍺</div>
+                    </>
+                  )}
+                </div>
+              )}
+              {!isLeader && (
+                <div style={{ fontSize: 12, color: 'var(--text-dim)' }}>
+                  En attente que le Chef de Groupe passe à la suite...
+                </div>
+              )}
+            </div>
+          );
+        })()}
 
         {/* ═══════════════════════════════════════════════════════ */}
         {/* PLAYING MINES                                           */}
@@ -1199,6 +1320,44 @@ export const PhoneScreen: React.FC = () => {
           </div>
         )}
 
+        {/* MINES RESULT (perso) */}
+        {joinedPlayer && currentRoom?.state === 'mines_result' && currentRoom.currentMinesResult && (() => {
+          const myResult = currentRoom.currentMinesResult.results.find(r => r.playerId === joinedPlayer.id);
+          const played = (myResult?.betAmount ?? 0) > 0;
+          const survived = myResult?.status === 'cashed_out';
+          return (
+            <div className="card animate-in" style={{ padding: '24px 18px', textAlign: 'center', display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <div className="label-xs">RÉSULTATS DES MINES 💣</div>
+              <div style={{ fontSize: 44 }}>{survived ? '💎' : played ? '💥' : '👀'}</div>
+              <h2 style={{ fontSize: 22, color: survived ? 'var(--green)' : '#f2696d' }}>
+                {!played ? 'Pas de mise'
+                  : survived ? `Gains sécurisés ! (${myResult!.safeClicks} 💎)`
+                  : 'BOUM ! Tu as sauté...'}
+              </h2>
+              {myResult && played && (
+                <div style={{ background: 'var(--bg-input)', borderRadius: 14, padding: 14 }}>
+                  {survived ? (
+                    <>
+                      <span className="label-xs" style={{ color: 'var(--green)' }}>Gains crédités</span>
+                      <div style={{ fontSize: 26, fontWeight: 700, color: 'var(--green)', marginTop: 2 }}>+{myResult.netGain} 💰</div>
+                    </>
+                  ) : (
+                    <>
+                      <span className="label-xs" style={{ color: '#f2696d' }}>Pénalité à boire</span>
+                      <div style={{ fontSize: 26, fontWeight: 700, color: '#f2696d', marginTop: 2 }}>+{myResult.sipsToDrink} 🍺</div>
+                    </>
+                  )}
+                </div>
+              )}
+              {!isLeader && (
+                <div style={{ fontSize: 12, color: 'var(--text-dim)' }}>
+                  En attente que le Chef de Groupe passe à la suite...
+                </div>
+              )}
+            </div>
+          );
+        })()}
+
         {/* ═══════════════════════════════════════════════════════ */}
         {/* PLAYING DERBY (Pari sur les Chevaux)                    */}
         {/* ═══════════════════════════════════════════════════════ */}
@@ -1210,7 +1369,7 @@ export const PhoneScreen: React.FC = () => {
             {hasDerbyBet || (joinedPlayer.derbyBet && joinedPlayer.derbyBet.amount > 0) ? (
               <div style={{
                 background: 'var(--green-subtle)',
-                border: '1px solid rgba(31,255,27,0.25)',
+                border: '1px solid rgba(92,201,99,0.25)',
                 borderRadius: 'var(--r-md)',
                 padding: '20px 16px',
                 display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, textAlign: 'center',
@@ -1236,10 +1395,10 @@ export const PhoneScreen: React.FC = () => {
                 {/* Horse Selection Grid */}
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
                   {[
-                    { id: 1, name: 'Éclair Rouge', color: '#ef5350', emoji: '🔴' },
-                    { id: 2, name: 'Tornade Bleue', color: '#3b82f6', emoji: '🔵' },
-                    { id: 3, name: 'Galop Vert', color: '#1fff1b', emoji: '🟢' },
-                    { id: 4, name: 'Pégase Jaune', color: '#f4c542', emoji: '🟡' },
+                    { id: 1, name: 'Éclair Rouge', color: '#f2696d', emoji: '🔴' },
+                    { id: 2, name: 'Tornade Bleue', color: '#4d9de0', emoji: '🔵' },
+                    { id: 3, name: 'Galop Vert', color: '#5cc963', emoji: '🟢' },
+                    { id: 4, name: 'Pégase Jaune', color: '#ffb629', emoji: '🟡' },
                   ].map((horse) => {
                     const isSelected = derbyHorseId === horse.id;
                     return (
@@ -1358,7 +1517,7 @@ export const PhoneScreen: React.FC = () => {
               <div style={{
                 width: 56, height: 56, borderRadius: '50%',
                 background: won ? 'var(--green-subtle)' : 'var(--red-subtle)',
-                border: won ? '2px solid var(--green)' : '2px solid #ef5350',
+                border: won ? '2px solid var(--green)' : '2px solid #f2696d',
                 display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto',
                 fontSize: 28,
               }}>
@@ -1366,7 +1525,7 @@ export const PhoneScreen: React.FC = () => {
               </div>
 
               <div>
-                <h2 style={{ fontSize: 22, fontWeight: 900, color: won ? 'var(--green)' : '#ef5350' }}>
+                <h2 style={{ fontSize: 22, fontWeight: 900, color: won ? 'var(--green)' : '#f2696d' }}>
                   {won ? 'PARI GAGNÉ ! 🎉' : 'PARI PERDU...'}
                 </h2>
                 <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 4 }}>
@@ -1384,8 +1543,8 @@ export const PhoneScreen: React.FC = () => {
                   </>
                 ) : (
                   <>
-                    <span className="label-xs" style={{ color: '#ef5350' }}>Pénalité à boire</span>
-                    <div style={{ fontSize: 26, fontWeight: 900, color: '#ef5350', marginTop: 2 }}>
+                    <span className="label-xs" style={{ color: '#f2696d' }}>Pénalité à boire</span>
+                    <div style={{ fontSize: 26, fontWeight: 900, color: '#f2696d', marginTop: 2 }}>
                       +{myResult?.sipsToDrink || 0} 🍺
                     </div>
                   </>
@@ -1406,22 +1565,22 @@ export const PhoneScreen: React.FC = () => {
         {/* ═══════════════════════════════════════════════════════ */}
         {joinedPlayer && currentRoom?.state === 'final_tax' && (
           <div className="card animate-in" style={{ padding: '24px 18px', textAlign: 'center', display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <div className="label-xs" style={{ color: '#ef5350' }}>LE GRAND FINAL</div>
+            <div className="label-xs" style={{ color: '#f2696d' }}>LE GRAND FINAL</div>
 
             <div style={{
               width: 60, height: 60, borderRadius: '50%',
-              background: 'var(--red-subtle)', border: '2px solid #ef5350',
+              background: 'var(--red-subtle)', border: '2px solid #f2696d',
               display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto',
             }}>
-              <Flame size={32} color="#ef5350" />
+              <Flame size={32} color="#f2696d" />
             </div>
 
             <div>
               <h2 style={{ fontSize: 24, fontWeight: 900, color: '#ffffff' }}>
-                Taxe Prélevée : <span style={{ color: '#ef5350' }}>{joinedPlayer.taxRate || 0}%</span>
+                Taxe Prélevée : <span style={{ color: '#f2696d' }}>{joinedPlayer.taxRate || 0}%</span>
               </h2>
               <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 4 }}>
-                Tu dois boire <strong style={{ color: '#ef5350' }}>{joinedPlayer.personalTaxSips || 0} gorgée{(joinedPlayer.personalTaxSips || 0) > 1 ? 's' : ''}</strong> de taxe personnelle !
+                Tu dois boire <strong style={{ color: '#f2696d' }}>{joinedPlayer.personalTaxSips || 0} gorgée{(joinedPlayer.personalTaxSips || 0) > 1 ? 's' : ''}</strong> de taxe personnelle !
               </p>
             </div>
 
@@ -1521,7 +1680,7 @@ export const PhoneScreen: React.FC = () => {
                   alignItems: 'center',
                 }}>
                   <span style={{ fontSize: 12, fontWeight: 600 }}>Total Alloué</span>
-                  <span style={{ fontSize: 14, fontWeight: 900, color: isFinalAllocationValid ? 'var(--green)' : '#ef5350' }}>
+                  <span style={{ fontSize: 14, fontWeight: 900, color: isFinalAllocationValid ? 'var(--green)' : '#f2696d' }}>
                     {currentTotalAllocated} / {expectedDistributable} 🍺
                   </span>
                 </div>
@@ -1555,7 +1714,7 @@ export const PhoneScreen: React.FC = () => {
             </div>
 
             <div>
-              <h2 style={{ fontSize: 24, fontWeight: 900, color: joinedPlayer.hasDrank ? 'var(--green)' : '#ef5350' }}>
+              <h2 style={{ fontSize: 24, fontWeight: 900, color: joinedPlayer.hasDrank ? 'var(--green)' : '#f2696d' }}>
                 {joinedPlayer.hasDrank
                   ? 'Santé ultime ! 🍻'
                   : `Tu dois boire ${joinedPlayer.sipsToDrink} gorgée${joinedPlayer.sipsToDrink > 1 ? 's' : ''} !`}
@@ -1596,7 +1755,7 @@ export const PhoneScreen: React.FC = () => {
             ) : (
               <form onSubmit={handleSendSips} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
                 <select value={targetPlayerId} onChange={e => setTargetPlayerId(e.target.value)} className="select" required>
-                  {otherPlayers.map(p => <option key={p.id} value={p.id} style={{ background: '#1d2d3e' }}>{p.name} ({p.balance} 💰)</option>)}
+                  {otherPlayers.map(p => <option key={p.id} value={p.id} style={{ background: '#241a0e' }}>{p.name} ({p.balance} 💰)</option>)}
                 </select>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <button type="button" onClick={() => setSipsAmount(Math.max(0, sipsAmount - 1))} className="btn btn-secondary btn-sm"><Minus size={14} /></button>
@@ -1630,7 +1789,7 @@ export const PhoneScreen: React.FC = () => {
                 </div>
 
                 <div>
-                  <h2 style={{ fontSize: 24, fontWeight: 900, color: joinedPlayer.hasDrank ? 'var(--green)' : '#ef5350' }}>
+                  <h2 style={{ fontSize: 24, fontWeight: 900, color: joinedPlayer.hasDrank ? 'var(--green)' : '#f2696d' }}>
                     {joinedPlayer.hasDrank ? 'Santé ! 🍻' : `Tu dois boire ${joinedPlayer.sipsToDrink} gorgée${joinedPlayer.sipsToDrink > 1 ? 's' : ''} !`}
                   </h2>
                 </div>

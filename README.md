@@ -38,13 +38,25 @@ casino-a-boire/
 
 ## 🚀 Démarrage Rapide
 
-### 1. Démarrer le Backend (Port 3001)
+### Mode simple (un seul process — recommandé)
+Le serveur Express sert aussi le build du client (`client/dist`) :
+```bash
+npm run install:all
+npm run build:client
+cd server && npm run dev
+```
+Puis ouvrez **http://localhost:3001/host** sur le grand écran et
+**http://<ip-locale>:3001** sur les téléphones.
+
+### Mode développement (hot-reload du client)
+
+#### 1. Démarrer le Backend (Port 3001)
 ```bash
 cd server
 npm run dev
 ```
 
-### 2. Démarrer le Frontend (Port 5173)
+#### 2. Démarrer le Frontend (Port 5173)
 ```bash
 cd client
 npm run dev
@@ -55,6 +67,18 @@ Ou depuis la racine :
 npm run dev:server   # Dans un terminal
 npm run dev:client   # Dans un second terminal
 ```
+
+### 🧪 Tests d'intégration Socket.io
+Avec le backend lancé :
+```bash
+cd server
+for t in test-*.js; do node "$t"; done
+```
+
+## 🎨 Design
+
+Interface au style **Sip Sip Studio** : noir chaud, crème, jaune bubble,
+titres Titan One, texte Fredoka, boutons pill à ombre dure.
 
 ---
 

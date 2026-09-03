@@ -1,5 +1,7 @@
 import express from 'express';
 import http from 'http';
+import path from 'path';
+import fs from 'fs';
 import { Server as SocketIOServer, Socket } from 'socket.io';
 import cors from 'cors';
 import { roomManager } from './roomManager';
@@ -38,6 +40,15 @@ app.get('/health', (_req, res) => {
 app.get('/api/rooms', (_req, res) => {
   res.json({ rooms: roomManager.getAllRooms() });
 });
+
+// Serve the built client (client/dist) so a single process hosts everything.
+const clientDist = path.resolve(__dirname, '../../client/dist');
+if (fs.existsSync(clientDist)) {
+  app.use(express.static(clientDist));
+  app.get(/^\/(?!api|health|socket\.io).*/, (_req, res) => {
+    res.sendFile(path.join(clientDist, 'index.html'));
+  });
+}
 
 const server = http.createServer(app);
 
@@ -247,6 +258,15 @@ io.on('connection', (socket: Socket) => {
     const room = roomManager.createRoom();
     socket.join(room.id);
     socket.emit('room_created', { room });
+  });
+
+  // Host screen re-subscribes to its room after a socket reconnection.
+  socket.on('watch_room', ({ roomId }: { roomId: string }) => {
+    const room = roomManager.getRoom(roomId || '');
+    if (room) {
+      socket.join(room.id);
+      socket.emit('room_updated', { room });
+    }
   });
 
   socket.on('join_room', (payload: JoinRoomPayload) => {
@@ -684,6 +704,15 @@ io.on('connection', (socket: Socket) => {
 
       if (removedInfo.room.state === 'blackjack_playing' && removedInfo.allBlackjackFinished) {
         startDealerTurn(roomId);
+        return;
+      }
+
+      if (removedInfo.room.state === 'playing_derby' && removedInfo.allDerbyBet) {
+        const started = roomManager.startDerbyRace(roomId);
+        if (started) {
+          io.to(roomId).emit('room_updated', { room: started });
+          startDerbyRaceLoop(roomId);
+        }
         return;
       }
 

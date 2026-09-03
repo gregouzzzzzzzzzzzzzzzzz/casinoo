@@ -85,13 +85,11 @@ async function runTest() {
 
   // 3. Lancement de la partie -> voting
   console.log('\n--- 1. Lancement de la partie & Vote pour Le Krach Boursier ---');
-  const votingStatePromise = waitForRoomState(hostSocket, 'voting');
-  aliceSocket.emit('start_game', { roomId });
-  await votingStatePromise;
+  // Fast-track : seul le Krach est activé, pas de phase de vote.
+  aliceSocket.emit('update_settings', { roomId, settings: { enabledGames: ['crash'] } });
 
   const crashStatePromise = waitForRoomState(hostSocket, 'playing_crash');
-  aliceSocket.emit('submit_vote', { roomId, vote: 'crash' });
-  bobSocket.emit('submit_vote', { roomId, vote: 'crash' });
+  aliceSocket.emit('start_game', { roomId });
   const crashRoom1 = await crashStatePromise;
   console.log(`✔ Vote Krach Boursier validé -> État: "${crashRoom1.state}", Session: ${crashRoom1.crashRound}/3`);
 

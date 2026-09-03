@@ -1,63 +1,77 @@
 /* ============================================================
-   CASINO À BOIRE — Design System v2 (Stake.com aesthetic)
+   CASINO À BOIRE — Design System v3 (Sip Sip Studio)
+   Noir chaud + crème + jaune bubble, hérité de la charte
+   Sip Sip Studio : cartes arrondies, boutons pill à ombre dure,
+   Titan One pour les titres, Fredoka pour le texte.
    ============================================================ */
 
 :root {
-  /* ── Backgrounds ─────────────────────────────────────────── */
-  --bg-base:       #0f1923;   /* fond principal, signature Stake */
-  --bg-surface:    #172231;   /* surface légèrement surélevée   */
-  --bg-card:       #1d2d3e;   /* cartes / panneaux               */
-  --bg-card-hover: #243447;   /* hover sur cartes                */
-  --bg-elevated:   #243447;   /* modales, dropdowns              */
-  --bg-input:      #0c1620;   /* fond inputs                     */
+  /* ── Backgrounds (noir chaud) ────────────────────────────── */
+  --bg-base:       #100c08;
+  --bg-surface:    #191209;
+  --bg-card:       #191209;
+  --bg-card-hover: #241a0e;
+  --bg-elevated:   #241a0e;
+  --bg-input:      #0c0906;
 
   /* ── Borders ─────────────────────────────────────────────── */
-  --border-default: rgba(45, 64, 84, 0.8);
-  --border-subtle:  rgba(45, 64, 84, 0.45);
-  --border-strong:  rgba(45, 64, 84, 1);
-  --border-focus:   #1fff1b;
+  --border-default: rgba(246, 235, 216, 0.14);
+  --border-subtle:  rgba(246, 235, 216, 0.08);
+  --border-strong:  rgba(246, 235, 216, 0.22);
+  --border-focus:   #ffb629;
 
-  /* ── Brand Green (Stake primary) ─────────────────────────── */
-  --green:          #1fff1b;
-  --green-dark:     #16c214;
-  --green-darker:   #0e8a0c;
-  --green-glow:     rgba(31, 255, 27, 0.18);
-  --green-subtle:   rgba(31, 255, 27, 0.10);
-  --green-muted:    rgba(31, 255, 27, 0.06);
+  /* ── Brand (jaune bubble Sip Sip) ────────────────────────── */
+  --yellow:        #ffb629;
+  --orange:        #ef8511;
+  --orange-deep:   #c96a0d;
+  --cream:         #f6ebd8;
+  --brown:         #6b3a1f;
+  --yellow-glow:   rgba(255, 182, 41, 0.22);
+  --yellow-subtle: rgba(255, 182, 41, 0.12);
 
   /* ── Semantic Colors ─────────────────────────────────────── */
-  --red:            #e53935;
-  --red-glow:       rgba(229, 57, 53, 0.18);
-  --red-subtle:     rgba(229, 57, 53, 0.10);
+  --green:          #5cc963;
+  --green-dark:     #47b04e;
+  --green-darker:   #2f8a36;
+  --green-glow:     rgba(92, 201, 99, 0.20);
+  --green-subtle:   rgba(92, 201, 99, 0.12);
+  --green-muted:    rgba(92, 201, 99, 0.07);
 
-  --gold:           #f4c542;
-  --gold-subtle:    rgba(244, 197, 66, 0.12);
-  --gold-glow:      rgba(244, 197, 66, 0.20);
+  --red:            #e5484d;
+  --red-shadow:     #8c2429;
+  --red-glow:       rgba(229, 72, 77, 0.20);
+  --red-subtle:     rgba(229, 72, 77, 0.10);
 
-  --blue:           #3b82f6;
-  --blue-subtle:    rgba(59, 130, 246, 0.12);
+  --gold:           #ffb629;
+  --gold-subtle:    rgba(255, 182, 41, 0.12);
+  --gold-glow:      rgba(255, 182, 41, 0.22);
+
+  --blue:           #4d9de0;
+  --blue-subtle:    rgba(77, 157, 224, 0.12);
 
   /* ── Text ────────────────────────────────────────────────── */
-  --text-primary:   #e2e8f0;
-  --text-secondary: #7c93a8;
-  --text-dim:       #4a6076;
-  --text-inverse:   #0f1923;
+  --text-primary:   #f6ebd8;
+  --text-secondary: rgba(246, 235, 216, 0.62);
+  --text-dim:       rgba(246, 235, 216, 0.35);
+  --text-inverse:   #100c08;
 
   /* ── Typography ──────────────────────────────────────────── */
-  --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font: 'Fredoka', 'Avenir Next', 'Trebuchet MS', sans-serif;
+  --font-display: 'Titan One', 'Fredoka', sans-serif;
 
   /* ── Radii ───────────────────────────────────────────────── */
-  --r-xs:   4px;
-  --r-sm:   6px;
-  --r-md:   8px;
-  --r-lg:   12px;
-  --r-xl:   16px;
+  --r-xs:   8px;
+  --r-sm:   10px;
+  --r-md:   14px;
+  --r-lg:   20px;
+  --r-xl:   24px;
   --r-full: 9999px;
 
   /* ── Shadows ─────────────────────────────────────────────── */
-  --shadow-sm:  0 1px 3px rgba(0,0,0,0.4);
-  --shadow-md:  0 4px 12px rgba(0,0,0,0.5);
-  --shadow-lg:  0 8px 24px rgba(0,0,0,0.6);
+  --shadow-sm:  0 2px 6px rgba(0,0,0,0.4);
+  --shadow-md:  0 6px 16px rgba(0,0,0,0.5);
+  --shadow-lg:  0 12px 28px rgba(0,0,0,0.6);
+  --shadow-sticker: 6px 6px 0 rgba(0, 0, 0, 0.4);
   --shadow-green: 0 0 20px var(--green-glow);
 }
 
@@ -77,6 +91,7 @@ body {
   font-size: 14px;
   line-height: 1.5;
   background-color: var(--bg-base);
+  background-image: radial-gradient(ellipse 80% 60% at 50% -10%, rgba(255, 182, 41, 0.06), transparent);
   color: var(--text-primary);
   min-height: 100vh;
   min-height: 100dvh;
@@ -85,18 +100,32 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+::selection { background: var(--yellow); color: var(--text-inverse); }
+
 /* ── Typography ────────────────────────────────────────────── */
-h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font);
-  font-weight: 700;
-  letter-spacing: -0.01em;
+h1, h2 {
+  font-family: var(--font-display);
+  font-weight: 400 !important;
+  letter-spacing: 0.01em;
   color: var(--text-primary);
+}
+
+h3, h4, h5, h6 {
+  font-family: var(--font);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* Texte "bubble" jaune façon logo Sip Sip */
+.bubble {
+  color: var(--yellow);
+  text-shadow: 0 0.055em 0 var(--orange-deep);
 }
 
 .label-xs {
   font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
+  font-weight: 600;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--text-secondary);
 }
@@ -104,95 +133,111 @@ h1, h2, h3, h4, h5, h6 {
 .label-sm {
   font-size: 11px;
   font-weight: 600;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--text-secondary);
 }
 
-/* ── Stake-style Cards / Panels ────────────────────────────── */
+/* ── Cards / Panels ────────────────────────────────────────── */
 .card {
   background: var(--bg-card);
   border: 1px solid var(--border-default);
-  border-radius: var(--r-lg);
+  border-radius: var(--r-xl);
 }
 
 .card-surface {
   background: var(--bg-surface);
   border: 1px solid var(--border-subtle);
-  border-radius: var(--r-lg);
+  border-radius: var(--r-xl);
 }
 
 .card-elevated {
   background: var(--bg-elevated);
   border: 1px solid var(--border-strong);
-  border-radius: var(--r-lg);
+  border-radius: var(--r-xl);
   box-shadow: var(--shadow-md);
 }
 
-/* ── Buttons ───────────────────────────────────────────────── */
+/* ── Buttons (pill + ombre dure Sip Sip) ───────────────────── */
 .btn {
   font-family: var(--font);
-  font-weight: 700;
+  font-weight: 600;
   font-size: 14px;
   padding: 10px 20px;
-  border-radius: var(--r-md);
+  border-radius: var(--r-full);
   border: none;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
-  transition: background 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
+  transition: transform 0.16s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.16s ease, background 0.16s ease, border-color 0.16s ease;
   text-decoration: none;
   user-select: none;
   white-space: nowrap;
   letter-spacing: 0.01em;
 }
 
-/* Primary — Stake Green */
+/* Primary — Jaune bubble */
 .btn-primary {
-  background: var(--green);
+  background: var(--yellow);
   color: var(--text-inverse);
-  box-shadow: none;
+  box-shadow: 0 4px 0 var(--orange-deep);
 }
 .btn-primary:hover:not(:disabled) {
-  background: var(--green-dark);
-  box-shadow: var(--shadow-green);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 0 var(--orange-deep);
 }
 .btn-primary:active:not(:disabled) {
-  background: var(--green-darker);
-  transform: scale(0.98);
+  transform: translateY(1px) scale(0.98);
+  box-shadow: 0 2px 0 var(--orange-deep);
 }
 
-/* Secondary — Surface */
+/* Secondary — Ghost crème */
 .btn-secondary {
-  background: var(--bg-elevated);
+  background: transparent;
   color: var(--text-primary);
-  border: 1px solid var(--border-default);
+  border: 2px solid var(--border-default);
 }
 .btn-secondary:hover:not(:disabled) {
-  background: #2d4054;
-  border-color: #3d5470;
+  border-color: var(--cream);
+  transform: translateY(-1px);
+}
+.btn-secondary:active:not(:disabled) {
+  transform: translateY(1px) scale(0.98);
 }
 
-/* Danger — Red */
-.btn-danger {
+/* Danger — Rouge */
+.btn-danger,
+.btn-red {
   background: var(--red);
   color: #fff;
+  box-shadow: 0 4px 0 var(--red-shadow);
 }
-.btn-danger:hover:not(:disabled) {
-  background: #c62828;
-  box-shadow: 0 0 16px var(--red-glow);
+.btn-danger:hover:not(:disabled),
+.btn-red:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 0 var(--red-shadow);
+}
+.btn-danger:active:not(:disabled),
+.btn-red:active:not(:disabled) {
+  transform: translateY(1px) scale(0.98);
+  box-shadow: 0 2px 0 var(--red-shadow);
 }
 
-/* Gold — Leader */
+/* Gold — Orange (actions spéciales) */
 .btn-gold {
-  background: var(--gold);
+  background: var(--orange);
   color: var(--text-inverse);
+  box-shadow: 0 4px 0 #a04e0a;
 }
 .btn-gold:hover:not(:disabled) {
-  background: #e6b82f;
-  box-shadow: 0 0 16px var(--gold-glow);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 0 #a04e0a;
+}
+.btn-gold:active:not(:disabled) {
+  transform: translateY(1px) scale(0.98);
+  box-shadow: 0 2px 0 #a04e0a;
 }
 
 .btn:disabled {
@@ -203,14 +248,14 @@ h1, h2, h3, h4, h5, h6 {
 /* Sizes */
 .btn-lg {
   font-size: 15px;
-  padding: 13px 24px;
+  font-weight: 600;
+  padding: 14px 26px;
 }
 
 .btn-sm {
   font-size: 12px;
   font-weight: 600;
   padding: 7px 12px;
-  border-radius: var(--r-sm);
 }
 
 .btn-full { width: 100%; }
@@ -224,17 +269,17 @@ h1, h2, h3, h4, h5, h6 {
 
 .field-label {
   font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.07em;
+  font-weight: 600;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--text-secondary);
 }
 
 .input {
   width: 100%;
-  padding: 10px 14px;
+  padding: 11px 16px;
   background: var(--bg-input);
-  border: 1px solid var(--border-default);
+  border: 2px solid var(--border-default);
   border-radius: var(--r-md);
   color: var(--text-primary);
   font-family: var(--font);
@@ -248,7 +293,7 @@ h1, h2, h3, h4, h5, h6 {
 
 .input:focus {
   border-color: var(--border-focus);
-  box-shadow: 0 0 0 2px var(--green-glow);
+  box-shadow: 0 0 0 3px var(--yellow-glow);
 }
 
 .input::placeholder {
@@ -259,16 +304,18 @@ h1, h2, h3, h4, h5, h6 {
 .input-code {
   text-transform: uppercase;
   letter-spacing: 0.18em;
-  font-weight: 800;
-  font-size: 18px;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 20px;
   text-align: center;
+  color: var(--yellow);
 }
 
 .select {
   width: 100%;
-  padding: 10px 14px;
+  padding: 11px 16px;
   background: var(--bg-input);
-  border: 1px solid var(--border-default);
+  border: 2px solid var(--border-default);
   border-radius: var(--r-md);
   color: var(--text-primary);
   font-family: var(--font);
@@ -279,7 +326,7 @@ h1, h2, h3, h4, h5, h6 {
   transition: border-color 0.15s ease;
   appearance: none;
   -webkit-appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%237c93a8' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23f6ebd8' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 14px center;
   padding-right: 36px;
@@ -287,15 +334,15 @@ h1, h2, h3, h4, h5, h6 {
 
 .select:focus {
   border-color: var(--border-focus);
-  box-shadow: 0 0 0 2px var(--green-glow);
+  box-shadow: 0 0 0 3px var(--yellow-glow);
 }
 
-/* Range Slider Stake Style */
+/* Range Slider */
 input[type="range"] {
   -webkit-appearance: none;
   appearance: none;
   width: 100%;
-  height: 4px;
+  height: 5px;
   background: var(--border-strong);
   border-radius: var(--r-full);
   outline: none;
@@ -305,60 +352,60 @@ input[type="range"] {
 input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
-  background: var(--green);
+  background: var(--yellow);
   cursor: pointer;
   border: 2px solid var(--bg-base);
-  box-shadow: 0 0 8px var(--green-glow);
+  box-shadow: 0 2px 0 var(--orange-deep);
 }
 
 input[type="range"]::-moz-range-thumb {
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
-  background: var(--green);
+  background: var(--yellow);
   cursor: pointer;
   border: 2px solid var(--bg-base);
-  box-shadow: 0 0 8px var(--green-glow);
+  box-shadow: 0 2px 0 var(--orange-deep);
 }
 
-/* ── Badges ────────────────────────────────────────────────── */
+/* ── Badges (pill) ─────────────────────────────────────────── */
 .badge {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 3px 8px;
-  border-radius: var(--r-xs);
+  padding: 3px 10px;
+  border-radius: var(--r-full);
   font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.03em;
+  font-weight: 600;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
 }
 
 .badge-green {
   background: var(--green-subtle);
   color: var(--green);
-  border: 1px solid rgba(31, 255, 27, 0.25);
+  border: 1px solid rgba(92, 201, 99, 0.3);
 }
 
 .badge-red {
   background: var(--red-subtle);
-  color: #ef5350;
-  border: 1px solid rgba(229, 57, 53, 0.25);
+  color: #f2696d;
+  border: 1px solid rgba(229, 72, 77, 0.3);
 }
 
 .badge-gold {
   background: var(--gold-subtle);
-  color: var(--gold);
-  border: 1px solid rgba(244, 197, 66, 0.25);
+  color: var(--yellow);
+  border: 1px solid rgba(255, 182, 41, 0.3);
 }
 
 .badge-blue {
   background: var(--blue-subtle);
-  color: #60a5fa;
-  border: 1px solid rgba(59, 130, 246, 0.25);
+  color: #7bb8ec;
+  border: 1px solid rgba(77, 157, 224, 0.3);
 }
 
 .badge-surface {
@@ -371,25 +418,26 @@ input[type="range"]::-moz-range-thumb {
 .stat-box {
   background: var(--bg-surface);
   border: 1px solid var(--border-subtle);
-  border-radius: var(--r-md);
-  padding: 10px 14px;
+  border-radius: var(--r-lg);
+  padding: 12px 16px;
   display: flex;
   flex-direction: column;
   gap: 2px;
 }
 
 .stat-value {
+  font-family: var(--font-display);
   font-size: 20px;
-  font-weight: 800;
+  font-weight: 400;
   color: var(--text-primary);
-  letter-spacing: -0.02em;
+  letter-spacing: 0.01em;
 }
 
 .stat-label {
   font-size: 11px;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.07em;
   color: var(--text-secondary);
 }
 
@@ -398,8 +446,8 @@ input[type="range"]::-moz-range-thumb {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 8px 12px;
-  background: var(--bg-surface);
+  padding: 9px 12px;
+  background: var(--bg-elevated);
   border: 1px solid var(--border-subtle);
   border-radius: var(--r-md);
   transition: border-color 0.15s ease, background 0.15s ease;
@@ -418,7 +466,7 @@ input[type="range"]::-moz-range-thumb {
   align-items: center;
   justify-content: center;
   font-size: 13px;
-  font-weight: 800;
+  font-weight: 700;
   color: #fff;
   flex-shrink: 0;
 }
@@ -426,41 +474,45 @@ input[type="range"]::-moz-range-thumb {
 /* ── Progress Bar ───────────────────────────────────────────── */
 .progress-track {
   width: 100%;
-  height: 6px;
-  background: var(--border-strong);
+  height: 8px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
   border-radius: var(--r-full);
   overflow: hidden;
 }
 
 .progress-fill {
   height: 100%;
-  background: var(--green);
+  background: var(--yellow);
   border-radius: var(--r-full);
   transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .progress-fill-gold {
-  background: var(--gold);
+  background: var(--orange);
 }
 
 /* ── Room Code Display ─────────────────────────────────────── */
 .room-code {
   background: var(--bg-input);
-  border: 1px solid var(--border-strong);
+  border: 2px solid rgba(255, 182, 41, 0.35);
   border-radius: var(--r-lg);
   padding: 16px 24px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0;
+  box-shadow: var(--shadow-sticker);
 }
 
 .room-code-text {
+  font-family: var(--font-display);
   font-size: 48px;
-  font-weight: 900;
+  font-weight: 400;
   letter-spacing: 0.2em;
   text-indent: 0.2em;
-  color: var(--text-primary);
+  color: var(--yellow);
+  text-shadow: 0 3px 0 var(--orange-deep);
   font-variant-numeric: tabular-nums;
 }
 
@@ -477,7 +529,7 @@ input[type="range"]::-moz-range-thumb {
   align-self: stretch;
 }
 
-/* ── Chip Buttons (Bet Quick Select) ────────────────────────── */
+/* ── Chip Buttons ───────────────────────────────────────────── */
 .chip-row {
   display: flex;
   gap: 6px;
@@ -485,10 +537,10 @@ input[type="range"]::-moz-range-thumb {
 }
 
 .chip {
-  padding: 5px 10px;
-  border-radius: var(--r-xs);
+  padding: 5px 12px;
+  border-radius: var(--r-full);
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 600;
   border: 1px solid var(--border-default);
   background: var(--bg-elevated);
   color: var(--text-secondary);
@@ -498,15 +550,15 @@ input[type="range"]::-moz-range-thumb {
 }
 
 .chip:hover {
-  border-color: var(--green);
-  color: var(--green);
-  background: var(--green-muted);
+  border-color: var(--yellow);
+  color: var(--yellow);
+  background: var(--yellow-subtle);
 }
 
 .chip-active {
-  border-color: var(--green);
-  color: var(--green);
-  background: var(--green-subtle);
+  border-color: var(--yellow);
+  color: var(--yellow);
+  background: var(--yellow-subtle);
 }
 
 /* ── Roulette Color Picker ──────────────────────────────────── */
@@ -517,11 +569,12 @@ input[type="range"]::-moz-range-thumb {
 }
 
 .color-btn {
-  padding: 12px 8px;
+  padding: 13px 8px;
   border-radius: var(--r-md);
-  border: 1.5px solid transparent;
+  border: 2px solid transparent;
+  font-family: var(--font);
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.15s ease;
   display: flex;
@@ -532,31 +585,31 @@ input[type="range"]::-moz-range-thumb {
 }
 
 .color-btn-red {
-  background: rgba(229, 57, 53, 0.15);
-  color: #ef5350;
-  border-color: rgba(229, 57, 53, 0.3);
+  background: rgba(229, 72, 77, 0.15);
+  color: #f2696d;
+  border-color: rgba(229, 72, 77, 0.3);
 }
 .color-btn-red:hover, .color-btn-red.active {
-  background: rgba(229, 57, 53, 0.25);
-  border-color: #e53935;
-  box-shadow: 0 0 12px rgba(229, 57, 53, 0.2);
+  background: rgba(229, 72, 77, 0.28);
+  border-color: var(--red);
+  box-shadow: 0 0 12px rgba(229, 72, 77, 0.25);
 }
 
 .color-btn-black {
-  background: rgba(30, 41, 59, 0.6);
-  color: #94a3b8;
-  border-color: rgba(100, 116, 139, 0.3);
+  background: rgba(246, 235, 216, 0.06);
+  color: var(--text-secondary);
+  border-color: rgba(246, 235, 216, 0.18);
 }
 .color-btn-black:hover, .color-btn-black.active {
-  background: rgba(30, 41, 59, 0.9);
-  border-color: #94a3b8;
-  box-shadow: 0 0 12px rgba(100, 116, 139, 0.15);
+  background: rgba(246, 235, 216, 0.12);
+  border-color: var(--cream);
+  box-shadow: 0 0 12px rgba(246, 235, 216, 0.12);
 }
 
 .color-btn-green-roulette {
   background: var(--green-muted);
   color: var(--green);
-  border-color: rgba(31, 255, 27, 0.2);
+  border-color: rgba(92, 201, 99, 0.25);
   grid-column: span 2;
 }
 .color-btn-green-roulette:hover, .color-btn-green-roulette.active {
@@ -570,9 +623,9 @@ input[type="range"]::-moz-range-thumb {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 10px;
-  background: var(--bg-surface);
-  border-radius: var(--r-sm);
+  padding: 8px 12px;
+  background: var(--bg-elevated);
+  border-radius: var(--r-md);
   border: 1px solid var(--border-subtle);
   font-size: 13px;
   animation: slideIn 0.25s ease-out;
@@ -585,14 +638,14 @@ input[type="range"]::-moz-range-thumb {
 
 /* ── Result Cards ───────────────────────────────────────────── */
 .result-win {
-  background: rgba(31, 255, 27, 0.06);
-  border: 1px solid rgba(31, 255, 27, 0.2);
+  background: var(--green-muted);
+  border: 1px solid rgba(92, 201, 99, 0.25);
   border-radius: var(--r-md);
 }
 
 .result-lose {
-  background: rgba(229, 57, 53, 0.06);
-  border: 1px solid rgba(229, 57, 53, 0.2);
+  background: rgba(229, 72, 77, 0.07);
+  border: 1px solid rgba(229, 72, 77, 0.22);
   border-radius: var(--r-md);
 }
 
@@ -613,8 +666,13 @@ input[type="range"]::-moz-range-thumb {
 }
 
 @keyframes greenPulse {
-  0%, 100% { box-shadow: 0 0 0 0 var(--green-glow); }
-  50%       { box-shadow: 0 0 0 6px transparent; }
+  0%, 100% { box-shadow: 0 4px 0 var(--orange-deep), 0 0 0 0 var(--yellow-glow); }
+  50%       { box-shadow: 0 4px 0 var(--orange-deep), 0 0 0 8px transparent; }
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-10px); }
 }
 
 .animate-in {
@@ -630,7 +688,11 @@ input[type="range"]::-moz-range-thumb {
 }
 
 .animate-green-pulse {
-  animation: greenPulse 2s ease-in-out infinite;
+  animation: greenPulse 1.6s ease-in-out infinite;
+}
+
+.animate-bounce {
+  animation: bounce 0.8s ease-in-out infinite;
 }
 
 /* ── Dot Status Indicator ───────────────────────────────────── */
@@ -644,7 +706,7 @@ input[type="range"]::-moz-range-thumb {
 
 .dot-green  { background: var(--green); }
 .dot-red    { background: var(--red); }
-.dot-gold   { background: var(--gold); }
+.dot-gold   { background: var(--yellow); }
 .dot-muted  { background: var(--text-dim); }
 
 /* ── Spinning Roulette Screen ───────────────────────────────── */
@@ -652,15 +714,15 @@ input[type="range"]::-moz-range-thumb {
   width: 100px;
   height: 100px;
   border-radius: 50%;
-  border: 3px solid var(--border-strong);
-  border-top-color: var(--green);
+  border: 4px solid var(--bg-elevated);
+  border-top-color: var(--yellow);
   animation: spin 0.8s linear infinite;
 }
 
 /* ── Utilities ──────────────────────────────────────────────── */
 .text-green   { color: var(--green); }
 .text-red     { color: var(--red); }
-.text-gold    { color: var(--gold); }
+.text-gold    { color: var(--yellow); }
 .text-primary { color: var(--text-primary); }
 .text-secondary { color: var(--text-secondary); }
 .text-dim     { color: var(--text-dim); }
@@ -689,16 +751,16 @@ input[type="range"]::-moz-range-thumb {
 .text-right  { text-align: right; }
 
 /* Scrollbar */
-::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: var(--bg-base); }
-::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 2px; }
-::-webkit-scrollbar-thumb:hover { background: #3d5470; }
+::-webkit-scrollbar-thumb { background: var(--bg-elevated); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--brown); }
 
 /* ── BLACKJACK CASINO FELT & PLAYING CARDS ──────────────────── */
 .blackjack-table {
   background: radial-gradient(ellipse at 50% 25%, #0e4828 0%, #082d18 55%, #04170d 100%);
-  border: 2px solid rgba(244, 197, 66, 0.3);
-  box-shadow: inset 0 0 80px rgba(0, 0, 0, 0.8), 0 10px 30px rgba(0, 0, 0, 0.6);
+  border: 2px solid rgba(255, 182, 41, 0.35);
+  box-shadow: inset 0 0 80px rgba(0, 0, 0, 0.8), var(--shadow-sticker);
   border-radius: var(--r-xl);
   position: relative;
   overflow: hidden;
@@ -707,14 +769,14 @@ input[type="range"]::-moz-range-thumb {
 .playing-card {
   width: 52px;
   height: 74px;
-  background: #ffffff;
-  border-radius: 6px;
+  background: #fdf8ee;
+  border-radius: 8px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   padding: 4px 6px;
-  font-weight: 900;
+  font-weight: 700;
   user-select: none;
   animation: cardDeal 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   flex-shrink: 0;
@@ -725,33 +787,33 @@ input[type="range"]::-moz-range-thumb {
   width: 68px;
   height: 96px;
   padding: 6px 8px;
-  border-radius: 8px;
+  border-radius: 10px;
 }
 
 .playing-card-sm {
   width: 40px;
   height: 56px;
   padding: 3px 4px;
-  border-radius: 4px;
+  border-radius: 6px;
 }
 
 .playing-card-red {
-  color: #e53935;
+  color: #d33a3f;
 }
 
 .playing-card-black {
-  color: #1e293b;
+  color: #241a0e;
 }
 
 .card-back {
   background: repeating-linear-gradient(
     45deg,
-    #1e3a8a,
-    #1e3a8a 5px,
-    #172554 5px,
-    #172554 10px
+    var(--orange),
+    var(--orange) 5px,
+    var(--orange-deep) 5px,
+    var(--orange-deep) 10px
   );
-  border: 2px solid #ffffff;
+  border: 2px solid var(--cream);
 }
 
 @keyframes cardDeal {
@@ -786,9 +848,11 @@ input[type="range"]::-moz-range-thumb {
 
 .mines-cell {
   aspect-ratio: 1 / 1;
-  background: var(--bg-card);
+  background: var(--bg-elevated);
   border: 1px solid var(--border-default);
   border-radius: var(--r-md);
+  color: var(--text-primary);
+  font-family: var(--font);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -805,9 +869,9 @@ input[type="range"]::-moz-range-thumb {
 
 .mines-cell-interactive:hover {
   background: var(--bg-card-hover);
-  border-color: var(--green);
+  border-color: var(--yellow);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px var(--green-glow);
+  box-shadow: 0 4px 12px var(--yellow-glow);
 }
 
 .mines-cell-interactive:active {
@@ -815,16 +879,16 @@ input[type="range"]::-moz-range-thumb {
 }
 
 .mines-cell-safe {
-  background: #0d3820;
+  background: #14301a;
   border-color: var(--green);
-  box-shadow: inset 0 0 15px rgba(31, 255, 27, 0.3), 0 0 15px rgba(31, 255, 27, 0.2);
+  box-shadow: inset 0 0 15px rgba(92, 201, 99, 0.3), 0 0 15px rgba(92, 201, 99, 0.2);
   animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .mines-cell-bomb {
   background: #3b0d0c;
-  border-color: #ef5350;
-  box-shadow: inset 0 0 15px rgba(229, 57, 53, 0.4), 0 0 20px rgba(229, 57, 53, 0.4);
+  border-color: var(--red);
+  box-shadow: inset 0 0 15px rgba(229, 72, 77, 0.4), 0 0 20px rgba(229, 72, 77, 0.4);
   animation: bombExplode 0.4s ease-out;
 }
 
@@ -849,4 +913,3 @@ input[type="range"]::-moz-range-thumb {
   50% { transform: scale(1.15); }
   100% { transform: scale(1); }
 }
-

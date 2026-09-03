@@ -84,13 +84,10 @@ async function runTest() {
 
   // 3. Phase de Vote -> Mines
   console.log('\n--- 1. Phase de Vote : Choix des Mines ---');
-  const votingStatePromise = waitForRoomState(hostSocket, 'voting');
-  aliceSocket.emit('start_game', { roomId });
-  await votingStatePromise;
-
+  // Fast-track : seul le jeu des Mines est activé, pas de phase de vote.
+  aliceSocket.emit('update_settings', { roomId, settings: { enabledGames: ['mines'] } });
   const minesBettingStatePromise = waitForRoomState(hostSocket, 'playing_mines');
-  aliceSocket.emit('submit_vote', { roomId, vote: 'mines' });
-  bobSocket.emit('submit_vote', { roomId, vote: 'mines' });
+  aliceSocket.emit('start_game', { roomId });
   const minesBettingRoom = await minesBettingStatePromise;
   console.log(`✔ Vote validé -> État: "${minesBettingRoom.state}"`);
 

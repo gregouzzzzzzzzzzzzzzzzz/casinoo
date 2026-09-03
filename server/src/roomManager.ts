@@ -94,8 +94,8 @@ export function pickVoteOptions(enabledGames: GameChoice[]): GameChoice[] {
 export const DEFAULT_DERBY_HORSES: DerbyHorse[] = [
   { id: 1, name: 'Éclair Rouge', color: '#ef5350', emoji: '🔴', progress: 0 },
   { id: 2, name: 'Tornade Bleue', color: '#3b82f6', emoji: '🔵', progress: 0 },
-  { id: 3, name: 'Galop Vert', color: '#1fff1b', emoji: '🟢', progress: 0 },
-  { id: 4, name: 'Pégase Jaune', color: '#f4c542', emoji: '🟡', progress: 0 },
+  { id: 3, name: 'Galop Vert', color: '#5cc963', emoji: '🟢', progress: 0 },
+  { id: 4, name: 'Pégase Jaune', color: '#ffb629', emoji: '🟡', progress: 0 },
 ];
 
 export class RoomManager {
@@ -269,6 +269,7 @@ export class RoomManager {
     allBlackjackBet?: boolean;
     allBlackjackFinished?: boolean;
     allMinesBet?: boolean;
+    allDerbyBet?: boolean;
     minesTurnAdvanced?: boolean;
     allFinalDistributed?: boolean;
   } | null {
@@ -289,6 +290,7 @@ export class RoomManager {
     if (room.crashBets && room.crashBets[socketId]) delete room.crashBets[socketId];
     if (room.blackjackBets && room.blackjackBets[socketId]) delete room.blackjackBets[socketId];
     if (room.minesBets && room.minesBets[socketId]) delete room.minesBets[socketId];
+    if (room.derbyBets && room.derbyBets[socketId]) delete room.derbyBets[socketId];
 
     if (room.leaderId === socketId) {
       if (room.players.length > 0) {
@@ -309,6 +311,12 @@ export class RoomManager {
     const allBlackjackBet = room.state === 'playing_blackjack' ? this.checkAllBlackjackBet(room) : false;
     const allBlackjackFinished = room.state === 'blackjack_playing' ? this.checkAllBlackjackFinished(room) : false;
     const allMinesBet = room.state === 'playing_mines' ? this.checkAllMinesBet(room) : false;
+
+    let allDerbyBet = false;
+    if (room.state === 'playing_derby') {
+      const activeBettors = room.players.filter((p) => p.balance > 0);
+      allDerbyBet = activeBettors.length > 0 && activeBettors.every((p) => Boolean(p.derbyBet && p.derbyBet.amount > 0));
+    }
 
     let minesTurnAdvanced = false;
     if (room.state === 'mines_playing' && room.currentTurnPlayerId === socketId) {
@@ -333,6 +341,7 @@ export class RoomManager {
       allBlackjackBet,
       allBlackjackFinished,
       allMinesBet,
+      allDerbyBet,
       minesTurnAdvanced,
       allFinalDistributed,
     };
@@ -426,8 +435,10 @@ export class RoomManager {
       : (room.settings?.enabledGames ?? ['roulette', 'crash', 'blackjack', 'mines', 'derby']) as GameChoice[];
 
     // Build a vote tally initialised to 0 for each valid option only.
+    // 'end_game' is always a votable option (the phone offers it once minRounds is reached).
     const voteCounts: Record<string, number> = {};
     validOptions.forEach((opt) => { voteCounts[opt] = 0; });
+    voteCounts['end_game'] = 0;
 
     Object.values(votes).forEach((v) => {
       if (voteCounts[v] !== undefined) {
@@ -442,8 +453,9 @@ export class RoomManager {
     }
 
     // Collect all options tied at maxVotes, then pick one at random.
+    // With zero votes cast, never end the game by accident.
     const winners = Object.entries(voteCounts)
-      .filter(([, count]) => count === maxVotes)
+      .filter(([choice, count]) => count === maxVotes && !(choice === 'end_game' && maxVotes === 0))
       .map(([choice]) => choice as GameChoice);
 
     const winningChoice = winners[Math.floor(Math.random() * winners.length)];
