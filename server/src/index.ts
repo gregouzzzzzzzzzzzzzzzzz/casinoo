@@ -345,8 +345,25 @@ io.on('connection', (socket: Socket) => {
         if (resolution) {
           io.to(roomId).emit('room_updated', { room: resolution.room });
         }
-      }, 3000);
+      }, 7000);
     }
+  });
+
+  socket.on('start_roulette_spin', ({ roomId }: { roomId: string }) => {
+    const room = roomManager.getRoom(roomId);
+    if (!room || room.state !== 'playing_roulette') return;
+
+    const spinningRoom = roomManager.startSpinning(roomId);
+    if (spinningRoom) {
+      io.to(roomId).emit('room_updated', { room: spinningRoom });
+    }
+
+    setTimeout(() => {
+      const resolution = roomManager.resolveRoulette(roomId);
+      if (resolution) {
+        io.to(roomId).emit('room_updated', { room: resolution.room });
+      }
+    }, 7000);
   });
 
   /* =====================================================================
@@ -669,7 +686,7 @@ io.on('connection', (socket: Socket) => {
           if (resolution) {
             io.to(roomId).emit('room_updated', { room: resolution.room });
           }
-        }, 3000);
+        }, 7000);
         return;
       }
 

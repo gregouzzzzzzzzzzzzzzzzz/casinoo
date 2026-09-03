@@ -551,6 +551,21 @@ export class RoomManager {
     const room = this.getRoom(roomId);
     if (!room) return undefined;
 
+    const winningNumber = Math.floor(Math.random() * 37);
+    let winningColor: RouletteColor;
+    if (winningNumber === 0) {
+      winningColor = 'green';
+    } else if (RED_NUMBERS.includes(winningNumber)) {
+      winningColor = 'red';
+    } else {
+      winningColor = 'black';
+    }
+
+    room.currentResult = {
+      winningColor,
+      winningNumber,
+      results: [],
+    };
     room.state = 'roulette_spinning';
     return room;
   }
@@ -559,7 +574,7 @@ export class RoomManager {
     const room = this.getRoom(roomId);
     if (!room) return undefined;
 
-    const winningNumber = Math.floor(Math.random() * 37);
+    const winningNumber = room.currentResult?.winningNumber ?? Math.floor(Math.random() * 37);
     let winningColor: RouletteColor;
     if (winningNumber === 0) {
       winningColor = 'green';

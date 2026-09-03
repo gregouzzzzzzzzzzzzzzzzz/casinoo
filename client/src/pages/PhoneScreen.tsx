@@ -1062,33 +1062,262 @@ export const PhoneScreen: React.FC = () => {
         {/* ═══════════════════════════════════════════════════════ */}
         {/* PLAYING ROULETTE                                        */}
         {/* ═══════════════════════════════════════════════════════ */}
+        {/* ═══════════════════════════════════════════════════════ */}
+        {/* PLAYING ROULETTE (Mise avec jetons rapides)              */}
+        {/* ═══════════════════════════════════════════════════════ */}
         {joinedPlayer && currentRoom?.state === 'playing_roulette' && (
-          <div className="card animate-in" style={{ padding: '20px 16px' }}>
-            <div className="label-xs" style={{ marginBottom: 6 }}>ROULETTE — MISE</div>
-            <h2 style={{ fontSize: 20, fontWeight: 800, marginBottom: 16 }}>Placez votre mise</h2>
+          <div className="card animate-in" style={{ padding: '20px 16px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <div>
+              <div className="label-xs" style={{ marginBottom: 4, color: 'var(--gold)' }}>CASINO ROYALE · ROULETTE</div>
+              <h2 style={{ fontSize: 22, fontWeight: 900, margin: 0 }}>Placez votre mise</h2>
+            </div>
 
             {hasBet ? (
-              <div style={{ background: 'var(--green-subtle)', border: '1px solid rgba(31,255,27,0.25)', borderRadius: 'var(--r-md)', padding: '16px', textAlign: 'center' }}>
-                <CheckCircle2 size={28} color="var(--green)" style={{ margin: '0 auto 6px' }} />
-                <div style={{ fontWeight: 700, color: 'var(--green)' }}>Mise validée ({betAmount} 💰)</div>
+              <div style={{
+                background: 'rgba(31, 255, 27, 0.1)',
+                border: '1px solid var(--green)',
+                borderRadius: 'var(--r-md)',
+                padding: '20px 16px',
+                textAlign: 'center',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: 10,
+              }}>
+                <CheckCircle2 size={36} color="var(--green)" />
+                <div>
+                  <div style={{ fontWeight: 900, fontSize: 18, color: 'var(--green)' }}>Mise validée !</div>
+                  <div style={{ fontSize: 14, color: 'var(--text-secondary)', marginTop: 4 }}>
+                    {betAmount} 💰 placés sur {betColor === 'red' ? '🔴 ROUGE' : betColor === 'black' ? '⚫ NOIR' : '🟢 ZÉRO'}
+                  </div>
+                </div>
+                <div className="badge badge-surface" style={{ fontSize: 11, marginTop: 4 }}>
+                  Regardez l'écran central pour le tirage...
+                </div>
               </div>
             ) : (
               <form onSubmit={handleRouletteBetSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <button type="button" onClick={() => setBetAmount(clampBet(betAmount - 1))} className="btn btn-secondary btn-sm"><Minus size={14} /></button>
-                  <input type="number" min={1} max={maxBet} value={betAmount} onChange={e => setBetAmount(clampBet(parseInt(e.target.value) || 1))} className="input" style={{ textAlign: 'center', fontSize: 18, fontWeight: 800 }} required />
-                  <button type="button" onClick={() => setBetAmount(clampBet(betAmount + 1))} className="btn btn-secondary btn-sm"><Plus size={14} /></button>
+                {/* Montant de la mise avec stepper et jetons rapides */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  <div className="label-xs">MONTANT DU JETON (MAX: {maxBet} 💰)</div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <button type="button" onClick={() => setBetAmount(clampBet(betAmount - 1))} className="btn btn-secondary btn-sm" style={{ padding: '10px 14px' }}>
+                      <Minus size={16} />
+                    </button>
+                    <input
+                      type="number"
+                      min={1}
+                      max={maxBet}
+                      value={betAmount}
+                      onChange={e => setBetAmount(clampBet(parseInt(e.target.value) || 1))}
+                      className="input"
+                      style={{ textAlign: 'center', fontSize: 22, fontWeight: 900, flex: 1 }}
+                      required
+                    />
+                    <button type="button" onClick={() => setBetAmount(clampBet(betAmount + 1))} className="btn btn-secondary btn-sm" style={{ padding: '10px 14px' }}>
+                      <Plus size={16} />
+                    </button>
+                  </div>
+
+                  {/* Jetons rapides */}
+                  <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
+                    {[1, 5, 10, maxBet].map((val, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => setBetAmount(clampBet(val))}
+                        className="btn btn-secondary btn-sm"
+                        style={{
+                          flex: 1,
+                          fontSize: 12,
+                          fontWeight: 800,
+                          padding: '6px 4px',
+                          border: betAmount === val ? '1px solid var(--green)' : undefined,
+                          color: betAmount === val ? 'var(--green)' : undefined,
+                        }}
+                      >
+                        {val === maxBet ? 'MAX' : `${val} 💰`}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-                <div className="color-grid">
-                  <button type="button" onClick={() => setBetColor('red')} className={`color-btn color-btn-red ${betColor === 'red' ? 'active' : ''}`}>🔴 Rouge</button>
-                  <button type="button" onClick={() => setBetColor('black')} className={`color-btn color-btn-black ${betColor === 'black' ? 'active' : ''}`}>⚫ Noir</button>
-                  <button type="button" onClick={() => setBetColor('green')} className={`color-btn color-btn-green-roulette ${betColor === 'green' ? 'active' : ''}`}>🟢 Vert</button>
+
+                {/* Choix de la couleur */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  <div className="label-xs">CHOISISSEZ VOTRE COULEUR</div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                    <button
+                      type="button"
+                      onClick={() => setBetColor('red')}
+                      className={`color-btn color-btn-red ${betColor === 'red' ? 'active' : ''}`}
+                      style={{ padding: '16px 8px', fontSize: 15, fontWeight: 900 }}
+                    >
+                      🔴 ROUGE (×2)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setBetColor('black')}
+                      className={`color-btn color-btn-black ${betColor === 'black' ? 'active' : ''}`}
+                      style={{ padding: '16px 8px', fontSize: 15, fontWeight: 900 }}
+                    >
+                      ⚫ NOIR (×2)
+                    </button>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setBetColor('green')}
+                    className={`color-btn color-btn-green-roulette ${betColor === 'green' ? 'active' : ''}`}
+                    style={{ padding: '12px', fontSize: 14, fontWeight: 900 }}
+                  >
+                    🟢 LE ZÉRO (×36)
+                  </button>
                 </div>
-                <button type="submit" className="btn btn-primary btn-full btn-lg">Miser {betAmount} 💰</button>
+
+                <button type="submit" className="btn btn-primary btn-full btn-lg" style={{ fontSize: 16, fontWeight: 900, padding: 16 }}>
+                  Miser {betAmount} 💰 sur {betColor === 'red' ? 'ROUGE' : betColor === 'black' ? 'NOIR' : 'ZÉRO'}
+                </button>
               </form>
             )}
           </div>
         )}
+
+        {/* ═══════════════════════════════════════════════════════ */}
+        {/* ROULETTE SPINNING (Suspense sur Mobile)                 */}
+        {/* ═══════════════════════════════════════════════════════ */}
+        {joinedPlayer && currentRoom?.state === 'roulette_spinning' && (() => {
+          const myBet = joinedPlayer.currentBet || (currentRoom.bets ? currentRoom.bets[socket.id || ''] : null);
+
+          return (
+            <div className="card animate-in" style={{
+              padding: '32px 20px',
+              textAlign: 'center',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: 20,
+              border: '2px solid var(--gold)',
+              background: 'radial-gradient(circle, rgba(30,41,59,0.9) 0%, var(--bg-card) 100%)',
+            }}>
+              <div style={{ fontSize: 54, animation: 'spin 3s linear infinite', display: 'inline-block' }}>
+                🎡
+              </div>
+              <div>
+                <div className="label-xs" style={{ color: 'var(--gold)', letterSpacing: '0.15em', marginBottom: 6 }}>
+                  TIRAGE EN DIRECT
+                </div>
+                <h2 style={{ fontSize: 24, fontWeight: 900, margin: 0, color: '#ffffff' }}>
+                  Rien ne va plus !
+                </h2>
+                <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 6 }}>
+                  La bille tourne sur le cylindre... Regardez l'écran hôte !
+                </p>
+              </div>
+
+              {myBet ? (
+                <div style={{
+                  background: 'var(--bg-input)',
+                  border: '1px solid var(--border-strong)',
+                  borderRadius: 12,
+                  padding: '12px 20px',
+                  width: '100%',
+                }}>
+                  <div className="label-xs" style={{ marginBottom: 4 }}>VOTRE MISE</div>
+                  <div style={{ fontSize: 16, fontWeight: 800 }}>
+                    {myBet.amount} 💰 sur {myBet.color === 'red' ? '🔴 ROUGE' : myBet.color === 'black' ? '⚫ NOIR' : '🟢 ZÉRO'}
+                  </div>
+                </div>
+              ) : (
+                <div style={{ fontSize: 12, color: 'var(--text-dim)', fontStyle: 'italic' }}>
+                  Vous n'avez pas misé sur ce tour.
+                </div>
+              )}
+            </div>
+          );
+        })()}
+
+        {/* ═══════════════════════════════════════════════════════ */}
+        {/* ROULETTE RESULT (Résultat individuel sur Mobile)        */}
+        {/* ═══════════════════════════════════════════════════════ */}
+        {joinedPlayer && currentRoom?.state === 'roulette_result' && currentRoom.currentResult && (() => {
+          const res = currentRoom.currentResult;
+          const myRound = res.results.find(r => r.playerId === socket.id);
+          const won = myRound?.won ?? false;
+          const wc = res.winningColor;
+          const wn = res.winningNumber;
+
+          return (
+            <div className="card animate-in" style={{
+              padding: '24px 18px',
+              textAlign: 'center',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: 16,
+              border: `2px solid ${won ? 'var(--green)' : '#ef4444'}`,
+              background: won ? 'radial-gradient(circle, rgba(31,255,27,0.12) 0%, var(--bg-card) 100%)' : 'radial-gradient(circle, rgba(239,68,68,0.12) 0%, var(--bg-card) 100%)',
+            }}>
+              {/* Le numéro tiré */}
+              <div style={{
+                width: 70, height: 70, borderRadius: '50%',
+                background: wc === 'red' ? '#dc2626' : wc === 'black' ? '#18181b' : '#059669',
+                border: '3px solid #ffffff',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: 32, fontWeight: 900, color: '#ffffff',
+                boxShadow: '0 6px 20px rgba(0,0,0,0.5)',
+              }}>
+                {wn}
+              </div>
+
+              <div>
+                <div className="label-xs" style={{ marginBottom: 4 }}>NUMÉRO TIRÉ</div>
+                <h3 style={{ fontSize: 20, fontWeight: 900, margin: 0 }}>
+                  {wc === 'red' ? '🔴 ROUGE' : wc === 'black' ? '⚫ NOIR' : '🟢 ZÉRO'} ({wn})
+                </h3>
+              </div>
+
+              {/* Message de victoire ou de gorgée */}
+              {myRound ? (
+                won ? (
+                  <div style={{
+                    background: 'rgba(31,255,27,0.15)',
+                    border: '1px solid var(--green)',
+                    borderRadius: 12,
+                    padding: '16px',
+                    width: '100%',
+                  }}>
+                    <div style={{ fontSize: 32 }}>🎉</div>
+                    <div style={{ fontSize: 20, fontWeight: 900, color: 'var(--green)', marginTop: 4 }}>
+                      VICTOIRE !
+                    </div>
+                    <div style={{ fontSize: 16, fontWeight: 800, marginTop: 4 }}>
+                      +{myRound.netGain} 💰 ajoutés à votre solde !
+                    </div>
+                  </div>
+                ) : (
+                  <div style={{
+                    background: 'rgba(239,68,68,0.15)',
+                    border: '1px solid #ef4444',
+                    borderRadius: 12,
+                    padding: '16px',
+                    width: '100%',
+                  }}>
+                    <div style={{ fontSize: 32 }}>🍺</div>
+                    <div style={{ fontSize: 20, fontWeight: 900, color: '#ef4444', marginTop: 4 }}>
+                      C'EST PERDU !
+                    </div>
+                    <div style={{ fontSize: 16, fontWeight: 800, marginTop: 4 }}>
+                      Vous devez boire {myRound.betAmount} gorgée{myRound.betAmount > 1 ? 's' : ''} !
+                    </div>
+                  </div>
+                )
+              ) : (
+                <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
+                  Vous n'aviez pas placé de mise sur cette manche.
+                </div>
+              )}
+            </div>
+          );
+        })()}
 
         {/* ═══════════════════════════════════════════════════════ */}
         {/* PLAYING CRASH                                           */}

@@ -20,6 +20,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
+import { RouletteWheelCanvas } from '../components/RouletteWheelCanvas';
 
 // ── Helpers ──────────────────────────────────────────────────
 const AVATAR_COLORS = [
@@ -112,16 +113,6 @@ const PlayingCard: React.FC<PlayingCardProps> = ({ card, size = 'md', hidden = f
   );
 };
 
-// ── Composant Roulette Animé ─────────────────────────────────
-const RouletteWheel = ({ isSpinning }: { isSpinning: boolean }) => (
-  <div className="roulette-wheel-container">
-    <div className={`roulette-wheel ${isSpinning ? 'spinning' : 'slow-spin'}`} />
-    <div className={`roulette-ball-track ${isSpinning ? 'spinning' : 'slow-spin'}`}>
-      <div className="roulette-ball" />
-    </div>
-    <div className="roulette-center" />
-  </div>
-);
 
 // ── Main Component ───────────────────────────────────────────
 export const HostScreen: React.FC = () => {
@@ -582,170 +573,443 @@ export const HostScreen: React.FC = () => {
         )}
 
         {/* ═══════════════════════════════════════════════════════ */}
-        {/* PLAYING ROULETTE (Betting Phase)                       */}
+        {/* PLAYING ROULETTE (Phase de mise & Tapis de Casino)      */}
         {/* ═══════════════════════════════════════════════════════ */}
-        {room?.state === 'playing_roulette' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16, flex: 1 }}>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
-              <div className="stat-box">
-                <span className="stat-value text-green">{betCount}</span>
-                <span className="stat-label">Mises validées</span>
+        {room?.state === 'playing_roulette' && (() => {
+          const redBettors = room.players.filter(p => (p.currentBet?.color || room.bets?.[p.id]?.color) === 'red');
+          const blackBettors = room.players.filter(p => (p.currentBet?.color || room.bets?.[p.id]?.color) === 'black');
+          const greenBettors = room.players.filter(p => (p.currentBet?.color || room.bets?.[p.id]?.color) === 'green');
+
+          return (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16, flex: 1 }}>
+              {/* Header stats */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
+                <div className="stat-box">
+                  <span className="stat-value text-green">{betCount} / {activeBettors}</span>
+                  <span className="stat-label">Mises enregistrées</span>
+                </div>
+                <div className="stat-box">
+                  <span className="stat-value text-primary">{activeBettors}</span>
+                  <span className="stat-label">Joueurs à la table</span>
+                </div>
+                <div className="stat-box">
+                  <span className="stat-value text-primary">{phaseSeconds}s</span>
+                  <span className="stat-label">Temps de mise</span>
+                </div>
               </div>
-              <div className="stat-box">
-                <span className="stat-value text-primary">{activeBettors}</span>
-                <span className="stat-label">Joueurs actifs</span>
-              </div>
-              <div className="stat-box">
-                <span className="stat-value text-primary">{phaseSeconds}s</span>
-                <span className="stat-label">Durée phase</span>
+
+              {/* Main Casino Layout: Roulette Wheel + Green Felt Table */}
+              <div style={{ display: 'grid', gridTemplateColumns: '460px 1fr', gap: 20, flex: 1, alignItems: 'stretch' }}>
+                {/* Left: Authentic 3D European Wheel */}
+                <div className="card" style={{
+                  padding: 24,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  background: 'radial-gradient(ellipse at center, rgba(30,41,59,0.7) 0%, var(--bg-card) 100%)',
+                }}>
+                  <div className="label-xs" style={{ marginBottom: 12, color: 'var(--gold)', letterSpacing: '0.12em' }}>
+                    CYLINDRE EUROPÉEN · 37 NUMÉROS
+                  </div>
+                  <RouletteWheelCanvas isSpinning={false} size={380} targetNumber={room.currentResult?.winningNumber ?? 0} />
+                  <div style={{ marginTop: 14, fontSize: 13, color: 'var(--text-secondary)', fontWeight: 600 }}>
+                    Faites vos jeux sur vos smartphones...
+                  </div>
+                </div>
+
+                {/* Right: Casino Green Felt Table (Tapis de mise) */}
+                <div className="card" style={{
+                  padding: 20,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 16,
+                  background: 'linear-gradient(145deg, #0b3d22 0%, #062414 100%)',
+                  border: '2px solid #15803d',
+                  boxShadow: 'inset 0 0 30px rgba(0,0,0,0.5)',
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <div>
+                      <div className="label-xs" style={{ color: '#86efac', letterSpacing: '0.1em' }}>TAPIS DES MISES</div>
+                      <h2 style={{ fontSize: 24, fontWeight: 900, color: '#ffffff', margin: 0 }}>FAITES VOS JEUX</h2>
+                    </div>
+                    {/* Host quick launch button */}
+                    <button
+                      onClick={() => socket.emit('start_roulette_spin', { roomId: room.id })}
+                      className="btn btn-primary animate-green-pulse"
+                      style={{ padding: '8px 16px', fontSize: 13, fontWeight: 800 }}
+                    >
+                      Lancer le tirage 🎡
+                    </button>
+                  </div>
+
+                  {/* The 3 Felt Betting Zones */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 12, flex: 1 }}>
+                    {/* GREEN (ZERO) */}
+                    <div style={{
+                      background: 'rgba(5, 150, 105, 0.25)',
+                      border: '2px solid #059669',
+                      borderRadius: 10,
+                      padding: 12,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: 8,
+                    }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ fontWeight: 900, color: '#34d399', fontSize: 14, letterSpacing: '0.05em' }}>
+                          🟢 0 (ZÉRO)
+                        </span>
+                        <span className="badge" style={{ background: '#059669', color: '#fff', fontWeight: 900 }}>
+                          Cote ×36.00
+                        </span>
+                      </div>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, minHeight: 36, alignItems: 'center' }}>
+                        {greenBettors.length === 0 ? (
+                          <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', fontStyle: 'italic' }}>Aucune mise sur le Zéro</span>
+                        ) : greenBettors.map(p => (
+                          <div key={p.id} style={{
+                            background: '#047857',
+                            border: '1px solid #34d399',
+                            borderRadius: 20,
+                            padding: '4px 10px',
+                            display: 'flex', alignItems: 'center', gap: 6,
+                            fontSize: 12, fontWeight: 800, color: '#fff',
+                            boxShadow: '0 2px 6px rgba(0,0,0,0.4)',
+                          }}>
+                            <Avatar name={p.name} size={20} />
+                            <span>{p.name}</span>
+                            <span style={{ background: '#fef08a', color: '#000', borderRadius: 10, padding: '1px 6px', fontSize: 11 }}>
+                              {p.currentBet?.amount || room.bets?.[p.id]?.amount} 💰
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* RED & BLACK SIDE BY SIDE */}
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, flex: 1 }}>
+                      {/* RED FELT */}
+                      <div style={{
+                        background: 'rgba(220, 38, 38, 0.25)',
+                        border: '2px solid #dc2626',
+                        borderRadius: 10,
+                        padding: 12,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: 8,
+                      }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <span style={{ fontWeight: 900, color: '#f87171', fontSize: 14, letterSpacing: '0.05em' }}>
+                            🔴 ROUGE
+                          </span>
+                          <span className="badge" style={{ background: '#dc2626', color: '#fff', fontWeight: 900 }}>
+                            Cote ×2.00
+                          </span>
+                        </div>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, minHeight: 40, alignItems: 'center' }}>
+                          {redBettors.length === 0 ? (
+                            <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', fontStyle: 'italic' }}>En attente de mises...</span>
+                          ) : redBettors.map(p => (
+                            <div key={p.id} style={{
+                              background: '#991b1b',
+                              border: '1px solid #f87171',
+                              borderRadius: 20,
+                              padding: '4px 10px',
+                              display: 'flex', alignItems: 'center', gap: 6,
+                              fontSize: 12, fontWeight: 800, color: '#fff',
+                              boxShadow: '0 2px 6px rgba(0,0,0,0.4)',
+                            }}>
+                              <Avatar name={p.name} size={20} />
+                              <span>{p.name}</span>
+                              <span style={{ background: '#fef08a', color: '#000', borderRadius: 10, padding: '1px 6px', fontSize: 11 }}>
+                                {p.currentBet?.amount || room.bets?.[p.id]?.amount} 💰
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* BLACK FELT */}
+                      <div style={{
+                        background: 'rgba(24, 24, 27, 0.55)',
+                        border: '2px solid #52525b',
+                        borderRadius: 10,
+                        padding: 12,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: 8,
+                      }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <span style={{ fontWeight: 900, color: '#e4e4e7', fontSize: 14, letterSpacing: '0.05em' }}>
+                            ⚫ NOIR
+                          </span>
+                          <span className="badge" style={{ background: '#27272a', color: '#fff', fontWeight: 900, border: '1px solid #52525b' }}>
+                            Cote ×2.00
+                          </span>
+                        </div>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, minHeight: 40, alignItems: 'center' }}>
+                          {blackBettors.length === 0 ? (
+                            <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', fontStyle: 'italic' }}>En attente de mises...</span>
+                          ) : blackBettors.map(p => (
+                            <div key={p.id} style={{
+                              background: '#18181b',
+                              border: '1px solid #71717a',
+                              borderRadius: 20,
+                              padding: '4px 10px',
+                              display: 'flex', alignItems: 'center', gap: 6,
+                              fontSize: 12, fontWeight: 800, color: '#fff',
+                              boxShadow: '0 2px 6px rgba(0,0,0,0.4)',
+                            }}>
+                              <Avatar name={p.name} size={20} />
+                              <span>{p.name}</span>
+                              <span style={{ background: '#fef08a', color: '#000', borderRadius: 10, padding: '1px 6px', fontSize: 11 }}>
+                                {p.currentBet?.amount || room.bets?.[p.id]?.amount} 💰
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Progress bar footer */}
+                  <div>
+                    <ProgressBar value={betCount} max={activeBettors} />
+                  </div>
+                </div>
               </div>
             </div>
+          );
+        })()}
 
-            <div className="card" style={{ padding: 20, flex: 1 }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-                <div>
-                  <div className="label-xs" style={{ marginBottom: 4 }}>ROULETTE EUROPÉENNE</div>
-                  <h2 style={{ fontSize: 22, fontWeight: 800 }}>Faites vos jeux !</h2>
+        {/* ═══════════════════════════════════════════════════════ */}
+        {/* ROULETTE SPINNING (Tirage en Direct Grand Spectacle)    */}
+        {/* ═══════════════════════════════════════════════════════ */}
+        {room?.state === 'roulette_spinning' && (() => {
+          const targetNum = room.currentResult?.winningNumber ?? Math.floor(Math.random() * 37);
+
+          return (
+            <div style={{
+              flex: 1,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 24,
+              padding: 24,
+            }}>
+              {/* Marquee Banner */}
+              <div style={{
+                background: 'rgba(15, 23, 42, 0.85)',
+                border: '2px solid var(--gold)',
+                borderRadius: 16,
+                padding: '12px 32px',
+                boxShadow: '0 0 35px rgba(244, 197, 66, 0.25)',
+                textAlign: 'center',
+              }}>
+                <div className="label-xs" style={{ color: 'var(--gold)', letterSpacing: '0.2em' }}>
+                  CASINO ROYALE · TIRAGE EN DIRECT
                 </div>
-                <div style={{ display: 'flex', gap: 10, alignItems: 'center', fontSize: 13, fontWeight: 700 }}>
-                  <span style={{ color: '#ef5350' }}>🔴 x2</span>
-                  <span style={{ color: '#94a3b8' }}>⚫ x2</span>
-                  <span style={{ color: 'var(--green)' }}>🟢 x36</span>
-                </div>
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 24, marginBottom: 24 }}>
-                <RouletteWheel isSpinning={false} />
-                <div style={{ width: '100%' }}>
-                  <ProgressBar value={betCount} max={activeBettors} />
-                </div>
+                <h1 style={{
+                  fontSize: 34,
+                  fontWeight: 900,
+                  color: '#ffffff',
+                  margin: '4px 0 0',
+                  letterSpacing: '-0.02em',
+                }}>
+                  🎡 RIEN NE VA PLUS !
+                </h1>
+                <p style={{ margin: '4px 0 0', fontSize: 13, color: 'var(--text-secondary)' }}>
+                  La bille tourne à pleine vitesse dans la gorge du cylindre...
+                </p>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 8 }}>
-                {room.players.map(player => {
-                  const bet = player.currentBet ?? (room.bets ? room.bets[player.id] : null);
-                  const hasBet = Boolean(bet);
-                  const COLOR_STYLES: Record<string, { color: string; emoji: string }> = {
-                    red:   { color: '#ef5350', emoji: '🔴' },
-                    black: { color: '#94a3b8', emoji: '⚫' },
-                    green: { color: 'var(--green)', emoji: '🟢' },
-                  };
-                  const cs = bet ? COLOR_STYLES[bet.color] : null;
+              {/* Realistic 3D Wheel in Full Spin Mode */}
+              <div className="card animate-in" style={{
+                padding: 32,
+                borderRadius: '50%',
+                background: 'radial-gradient(circle, rgba(30,41,59,0.9) 0%, #090e15 100%)',
+                boxShadow: '0 20px 50px rgba(0,0,0,0.8), 0 0 60px rgba(244, 197, 66, 0.15)',
+                border: '3px solid rgba(244, 197, 66, 0.4)',
+              }}>
+                <RouletteWheelCanvas
+                  isSpinning={true}
+                  targetNumber={targetNum}
+                  size={460}
+                  durationMs={6800}
+                />
+              </div>
+
+              {/* Live Bettors ticker bar */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 12,
+                flexWrap: 'wrap',
+                justifyContent: 'center',
+                maxWidth: 700,
+              }}>
+                {room.players.map(p => {
+                  const bet = p.currentBet || room.bets?.[p.id];
+                  if (!bet) return null;
+                  const colorBadge = bet.color === 'red' ? '🔴 ROUGE' : bet.color === 'black' ? '⚫ NOIR' : '🟢 ZÉRO';
+                  const bg = bet.color === 'red' ? '#991b1b' : bet.color === 'black' ? '#27272a' : '#047857';
 
                   return (
-                    <div key={player.id} className={hasBet ? 'result-win' : 'player-row'}
-                      style={{ padding: '10px 12px', display: 'flex', flexDirection: 'column', gap: 6 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                          <Avatar name={player.name} size={26} />
-                          <div>
-                            <div style={{ fontWeight: 700, fontSize: 13 }}>{player.name}</div>
-                            <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>💰 {player.balance}</div>
-                          </div>
-                        </div>
-                        {hasBet
-                          ? <span className="badge badge-green">Validé</span>
-                          : <span className="badge badge-surface">En attente</span>}
-                      </div>
-                      {hasBet && cs && (
-                        <div style={{
-                          background: 'var(--bg-input)',
-                          borderRadius: 'var(--r-sm)',
-                          padding: '4px 8px',
-                          fontSize: 12, fontWeight: 700,
-                          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                        }}>
-                          <span style={{ color: 'var(--text-secondary)' }}>Mise</span>
-                          <span style={{ color: cs.color }}>{cs.emoji} {bet!.amount} jetons</span>
-                        </div>
-                      )}
+                    <div key={p.id} style={{
+                      background: bg,
+                      border: '1px solid rgba(255,255,255,0.2)',
+                      borderRadius: 20,
+                      padding: '6px 14px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 8,
+                      fontSize: 13,
+                      fontWeight: 800,
+                      color: '#ffffff',
+                      boxShadow: '0 4px 10px rgba(0,0,0,0.4)',
+                    }}>
+                      <Avatar name={p.name} size={22} />
+                      <span>{p.name}</span>
+                      <span style={{ opacity: 0.75 }}>•</span>
+                      <span>{colorBadge} ({bet.amount} 💰)</span>
                     </div>
                   );
                 })}
               </div>
             </div>
-          </div>
-        )}
+          );
+        })()}
 
-        {/* ROULETTE SPINNING & RESULT */}
-        {room?.state === 'roulette_spinning' && (
-          <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <div className="card animate-in" style={{
-              padding: '64px 80px',
-              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 24,
-              maxWidth: 520, width: '100%', textAlign: 'center',
-            }}>
-              <RouletteWheel isSpinning={true} />
-              <div>
-                <div className="label-xs" style={{ marginBottom: 8, color: 'var(--green)' }}>TIRAGE EN COURS</div>
-                <h2 style={{ fontSize: 32, fontWeight: 900, letterSpacing: '-0.02em' }}>
-                  La roulette tourne... 🎡
-                </h2>
-              </div>
-            </div>
-          </div>
-        )}
-
+        {/* ═══════════════════════════════════════════════════════ */}
+        {/* ROULETTE RESULT (Résultats et Distribution)             */}
+        {/* ═══════════════════════════════════════════════════════ */}
         {room?.state === 'roulette_result' && room.currentResult && (() => {
           const wc = room.currentResult.winningColor;
-          const winColorStyle = wc === 'red' ? { bg: 'rgba(229,57,53,0.12)', border: 'rgba(229,57,53,0.3)', text: '#ef5350', emoji: '🔴' }
-            : wc === 'black' ? { bg: 'rgba(30,41,59,0.6)', border: 'rgba(100,116,139,0.3)', text: '#94a3b8', emoji: '⚫' }
-            : { bg: 'var(--green-muted)', border: 'rgba(31,255,27,0.3)', text: 'var(--green)', emoji: '🟢' };
+          const wn = room.currentResult.winningNumber;
+          const winColorStyle = wc === 'red'
+            ? { bg: 'linear-gradient(135deg, rgba(220,38,38,0.3) 0%, rgba(153,27,27,0.15) 100%)', border: '#ef4444', text: '#ef4444', emoji: '🔴', label: 'ROUGE' }
+            : wc === 'black'
+            ? { bg: 'linear-gradient(135deg, rgba(39,39,42,0.6) 0%, rgba(24,24,27,0.3) 100%)', border: '#71717a', text: '#e4e4e7', emoji: '⚫', label: 'NOIR' }
+            : { bg: 'linear-gradient(135deg, rgba(5,150,105,0.3) 0%, rgba(4,120,87,0.15) 100%)', border: '#10b981', text: '#10b981', emoji: '🟢', label: 'ZÉRO' };
+
           return (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16, flex: 1 }}>
+              {/* Grand Banner Reveal */}
               <div style={{
                 background: winColorStyle.bg,
-                border: `1px solid ${winColorStyle.border}`,
+                border: `2px solid ${winColorStyle.border}`,
                 borderRadius: 'var(--r-lg)',
-                padding: '20px 24px',
-                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                padding: '24px 32px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                boxShadow: `0 0 40px ${winColorStyle.border}33`,
               }}>
-                <div>
-                  <div className="label-xs" style={{ marginBottom: 4 }}>RÉSULTAT DU TIRAGE</div>
-                  <h2 style={{ fontSize: 36, fontWeight: 900, color: winColorStyle.text }}>
-                    {winColorStyle.emoji} {wc === 'red' ? 'ROUGE' : wc === 'black' ? 'NOIR' : 'VERT'}
-                  </h2>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
+                  <div style={{
+                    width: 80, height: 80, borderRadius: '50%',
+                    background: wc === 'red' ? '#dc2626' : wc === 'black' ? '#18181b' : '#059669',
+                    border: '3px solid #ffffff',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: 38, fontWeight: 900, color: '#ffffff',
+                    boxShadow: '0 8px 25px rgba(0,0,0,0.5)',
+                  }}>
+                    {wn}
+                  </div>
+                  <div>
+                    <div className="label-xs" style={{ color: winColorStyle.text, letterSpacing: '0.12em' }}>
+                      RÉSULTAT OFFICIEL DU TIRAGE
+                    </div>
+                    <h1 style={{ fontSize: 36, fontWeight: 900, color: '#ffffff', margin: 0 }}>
+                      {winColorStyle.emoji} NUMÉRO {wn} {winColorStyle.label} !
+                    </h1>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: 13, margin: '4px 0 0' }}>
+                      {winners.length > 0 ? `Félicitations aux ${winners.length} vainqueur(s) ! 🎉` : 'La banque rafle la mise... Les verres se remplissent ! 🍻'}
+                    </p>
+                  </div>
                 </div>
+
                 <div style={{ textAlign: 'right' }}>
-                  <div className="label-xs">NUMÉRO</div>
-                  <span style={{ fontSize: 64, fontWeight: 900, lineHeight: 1, color: winColorStyle.text }}>
-                    {room.currentResult.winningNumber}
+                  <span className="badge" style={{
+                    background: winColorStyle.border,
+                    color: '#ffffff',
+                    fontSize: 16,
+                    fontWeight: 900,
+                    padding: '8px 16px',
+                  }}>
+                    {wc === 'green' ? 'Cote ×36' : 'Cote ×2'}
                   </span>
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, flex: 1 }}>
-                <div className="card" style={{ padding: 16 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-                    <TrendingUp size={16} color="var(--green)" />
-                    <span style={{ fontWeight: 700, fontSize: 13 }}>Gagnants</span>
+              {/* Side-by-side Wheel & Winners/Losers tables */}
+              <div style={{ display: 'grid', gridTemplateColumns: '360px 1fr 1fr', gap: 16, flex: 1 }}>
+                {/* Left: The settled wheel */}
+                <div className="card" style={{
+                  padding: 16,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  background: 'radial-gradient(circle, rgba(30,41,59,0.8) 0%, var(--bg-card) 100%)',
+                }}>
+                  <div className="label-xs" style={{ marginBottom: 8 }}>ROUE ARRÊTÉE</div>
+                  <RouletteWheelCanvas isSpinning={false} size={300} targetNumber={wn} />
+                </div>
+
+                {/* Center: Winners */}
+                <div className="card" style={{ padding: 18, display: 'flex', flexDirection: 'column' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
+                    <TrendingUp size={18} color="var(--green)" />
+                    <span style={{ fontWeight: 800, fontSize: 15 }}>Gagnants</span>
                     <span className="badge badge-green">{winners.length}</span>
                   </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                    {winners.map((r: PlayerRoundResult) => (
-                      <div key={r.playerId} className="result-win" style={{ padding: '8px 12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <Avatar name={r.playerName} size={24} />
-                        <span style={{ fontSize: 13, fontWeight: 700 }}>{r.playerName}</span>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8, overflowY: 'auto', flex: 1 }}>
+                    {winners.length === 0 ? (
+                      <div style={{ textAlign: 'center', color: 'var(--text-dim)', fontSize: 13, padding: '24px 0' }}>
+                        Aucun gagnant sur ce tirage ! 💀
+                      </div>
+                    ) : winners.map((r: PlayerRoundResult) => (
+                      <div key={r.playerId} className="result-win" style={{ padding: '10px 14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <Avatar name={r.playerName} size={26} />
+                          <div>
+                            <div style={{ fontSize: 14, fontWeight: 800 }}>{r.playerName}</div>
+                            <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>Mise : {r.betAmount} 💰</div>
+                          </div>
+                        </div>
                         <div style={{ textAlign: 'right' }}>
-                          <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--green)' }}>+{r.netGain} 💰</div>
+                          <div style={{ fontSize: 16, fontWeight: 900, color: 'var(--green)' }}>+{r.netGain} 💰</div>
                         </div>
                       </div>
                     ))}
                   </div>
                 </div>
 
-                <div className="card" style={{ padding: 16 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-                    <TrendingDown size={16} color="var(--red)" />
-                    <span style={{ fontWeight: 700, fontSize: 13 }}>Perdants — Gorgées</span>
+                {/* Right: Losers (Sips to drink) */}
+                <div className="card" style={{ padding: 18, display: 'flex', flexDirection: 'column' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
+                    <TrendingDown size={18} color="var(--red)" />
+                    <span style={{ fontWeight: 800, fontSize: 15 }}>Perdants — Gorgées</span>
                     <span className="badge badge-red">{losers.length}</span>
                   </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                    {losers.map((r: PlayerRoundResult) => (
-                      <div key={r.playerId} className="result-lose" style={{ padding: '8px 12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <Avatar name={r.playerName} size={24} />
-                        <span style={{ fontSize: 13, fontWeight: 700 }}>{r.playerName}</span>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8, overflowY: 'auto', flex: 1 }}>
+                    {losers.length === 0 ? (
+                      <div style={{ textAlign: 'center', color: 'var(--green)', fontSize: 13, padding: '24px 0', fontWeight: 700 }}>
+                        Incroyable ! Tout le monde a gagné ! 🍻
+                      </div>
+                    ) : losers.map((r: PlayerRoundResult) => (
+                      <div key={r.playerId} className="result-lose" style={{ padding: '10px 14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <Avatar name={r.playerName} size={26} />
+                          <div>
+                            <div style={{ fontSize: 14, fontWeight: 800 }}>{r.playerName}</div>
+                            <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>Mise perdue : {r.betAmount} 💰</div>
+                          </div>
+                        </div>
                         <div style={{ textAlign: 'right' }}>
-                          <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--red)' }}>+{r.betAmount} 🍺</div>
+                          <div style={{ fontSize: 16, fontWeight: 900, color: 'var(--red)' }}>+{r.betAmount} 🍺</div>
                         </div>
                       </div>
                     ))}
