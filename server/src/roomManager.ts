@@ -367,7 +367,8 @@ export class RoomManager {
       case 'end_game':
         return this.startFinalTax(roomId);
       default:
-        return this.transitionToMines(roomId);
+        // Choix non reconnu : ne rien faire plutôt que de lancer les Mines par défaut.
+        return undefined;
     }
   }
 
@@ -436,9 +437,15 @@ export class RoomManager {
       ? (room.currentVoteOptions as GameChoice[])
       : (room.settings?.enabledGames ?? ['roulette', 'crash', 'blackjack', 'mines', 'derby']) as GameChoice[];
 
+    // end_game is always a valid vote option even though it is not in currentVoteOptions
+    // (it is displayed as an extra button on the client side).
+    const allValidOptions: GameChoice[] = validOptions.includes('end_game')
+      ? validOptions
+      : [...validOptions, 'end_game'];
+
     // Build a vote tally initialised to 0 for each valid option only.
     const voteCounts: Record<string, number> = {};
-    validOptions.forEach((opt) => { voteCounts[opt] = 0; });
+    allValidOptions.forEach((opt) => { voteCounts[opt] = 0; });
 
     Object.values(votes).forEach((v) => {
       if (voteCounts[v] !== undefined) {
@@ -453,9 +460,17 @@ export class RoomManager {
     }
 
     // Collect all options tied at maxVotes, then pick one at random.
-    const winners = Object.entries(voteCounts)
+    // If nobody voted (all 0), exclude end_game from random pick to avoid
+    // accidentally ending the game when everyone abstains.
+    let winners = Object.entries(voteCounts)
       .filter(([, count]) => count === maxVotes)
       .map(([choice]) => choice as GameChoice);
+
+    if (maxVotes === 0) {
+      // Nobody voted — pick randomly among game options only (not end_game).
+      winners = winners.filter((w) => w !== 'end_game');
+      if (winners.length === 0) winners = validOptions.filter((v) => v !== 'end_game');
+    }
 
     const winningChoice = winners[Math.floor(Math.random() * winners.length)];
 
