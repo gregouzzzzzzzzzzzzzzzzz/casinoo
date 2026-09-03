@@ -92,10 +92,10 @@ export function pickVoteOptions(enabledGames: GameChoice[]): GameChoice[] {
 }
 
 export const DEFAULT_DERBY_HORSES: DerbyHorse[] = [
-  { id: 1, name: 'Éclair Rouge', color: '#ef5350', emoji: '🔴', progress: 0 },
-  { id: 2, name: 'Tornade Bleue', color: '#3b82f6', emoji: '🔵', progress: 0 },
-  { id: 3, name: 'Galop Vert', color: '#1fff1b', emoji: '🟢', progress: 0 },
-  { id: 4, name: 'Pégase Jaune', color: '#f4c542', emoji: '🟡', progress: 0 },
+  { id: 1, name: 'Éclair Rouge', color: '#ef5350', emoji: '🔴', progress: 0, momentum: 'normal', momentumTimerTicks: 0, isTocard: false },
+  { id: 2, name: 'Tornade Bleue', color: '#3b82f6', emoji: '🔵', progress: 0, momentum: 'normal', momentumTimerTicks: 0, isTocard: false },
+  { id: 3, name: 'Galop Vert', color: '#1fff1b', emoji: '🟢', progress: 0, momentum: 'normal', momentumTimerTicks: 0, isTocard: false },
+  { id: 4, name: 'Pégase Jaune', color: '#f4c542', emoji: '🟡', progress: 0, momentum: 'normal', momentumTimerTicks: 0, isTocard: true },
 ];
 
 export class RoomManager {
@@ -1461,8 +1461,8 @@ export class RoomManager {
       ...h,
       progress: 0,
       status: 'running' as const,
-      fallenTimerMs: 0,
-      lastObstaclePassed: 0,
+      momentum: 'normal' as const,
+      momentumTimerTicks: 0,
     }));
     room.winningHorseId = null;
     return room;
@@ -1480,23 +1480,90 @@ export class RoomManager {
     if (!room || !room.derbyHorses) return { finished: false, winnerId: null, horses: [] };
 
     const WINNING_PROGRESS = 1080; // 3 tours complets de 360 degrés
-    let winner: DerbyHorse | null = null;
+
+    // 1. Repérer les positions relatives dynamiques des chevaux normaux pour le Rubber-banding
+    const normalHorses = room.derbyHorses.filter(h => !h.isTocard);
+    const sortedNormals = [...normalHorses].sort((a, b) => b.progress - a.progress);
+    const leaderHorse = sortedNormals[0];
+    const trailerHorse = sortedNormals[sortedNormals.length - 1];
+
+    // 2. Calculer indépendamment la vitesse et le momentum de chaque cheval
+    const speeds = new Map<number, number>();
 
     room.derbyHorses.forEach(horse => {
-      // Vitesse en degrés par tick (100ms) calibrée pour que le vainqueur atteigne 1080° en ~14-15 secondes
-      const boost = (Math.random() * 3.6) + 5.4;
-      horse.progress = Math.min(WINNING_PROGRESS, Math.round((horse.progress + boost) * 10) / 10);
+      if (horse.isTocard) {
+        // Le Tocard avance à vitesse très réduite (quasiment pas)
+        const tocardSpeed = Math.random() * 1.5 + 1.2;
+        speeds.set(horse.id, tocardSpeed);
+        return;
+      }
 
-      if (horse.progress >= WINNING_PROGRESS) {
-        if (!winner || horse.progress > winner.progress) {
-          winner = horse;
+      // Décrémenter le timer de momentum actif
+      if (horse.momentumTimerTicks && horse.momentumTimerTicks > 0) {
+        horse.momentumTimerTicks -= 1;
+        if (horse.momentumTimerTicks === 0) {
+          horse.momentum = 'normal';
         }
       }
+
+      // Évaluation des changements de momentum
+      if (!horse.momentum || horse.momentum === 'normal') {
+        const isLeading = leaderHorse && horse.id === leaderHorse.id;
+        const isTrailing = trailerHorse && horse.id === trailerHorse.id;
+        const leadGap = sortedNormals.length > 1 ? leaderHorse.progress - sortedNormals[1].progress : 0;
+        const trailGap = sortedNormals.length > 1 ? sortedNormals[sortedNormals.length - 2].progress - trailerHorse.progress : 0;
+
+        const roll = Math.random();
+
+        // Effet Mario Kart (Rubber-banding)
+        if (isLeading && leadGap > 25 && roll < 0.16) {
+          // Le 1er avec de l'avance s'essouffle (fatigue)
+          horse.momentum = 'fatigued';
+          horse.momentumTimerTicks = Math.floor(Math.random() * 7) + 6; // ~0.6s à 1.3s
+        } else if (isTrailing && trailGap > 20 && roll < 0.18) {
+          // Le dernier normal à la traîne a un sursaut d'énergie (boost sprint !)
+          horse.momentum = 'boosted';
+          horse.momentumTimerTicks = Math.floor(Math.random() * 8) + 8; // ~0.8s à 1.6s
+        } else if (roll < 0.06) {
+          // Aléatoire naturel indépendant
+          horse.momentum = Math.random() < 0.5 ? 'boosted' : 'fatigued';
+          horse.momentumTimerTicks = Math.floor(Math.random() * 7) + 6;
+        }
+      }
+
+      // Vitesse de base indépendante
+      let speed = Math.random() * 3.5 + 4.8;
+      if (horse.momentum === 'boosted') {
+        speed *= 2.5; // Multiplié par 2.5 pendant un instant
+      } else if (horse.momentum === 'fatigued') {
+        speed *= 0.5; // Divisé par 2
+      }
+
+      speeds.set(horse.id, speed);
     });
 
-    if (winner) {
-      room.winningHorseId = (winner as DerbyHorse).id;
-      return { finished: true, winnerId: (winner as DerbyHorse).id, horses: room.derbyHorses };
+    // 3. Appliquer l'avancée et déterminer le vainqueur exact par fraction d'arrivée
+    let bestCrossing: { horse: DerbyHorse; frac: number } | null = null;
+
+    for (const horse of room.derbyHorses) {
+      const speed = speeds.get(horse.id) ?? (Math.random() * 3.5 + 4.8);
+      const prevProgress = horse.progress;
+      const nextProgress = Math.round((prevProgress + speed) * 10) / 10;
+      horse.progress = nextProgress;
+
+      if (nextProgress >= WINNING_PROGRESS) {
+        // Fraction exacte de l'itération au moment où le cheval a atteint 1080°
+        const frac = (WINNING_PROGRESS - prevProgress) / speed;
+        if (!bestCrossing || frac < bestCrossing.frac) {
+          bestCrossing = { horse, frac };
+        }
+      }
+    }
+
+    if (bestCrossing) {
+      const winningHorse: DerbyHorse = bestCrossing.horse;
+      room.winningHorseId = winningHorse.id;
+      return { finished: true, winnerId: winningHorse.id, horses: room.derbyHorses };
     }
 
     return { finished: false, winnerId: null, horses: room.derbyHorses };

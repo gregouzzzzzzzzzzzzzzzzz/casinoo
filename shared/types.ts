@@ -172,8 +172,11 @@ export interface DerbyHorse {
   name: string;
   color: string;
   emoji: string;
-  progress: number; // 0 to 100
+  progress: number; // 0 to 1080 (3 tours de 360)
   status?: 'running' | 'jumping' | 'fallen';
+  momentum?: 'normal' | 'boosted' | 'fatigued';
+  momentumTimerTicks?: number;
+  isTocard?: boolean;
   fallenTimerMs?: number;
   lastObstaclePassed?: number;
 }

@@ -1449,72 +1449,6 @@ export const HostScreen: React.FC = () => {
                 border: '2px solid #1f3323',
                 margin: '6px 0',
               }}>
-                {/* HUD Classement en direct dans le coin supérieur droit */}
-                <div style={{
-                  position: 'absolute',
-                  top: 14,
-                  right: 14,
-                  background: 'rgba(13, 21, 32, 0.92)',
-                  border: '1.5px solid var(--gold)',
-                  borderRadius: 12,
-                  padding: '10px 14px',
-                  boxShadow: '0 8px 30px rgba(0,0,0,0.75)',
-                  width: 210,
-                  zIndex: 35,
-                  backdropFilter: 'blur(8px)',
-                }}>
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    borderBottom: '1px solid rgba(255,255,255,0.1)',
-                    paddingBottom: 6,
-                    marginBottom: 8,
-                  }}>
-                    <span className="label-xs" style={{ color: 'var(--gold)', letterSpacing: '0.1em' }}>
-                      CLASSEMENT LIVE
-                    </span>
-                    <span className="badge badge-gold" style={{ fontSize: 9, padding: '2px 6px' }}>
-                      HUD 🏆
-                    </span>
-                  </div>
-
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                    {[...horses].sort((a, b) => b.progress - a.progress).map((h, rank) => {
-                      const lap = Math.min(3, Math.floor(h.progress / 360) + 1);
-                      const medals = ['🥇', '🥈', '🥉', '4e'];
-                      return (
-                        <div key={h.id} style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'space-between',
-                          background: rank === 0 ? 'rgba(244,197,66,0.15)' : 'rgba(255,255,255,0.03)',
-                          borderLeft: `3px solid ${h.color}`,
-                          borderRadius: 6,
-                          padding: '4px 8px',
-                        }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                            <span style={{ fontSize: 11 }}>{medals[rank]}</span>
-                            <span style={{ fontSize: 12, fontWeight: 800, color: h.color }}>
-                              {h.name.split(' ')[0]}
-                            </span>
-                          </div>
-
-                          <div style={{ textAlign: 'right' }}>
-                            <span style={{
-                              fontSize: 11,
-                              fontWeight: 900,
-                              color: rank === 0 ? 'var(--gold)' : 'var(--text-secondary)',
-                            }}>
-                              T{lap} · {Math.min(100, Math.round((h.progress / 1080) * 100))}%
-                            </span>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-
                 {/* SVG de la Piste Ovale (Terre battue, couloirs, pelouse, ligne de départ/arrivée) */}
                 <svg
                   viewBox="0 0 780 430"
@@ -1589,27 +1523,107 @@ export const HostScreen: React.FC = () => {
                   <text x="390" y="286" textAnchor="middle" fill="#f4c542" fontSize="10" fontWeight="900" letterSpacing="0.1em">
                     LIGNE D'ARRIVÉE
                   </text>
-
-                  {/* Décoration et affichage central sur la pelouse */}
-                  <text x="390" y="195" textAnchor="middle" fill="#86efac" fontSize="11" fontWeight="800" letterSpacing="0.12em">
-                    HIPPODROME OVALE · 3 TOURS
-                  </text>
-                  <text x="390" y="225" textAnchor="middle" fill="#ffffff" fontSize="26" fontWeight="900">
-                    {leader ? (
-                      leader.progress >= 720 ? 'TOUR 3/3' : leader.progress >= 360 ? 'TOUR 2/3' : 'TOUR 1/3'
-                    ) : 'DÉPART'}
-                  </text>
-                  {leader && leader.progress >= 720 && (
-                    <text x="390" y="246" textAnchor="middle" fill="#ef4444" fontSize="11" fontWeight="900">
-                      ⚡ DERNIER TOUR ! ⚡
-                    </text>
-                  )}
                 </svg>
+
+                {/* HUD Classement & Tours exactement au centre de l'ovale (pelouse dégagée) */}
+                <div style={{
+                  position: 'absolute',
+                  top: '50%',
+                  left: '50%',
+                  transform: 'translate(-50%, -50%)',
+                  width: 280,
+                  background: 'rgba(8, 30, 16, 0.94)',
+                  border: '2px solid rgba(244, 197, 66, 0.45)',
+                  borderRadius: 14,
+                  padding: '8px 12px',
+                  boxShadow: '0 8px 30px rgba(0,0,0,0.85), inset 0 0 15px rgba(0,0,0,0.4)',
+                  zIndex: 10,
+                  backdropFilter: 'blur(8px)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 4,
+                  pointerEvents: 'none',
+                }}>
+                  {/* Header: Tour actuel & badge Live */}
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    borderBottom: '1px solid rgba(255,255,255,0.12)',
+                    paddingBottom: 4,
+                    marginBottom: 2,
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <span style={{ fontSize: 13 }}>🏁</span>
+                      <span style={{ fontSize: 13, fontWeight: 900, color: '#ffffff', letterSpacing: '0.05em' }}>
+                        {leader ? (
+                          leader.progress >= 720 ? '⚡ TOUR 3/3 (FINAL) ⚡' : leader.progress >= 360 ? 'TOUR 2/3' : 'TOUR 1/3'
+                        ) : 'DÉPART'}
+                      </span>
+                    </div>
+                    <span className="badge badge-gold" style={{ fontSize: 9, padding: '1px 6px' }}>
+                      DIRECT LIVE
+                    </span>
+                  </div>
+
+                  {/* Les 4 chevaux triés en direct */}
+                  {[...horses].sort((a, b) => b.progress - a.progress).map((h, rank) => {
+                    const isFirst = rank === 0;
+                    const medals = ['🥇', '🥈', '🥉', '4e'];
+                    const isBoosted = h.momentum === 'boosted';
+                    const isFatigued = h.momentum === 'fatigued';
+
+                    return (
+                      <div key={h.id} style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        background: isFirst ? 'rgba(244,197,66,0.2)' : 'rgba(255,255,255,0.04)',
+                        borderLeft: `3px solid ${h.color}`,
+                        borderRadius: 5,
+                        padding: '3px 8px',
+                      }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                          <span style={{ fontSize: 11 }}>{medals[rank]}</span>
+                          <span style={{
+                            fontSize: 12,
+                            fontWeight: 800,
+                            color: h.color,
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 4,
+                          }}>
+                            {h.name.split(' ')[0]}
+                            {isBoosted && <span title="Sprint Boosté !">🔥</span>}
+                            {isFatigued && <span title="Essoufflé !">💨</span>}
+                          </span>
+                        </div>
+
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                          {h.isTocard && (
+                            <span style={{ fontSize: 9, color: 'var(--text-dim)', fontStyle: 'italic' }}>
+                              Tocard
+                            </span>
+                          )}
+                          <span style={{
+                            fontSize: 11,
+                            fontWeight: 900,
+                            color: isFirst ? 'var(--gold)' : 'rgba(255,255,255,0.85)',
+                          }}>
+                            {Math.min(100, Math.round((h.progress / 1080) * 100))}%
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
 
                 {/* Les 4 Chevaux animés via CSS Motion Path (offset-path) */}
                 {horses.map((horse, idx) => {
                   const lanePath = getDerbyLanePath(idx);
                   const percentDistance = (horse.progress / 360) * 100;
+                  const isBoosted = horse.momentum === 'boosted';
+                  const isFatigued = horse.momentum === 'fatigued';
 
                   return (
                     <div
@@ -1639,14 +1653,19 @@ export const HostScreen: React.FC = () => {
                         fontWeight: 900,
                         color: '#ffffff',
                         background: 'rgba(0, 0, 0, 0.85)',
-                        border: `1.5px solid ${horse.color}`,
+                        border: isBoosted ? '2px solid #f59e0b' : `1.5px solid ${horse.color}`,
                         borderRadius: 8,
                         padding: '1px 6px',
                         whiteSpace: 'nowrap',
                         marginBottom: 2,
-                        boxShadow: '0 2px 5px rgba(0,0,0,0.8)',
+                        boxShadow: isBoosted ? '0 0 10px #f59e0b' : '0 2px 5px rgba(0,0,0,0.8)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 3,
                       }}>
-                        #{horse.id} {horse.name.split(' ')[0]}
+                        <span>#{horse.id} {horse.name.split(' ')[0]}</span>
+                        {isBoosted && <span style={{ fontSize: 11 }}>🔥</span>}
+                        {isFatigued && <span style={{ fontSize: 11 }}>💨</span>}
                       </div>
 
                       {/* Icône de cheval avec pastille de couleur */}
@@ -1659,8 +1678,12 @@ export const HostScreen: React.FC = () => {
                         alignItems: 'center',
                         justifyContent: 'center',
                         fontSize: 22,
-                        boxShadow: `0 0 16px ${horse.color}, 0 4px 10px rgba(0,0,0,0.7)`,
-                        border: '2.5px solid #ffffff',
+                        boxShadow: isBoosted
+                          ? `0 0 24px #f59e0b, 0 0 12px ${horse.color}`
+                          : `0 0 16px ${horse.color}, 0 4px 10px rgba(0,0,0,0.7)`,
+                        border: isBoosted ? '3px solid #f59e0b' : '2.5px solid #ffffff',
+                        transform: isBoosted ? 'scale(1.15)' : isFatigued ? 'scale(0.92)' : 'scale(1)',
+                        transition: 'transform 0.2s ease, box-shadow 0.2s ease',
                       }}>
                         🐎
                       </div>

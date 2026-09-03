@@ -1603,6 +1603,36 @@ export const PhoneScreen: React.FC = () => {
                       {chosenHorse.emoji} {chosenHorse.name}
                     </div>
 
+                    {chosenHorse.momentum === 'boosted' && (
+                      <div style={{
+                        background: 'rgba(245, 158, 11, 0.2)',
+                        border: '1px solid #f59e0b',
+                        borderRadius: 8,
+                        padding: '6px 10px',
+                        marginTop: 8,
+                        color: '#fef3c7',
+                        fontWeight: 800,
+                        fontSize: 13,
+                        animation: 'pulse 1s infinite',
+                      }}>
+                        🔥 SPRINT BOOSTÉ ! Plein gaz !
+                      </div>
+                    )}
+                    {chosenHorse.momentum === 'fatigued' && (
+                      <div style={{
+                        background: 'rgba(239, 68, 68, 0.2)',
+                        border: '1px solid #ef4444',
+                        borderRadius: 8,
+                        padding: '6px 10px',
+                        marginTop: 8,
+                        color: '#fca5a5',
+                        fontWeight: 800,
+                        fontSize: 13,
+                      }}>
+                        💨 Coup de fatigue... Accroche-toi !
+                      </div>
+                    )}
+
                     <div style={{ marginTop: 14 }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, fontWeight: 700, marginBottom: 4 }}>
                         <span>Distance parcourue</span>
@@ -1620,7 +1650,7 @@ export const PhoneScreen: React.FC = () => {
                   </div>
                 ) : (
                   <p style={{ fontSize: 14, color: 'var(--text-secondary)', marginTop: 8 }}>
-                    Regardez le grand écran pour suivre l'hippodrome circulaire !
+                    Regardez le grand écran pour suivre l'hippodrome ovale !
                   </p>
                 )}
               </div>
