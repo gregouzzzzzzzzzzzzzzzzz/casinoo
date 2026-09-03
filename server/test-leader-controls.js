@@ -95,17 +95,12 @@ async function runTest() {
 
   // 4. Alice (Leader) lance la partie depuis son smartphone
   console.log('\n--- 1. Alice (Leader) lance la partie ---');
-  const votingStatePromise = waitForRoomState(hostSocket, 'voting');
-  aliceSocket.emit('start_game', { roomId });
-  const votingRoom = await votingStatePromise;
-  console.log(`✔ Partie lancée par Alice -> État de la room : "${votingRoom.state}"`);
-
-  // 5. Votes et roulette
-  console.log('\n--- 2. Votes et Mises ---');
+  // Fast-track : seule la Roulette est activée, pas de phase de vote.
+  aliceSocket.emit('update_settings', { roomId, settings: { enabledGames: ['roulette'] } });
   const rouletteStatePromise = waitForRoomState(hostSocket, 'playing_roulette');
-  aliceSocket.emit('submit_vote', { roomId, vote: 'roulette' });
-  bobSocket.emit('submit_vote', { roomId, vote: 'roulette' });
+  aliceSocket.emit('start_game', { roomId });
   await rouletteStatePromise;
+  console.log('✔ Partie lancée par Alice (fast-track roulette)');
   console.log('✔ Transition vers "playing_roulette"');
 
   const spinningStatePromise = waitForRoomState(hostSocket, 'roulette_spinning');
@@ -128,6 +123,7 @@ async function runTest() {
   // 7. Alice (Leader) termine le tour depuis son smartphone
   console.log('\n--- 4. Alice (Leader) termine le tour ---');
   const nextRoundStatePromise = waitForRoomState(hostSocket, 'voting');
+  aliceSocket.emit('update_settings', { roomId, settings: { enabledGames: ['roulette', 'blackjack'] } });
   aliceSocket.emit('end_turn', { roomId });
   const nextRoom = await nextRoundStatePromise;
   console.log(`✔ Tour terminé par Alice -> Retour à l'état : "${nextRoom.state}"`);

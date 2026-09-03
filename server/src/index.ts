@@ -1,5 +1,7 @@
 import express from 'express';
 import http from 'http';
+import path from 'path';
+import fs from 'fs';
 import { Server as SocketIOServer, Socket } from 'socket.io';
 import cors from 'cors';
 import { roomManager } from './roomManager';
@@ -39,6 +41,15 @@ app.get('/api/rooms', (_req, res) => {
   res.json({ rooms: roomManager.getAllRooms() });
 });
 
+// Serve the built client (client/dist) so a single process hosts everything.
+const clientDist = path.resolve(__dirname, '../../client/dist');
+if (fs.existsSync(clientDist)) {
+  app.use(express.static(clientDist));
+  app.get(/^\/(?!api|health|socket\.io).*/, (_req, res) => {
+    res.sendFile(path.join(clientDist, 'index.html'));
+  });
+}
+
 const server = http.createServer(app);
 
 const io = new SocketIOServer(server, {
@@ -54,6 +65,9 @@ const votingTimeouts = new Map<string, NodeJS.Timeout>();
 const crashIntervals = new Map<string, NodeJS.Timeout>();
 // Track active derby race intervals by roomId
 const derbyIntervals = new Map<string, NodeJS.Timeout>();
+// Grace timers before destroying a room whose host disconnected
+const hostDestroyTimeouts = new Map<string, NodeJS.Timeout>();
+const HOST_DISCONNECT_GRACE_MS = 30000;
 
 function startDerbyRaceLoop(roomId: string) {
   if (derbyIntervals.has(roomId)) {
@@ -247,6 +261,23 @@ io.on('connection', (socket: Socket) => {
     const room = roomManager.createRoom(socket.id);
     socket.join(room.id);
     socket.emit('room_created', { room });
+  });
+
+  // Host screen re-subscribes to its room after a reconnection (page reload,
+  // bfcache restore, network blip) and cancels the pending destruction.
+  socket.on('watch_room', ({ roomId }: { roomId: string }) => {
+    const room = roomManager.reclaimHost((roomId || '').toUpperCase(), socket.id);
+    if (!room) {
+      socket.emit('room_not_found');
+      return;
+    }
+    const pending = hostDestroyTimeouts.get(room.id);
+    if (pending) {
+      clearTimeout(pending);
+      hostDestroyTimeouts.delete(room.id);
+    }
+    socket.join(room.id);
+    socket.emit('room_updated', { room });
   });
 
   socket.on('join_room', (payload: JoinRoomPayload) => {
@@ -662,10 +693,18 @@ io.on('connection', (socket: Socket) => {
   });
 
   socket.on('disconnect', () => {
-    // Si c'est l'hôte qui quitte, on détruit la room et on prévient tout le monde
-    const destroyedRoomId = roomManager.removeHost(socket.id);
-    if (destroyedRoomId) {
-      io.to(destroyedRoomId).emit('room_destroyed');
+    // Si c'est l'hôte qui quitte : délai de grâce avant de détruire la room,
+    // pour laisser l'écran se reconnecter (rechargement, veille, coupure wifi).
+    const hostRoomId = roomManager.getHostRoomId(socket.id);
+    if (hostRoomId) {
+      roomManager.clearHostMapping(socket.id);
+      const timeout = setTimeout(() => {
+        hostDestroyTimeouts.delete(hostRoomId);
+        if (roomManager.destroyRoom(hostRoomId)) {
+          io.to(hostRoomId).emit('room_destroyed');
+        }
+      }, HOST_DISCONNECT_GRACE_MS);
+      hostDestroyTimeouts.set(hostRoomId, timeout);
       return;
     }
 
@@ -718,6 +757,15 @@ io.on('connection', (socket: Socket) => {
 
       if (removedInfo.room.state === 'blackjack_playing' && removedInfo.allBlackjackFinished) {
         startDealerTurn(roomId);
+        return;
+      }
+
+      if (removedInfo.room.state === 'playing_derby' && removedInfo.allDerbyBet) {
+        const started = roomManager.startDerbyRace(roomId);
+        if (started) {
+          io.to(roomId).emit('room_updated', { room: started });
+          startDerbyRaceLoop(roomId);
+        }
         return;
       }
 

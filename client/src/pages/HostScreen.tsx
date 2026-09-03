@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { socket } from '../socket';
 import {
   Room,
@@ -24,7 +24,7 @@ import { RouletteWheelCanvas } from '../components/RouletteWheelCanvas';
 
 // ── Helpers ──────────────────────────────────────────────────
 const AVATAR_COLORS = [
-  '#e53935', '#f4c542', '#1fff1b', '#3b82f6',
+  '#e5484d', '#ffb629', '#5cc963', '#4d9de0',
   '#a855f7', '#ec4899', '#f97316', '#06b6d4',
 ];
 
@@ -151,12 +151,38 @@ export const HostScreen: React.FC = () => {
     }
   }, [room?.state, room?.crashRound]);
 
+  const createdRef = useRef(false);
+  const roomIdRef = useRef<string | null>(null);
+
   useEffect(() => {
-    socket.on('connect', () => setIsConnected(true));
+    // The shared socket often connects before this component mounts.
+    setIsConnected(socket.connected);
+    socket.on('connect', () => {
+      setIsConnected(true);
+      // After a reconnection (bfcache restore, wifi blip) the socket lost its
+      // room membership: reclaim the room before the server's grace expires.
+      if (roomIdRef.current) {
+        socket.emit('watch_room', { roomId: roomIdRef.current });
+      }
+    });
     socket.on('disconnect', () => setIsConnected(false));
-    socket.emit('create_room');
+
+    // The room no longer exists on the server (grace expired or restart):
+    // start over with a fresh room instead of showing a dead code.
+    socket.on('room_not_found', () => {
+      roomIdRef.current = null;
+      socket.emit('create_room');
+    });
+
+    // Guard against React StrictMode double-effect creating two rooms
+    // (the second create_room would leave the first room as a zombie).
+    if (!createdRef.current) {
+      createdRef.current = true;
+      socket.emit('create_room');
+    }
 
     socket.on('room_created', ({ room }: { room: Room }) => {
+      roomIdRef.current = room.id;
       setRoom(room);
     });
 
@@ -174,40 +200,40 @@ export const HostScreen: React.FC = () => {
     socket.on('room_updated', ({ room: updatedRoom }: { room: Room }) => {
       setRoom(prev => {
         if (prev && updatedRoom.state === 'lobby' && updatedRoom.players.length > prev.players.length) {
-          confetti({ particleCount: 30, spread: 55, origin: { y: 0.8 }, colors: ['#1fff1b', '#f4c542'] });
+          confetti({ particleCount: 30, spread: 55, origin: { y: 0.8 }, colors: ['#5cc963', '#ffb629'] });
         }
         if (prev?.state === 'roulette_spinning' && updatedRoom.state === 'roulette_result') {
-          confetti({ particleCount: 100, spread: 80, origin: { y: 0.5 }, colors: ['#1fff1b', '#f4c542', '#e53935'] });
+          confetti({ particleCount: 100, spread: 80, origin: { y: 0.5 }, colors: ['#5cc963', '#ffb629', '#e5484d'] });
         }
         if (prev?.state === 'crash_flying' && updatedRoom.state === 'crash_result') {
           const hasWinners = updatedRoom.currentCrashResult?.results.some(r => r.won);
           if (hasWinners) {
-            confetti({ particleCount: 80, spread: 70, origin: { y: 0.5 }, colors: ['#1fff1b', '#3b82f6'] });
+            confetti({ particleCount: 80, spread: 70, origin: { y: 0.5 }, colors: ['#5cc963', '#4d9de0'] });
           }
         }
         if (prev?.state === 'blackjack_dealer_turn' && updatedRoom.state === 'blackjack_result') {
           const hasWinners = updatedRoom.currentBlackjackResult?.results.some(r => r.status === 'won');
           if (hasWinners) {
-            confetti({ particleCount: 90, spread: 75, origin: { y: 0.5 }, colors: ['#1fff1b', '#f4c542'] });
+            confetti({ particleCount: 90, spread: 75, origin: { y: 0.5 }, colors: ['#5cc963', '#ffb629'] });
           }
         }
         if (prev?.state === 'mines_playing' && updatedRoom.state === 'mines_result') {
           const hasWinners = updatedRoom.currentMinesResult?.results.some(r => r.status === 'cashed_out');
           if (hasWinners) {
-            confetti({ particleCount: 90, spread: 80, origin: { y: 0.5 }, colors: ['#1fff1b', '#f4c542'] });
+            confetti({ particleCount: 90, spread: 80, origin: { y: 0.5 }, colors: ['#5cc963', '#ffb629'] });
           }
         }
         if (prev?.state === 'derby_racing' && updatedRoom.state === 'derby_result') {
           const hasWinners = updatedRoom.currentDerbyResult?.results.some(r => r.won);
           if (hasWinners) {
-            confetti({ particleCount: 110, spread: 85, origin: { y: 0.5 }, colors: ['#f4c542', '#1fff1b', '#3b82f6'] });
+            confetti({ particleCount: 110, spread: 85, origin: { y: 0.5 }, colors: ['#ffb629', '#5cc963', '#4d9de0'] });
           }
         }
         if (prev?.state !== 'final_tax' && updatedRoom.state === 'final_tax') {
-          confetti({ particleCount: 120, spread: 90, origin: { y: 0.4 }, colors: ['#ef5350', '#f4c542'] });
+          confetti({ particleCount: 120, spread: 90, origin: { y: 0.4 }, colors: ['#f2696d', '#ffb629'] });
         }
         if (prev?.state !== 'final_drinking' && updatedRoom.state === 'final_drinking') {
-          confetti({ particleCount: 150, spread: 100, origin: { y: 0.5 }, colors: ['#1fff1b', '#f4c542', '#3b82f6'] });
+          confetti({ particleCount: 150, spread: 100, origin: { y: 0.5 }, colors: ['#5cc963', '#ffb629', '#4d9de0'] });
         }
         return updatedRoom;
       });
@@ -216,6 +242,7 @@ export const HostScreen: React.FC = () => {
     return () => {
       socket.off('connect');
       socket.off('disconnect');
+      socket.off('room_not_found');
       socket.off('room_created');
       socket.off('crash_update', handleCrashUpdate);
       socket.off('room_updated');
@@ -305,14 +332,15 @@ export const HostScreen: React.FC = () => {
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <div style={{
-            width: 32, height: 32, borderRadius: 6,
-            background: 'var(--green)', display: 'flex',
+            width: 32, height: 32, borderRadius: 10,
+            background: 'var(--yellow)', boxShadow: '0 3px 0 var(--orange-deep)',
+            display: 'flex',
             alignItems: 'center', justifyContent: 'center', flexShrink: 0,
           }}>
             <span style={{ fontSize: 16 }}>🎲</span>
           </div>
-          <span style={{ fontWeight: 800, fontSize: 16, color: 'var(--text-primary)', letterSpacing: '-0.01em' }}>
-            Casino à Boire
+          <span style={{ fontFamily: 'var(--font-display)', fontSize: 17, color: 'var(--yellow)', textShadow: '0 2px 0 var(--orange-deep)', letterSpacing: '0.02em' }}>
+            CASINO À BOIRE
           </span>
           {room?.state && (
             <>
@@ -497,7 +525,7 @@ export const HostScreen: React.FC = () => {
 
                 <div style={{ background: 'var(--bg-input)', padding: '10px 12px', borderRadius: 6, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Bombes aux Mines</span>
-                  <span style={{ fontSize: 13, fontWeight: 800, color: '#ef5350' }}>
+                  <span style={{ fontSize: 13, fontWeight: 800, color: '#f2696d' }}>
                     {room?.settings?.minesBombCount ?? 7} 💣
                   </span>
                 </div>
@@ -554,9 +582,14 @@ export const HostScreen: React.FC = () => {
                   <div className="label-xs" style={{ marginBottom: 4 }}>PHASE DE VOTE · MANCHE {room.currentRound || 1}</div>
                   <h2 style={{ fontSize: 22, fontWeight: 800 }}>Choisissez le prochain jeu</h2>
                 </div>
-                <div style={{ textAlign: 'right' }}>
-                  <span style={{ fontSize: 28, fontWeight: 900, color: 'var(--green)' }}>{votedCount}</span>
-                  <span style={{ fontSize: 14, color: 'var(--text-secondary)' }}>/{totalPlayers}</span>
+                <div style={{ textAlign: 'right', display: 'flex', alignItems: 'center', gap: 14 }}>
+                  <span className="badge badge-gold animate-pulse" style={{ fontSize: 13, padding: '6px 12px' }}>
+                    ⏱ {Math.max(0, 10 - phaseSeconds)}s
+                  </span>
+                  <div>
+                    <span style={{ fontSize: 28, fontWeight: 900, color: 'var(--green)' }}>{votedCount}</span>
+                    <span style={{ fontSize: 14, color: 'var(--text-secondary)' }}>/{totalPlayers}</span>
+                  </div>
                 </div>
               </div>
 
@@ -569,7 +602,7 @@ export const HostScreen: React.FC = () => {
                   const hasVoted = room.votes && room.votes[player.id] !== undefined;
                   return (
                     <div key={player.id} className="player-row" style={{
-                      borderColor: hasVoted ? 'rgba(31,255,27,0.3)' : 'var(--border-subtle)',
+                      borderColor: hasVoted ? 'rgba(92,201,99,0.3)' : 'var(--border-subtle)',
                     }}>
                       <Avatar name={player.name} size={28} />
                       <div style={{ flex: 1, fontSize: 13, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
@@ -816,7 +849,7 @@ export const HostScreen: React.FC = () => {
                 border: '2px solid var(--gold)',
                 borderRadius: 16,
                 padding: '12px 32px',
-                boxShadow: '0 0 35px rgba(244, 197, 66, 0.25)',
+                boxShadow: '0 0 35px rgba(255, 182, 41, 0.25)',
                 textAlign: 'center',
               }}>
                 <div className="label-xs" style={{ color: 'var(--gold)', letterSpacing: '0.2em' }}>
@@ -841,8 +874,8 @@ export const HostScreen: React.FC = () => {
                 padding: 32,
                 borderRadius: '50%',
                 background: 'radial-gradient(circle, rgba(30,41,59,0.9) 0%, #090e15 100%)',
-                boxShadow: '0 20px 50px rgba(0,0,0,0.8), 0 0 60px rgba(244, 197, 66, 0.15)',
-                border: '3px solid rgba(244, 197, 66, 0.4)',
+                boxShadow: '0 20px 50px rgba(0,0,0,0.8), 0 0 60px rgba(255, 182, 41, 0.15)',
+                border: '3px solid rgba(255, 182, 41, 0.4)',
               }}>
                 <RouletteWheelCanvas
                   isSpinning={true}
@@ -1099,7 +1132,7 @@ export const HostScreen: React.FC = () => {
 
         {room?.state === 'crash_flying' && (
           <div className="card" style={{ padding: '40px 24px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
-            <div style={{ fontSize: 72, fontWeight: 900, color: trend === 'up' ? 'var(--green)' : '#ef5350' }}>
+            <div style={{ fontSize: 72, fontWeight: 900, color: trend === 'up' ? 'var(--green)' : '#f2696d' }}>
               {currentMultiplier.toFixed(2)}x
             </div>
           </div>
@@ -1107,7 +1140,7 @@ export const HostScreen: React.FC = () => {
 
         {room?.state === 'crash_result' && room.currentCrashResult && (
           <div className="card" style={{ padding: 24, textAlign: 'center' }}>
-            <h2 style={{ fontSize: 32, fontWeight: 900, color: '#ef5350' }}>
+            <h2 style={{ fontSize: 32, fontWeight: 900, color: '#f2696d' }}>
               📉 KRACH BOURSIER à {room.currentCrashResult.crashPoint.toFixed(2)}x !
             </h2>
           </div>
@@ -1340,10 +1373,10 @@ export const HostScreen: React.FC = () => {
               {/* 4 Starting Stalls */}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10 }}>
                 {(room.derbyHorses || [
-                  { id: 1, name: 'Éclair Rouge', color: '#ef5350', emoji: '🔴' },
-                  { id: 2, name: 'Tornade Bleue', color: '#3b82f6', emoji: '🔵' },
-                  { id: 3, name: 'Galop Vert', color: '#1fff1b', emoji: '🟢' },
-                  { id: 4, name: 'Pégase Jaune', color: '#f4c542', emoji: '🟡' },
+                  { id: 1, name: 'Éclair Rouge', color: '#f2696d', emoji: '🔴' },
+                  { id: 2, name: 'Tornade Bleue', color: '#4d9de0', emoji: '🔵' },
+                  { id: 3, name: 'Galop Vert', color: '#5cc963', emoji: '🟢' },
+                  { id: 4, name: 'Pégase Jaune', color: '#ffb629', emoji: '🟡' },
                 ]).map((horse) => (
                   <div key={horse.id} style={{
                     background: 'var(--bg-input)',
@@ -1412,9 +1445,9 @@ export const HostScreen: React.FC = () => {
                 width: '100%',
                 padding: '14px 24px',
                 border: '2px solid var(--gold)',
-                background: 'radial-gradient(ellipse at 50% 0%, rgba(244,197,66,0.15) 0%, var(--bg-card) 100%)',
+                background: 'radial-gradient(ellipse at 50% 0%, rgba(255,182,41,0.15) 0%, var(--bg-card) 100%)',
                 display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                boxShadow: '0 0 25px rgba(244,197,66,0.15)',
+                boxShadow: '0 0 25px rgba(255,182,41,0.15)',
               }}>
                 <div>
                   <div className="label-xs" style={{ color: 'var(--gold)', letterSpacing: '0.12em' }}>
@@ -1520,7 +1553,7 @@ export const HostScreen: React.FC = () => {
                     strokeWidth="1"
                   />
                   <text x="390" y="420" textAnchor="middle" fontSize="18">🏁</text>
-                  <text x="390" y="286" textAnchor="middle" fill="#f4c542" fontSize="10" fontWeight="900" letterSpacing="0.1em">
+                  <text x="390" y="286" textAnchor="middle" fill="#ffb629" fontSize="10" fontWeight="900" letterSpacing="0.1em">
                     LIGNE D'ARRIVÉE
                   </text>
                 </svg>
@@ -1533,7 +1566,7 @@ export const HostScreen: React.FC = () => {
                   transform: 'translate(-50%, -50%)',
                   width: 280,
                   background: 'rgba(8, 30, 16, 0.94)',
-                  border: '2px solid rgba(244, 197, 66, 0.45)',
+                  border: '2px solid rgba(255, 182, 41, 0.45)',
                   borderRadius: 14,
                   padding: '8px 12px',
                   boxShadow: '0 8px 30px rgba(0,0,0,0.85), inset 0 0 15px rgba(0,0,0,0.4)',
@@ -1578,7 +1611,7 @@ export const HostScreen: React.FC = () => {
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'space-between',
-                        background: isFirst ? 'rgba(244,197,66,0.2)' : 'rgba(255,255,255,0.04)',
+                        background: isFirst ? 'rgba(255,182,41,0.2)' : 'rgba(255,255,255,0.04)',
                         borderLeft: `3px solid ${h.color}`,
                         borderRadius: 5,
                         padding: '3px 8px',
@@ -1812,15 +1845,15 @@ export const HostScreen: React.FC = () => {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16, flex: 1 }}>
             <div className="card animate-in" style={{
               padding: '24px',
-              background: 'radial-gradient(ellipse at 50% 50%, rgba(229, 57, 53, 0.15) 0%, var(--bg-card) 100%)',
-              border: '2px solid #ef5350',
+              background: 'radial-gradient(ellipse at 50% 50%, rgba(229, 72, 77, 0.15) 0%, var(--bg-card) 100%)',
+              border: '2px solid #f2696d',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              boxShadow: '0 0 30px rgba(229, 57, 53, 0.3)',
+              boxShadow: '0 0 30px rgba(229, 72, 77, 0.3)',
             }}>
               <div>
-                <div className="label-xs" style={{ color: '#ef5350', letterSpacing: '0.1em' }}>LE GRAND FINAL</div>
+                <div className="label-xs" style={{ color: '#f2696d', letterSpacing: '0.1em' }}>LE GRAND FINAL</div>
                 <h1 style={{ fontSize: 36, fontWeight: 900, color: '#ffffff', letterSpacing: '-0.02em', margin: 0 }}>
                   💸 LA TAXE FINALE ! 💥
                 </h1>
@@ -1854,8 +1887,8 @@ export const HostScreen: React.FC = () => {
 
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
                     <div style={{ background: 'var(--bg-input)', padding: '8px 10px', borderRadius: 6 }}>
-                      <div className="label-xs" style={{ color: '#ef5350' }}>Taxe (À boire)</div>
-                      <div style={{ fontSize: 18, fontWeight: 900, color: '#ef5350' }}>
+                      <div className="label-xs" style={{ color: '#f2696d' }}>Taxe (À boire)</div>
+                      <div style={{ fontSize: 18, fontWeight: 900, color: '#f2696d' }}>
                         {player.personalTaxSips || 0} 🍺
                       </div>
                     </div>
@@ -1873,7 +1906,7 @@ export const HostScreen: React.FC = () => {
 
             <div style={{
               background: 'var(--gold-subtle)',
-              border: '1px solid rgba(244,197,66,0.25)',
+              border: '1px solid rgba(255,182,41,0.25)',
               borderRadius: 'var(--r-md)',
               padding: '12px 18px',
               display: 'flex', alignItems: 'center', gap: 10,
@@ -1948,12 +1981,12 @@ export const HostScreen: React.FC = () => {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16, flex: 1 }}>
             <div className="card animate-in" style={{
               padding: '28px 24px',
-              background: 'radial-gradient(ellipse at 50% 50%, rgba(31, 255, 27, 0.15) 0%, var(--bg-card) 100%)',
+              background: 'radial-gradient(ellipse at 50% 50%, rgba(92, 201, 99, 0.15) 0%, var(--bg-card) 100%)',
               border: '2px solid var(--green)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              boxShadow: '0 0 35px rgba(31, 255, 27, 0.3)',
+              boxShadow: '0 0 35px rgba(92, 201, 99, 0.3)',
             }}>
               <div>
                 <div className="label-xs" style={{ color: 'var(--green)', letterSpacing: '0.1em' }}>LE GRAND BILAN</div>
@@ -1995,7 +2028,7 @@ export const HostScreen: React.FC = () => {
                       </div>
 
                       <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4 }}>
-                        <div style={{ color: sips > 0 ? '#ef5350' : 'var(--green)', fontWeight: 900, fontSize: 18 }}>
+                        <div style={{ color: sips > 0 ? '#f2696d' : 'var(--green)', fontWeight: 900, fontSize: 18 }}>
                           {sips} 🍺
                         </div>
                         {hasFinished ? (
@@ -2012,7 +2045,7 @@ export const HostScreen: React.FC = () => {
 
             <div style={{
               background: allPlayersDrank ? 'var(--green-subtle)' : 'var(--gold-subtle)',
-              border: `1px solid ${allPlayersDrank ? 'rgba(31,255,27,0.3)' : 'rgba(244,197,66,0.25)'}`,
+              border: `1px solid ${allPlayersDrank ? 'rgba(92,201,99,0.3)' : 'rgba(255,182,41,0.25)'}`,
               borderRadius: 'var(--r-md)',
               padding: '12px 18px',
               display: 'flex', alignItems: 'center', gap: 10,
@@ -2057,7 +2090,7 @@ export const HostScreen: React.FC = () => {
                       <div style={{ fontWeight: 700 }}>{player.name}</div>
                     </div>
                     <div style={{ textAlign: 'right' }}>
-                      <div style={{ fontWeight: 800, color: (player.sipsToDrink || 0) > 0 ? '#ef5350' : 'var(--green)' }}>
+                      <div style={{ fontWeight: 800, color: (player.sipsToDrink || 0) > 0 ? '#f2696d' : 'var(--green)' }}>
                         {player.sipsToDrink || 0} 🍺
                       </div>
                       {player.hasDrank ? <span className="badge badge-green">A bu</span> : <span className="badge badge-red">En train de boire</span>}

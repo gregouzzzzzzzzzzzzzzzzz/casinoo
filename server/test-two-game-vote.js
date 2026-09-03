@@ -83,6 +83,9 @@ async function runTest() {
 
   // 3. Lancer la partie avec 4 jeux activés -> Doit proposer exactement 2 jeux au vote
   console.log('\n--- 1. Vérification du Vote Restreint à 2 Jeux ---');
+  // Déterministe : avec exactement 2 jeux activés, les 2 options proposées
+  // sont forcément [blackjack, roulette].
+  aliceSocket.emit('update_settings', { roomId, settings: { enabledGames: ['blackjack', 'roulette'] } });
   const votingRoomPromise = waitForRoomState(hostSocket, 'voting');
   aliceSocket.emit('start_game', { roomId });
   const votingRoom = await votingRoomPromise;

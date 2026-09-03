@@ -85,16 +85,10 @@ async function runTest() {
 
   // 3. Alice (Leader) lance la partie -> voting
   console.log('\n--- 1. Lancement de la partie ---');
-  const votingStatePromise = waitForRoomState(hostSocket, 'voting');
-  aliceSocket.emit('start_game', { roomId });
-  await votingStatePromise;
-  console.log('✔ Transition vers "voting"');
-
-  // 4. Vote des joueurs -> playing_roulette
-  console.log('\n--- 2. Vote des joueurs ---');
+  // Fast-track : seule la Roulette est activée, pas de phase de vote.
+  aliceSocket.emit('update_settings', { roomId, settings: { enabledGames: ['roulette'] } });
   const rouletteStatePromise = waitForRoomState(hostSocket, 'playing_roulette');
-  aliceSocket.emit('submit_vote', { roomId, vote: 'roulette' });
-  bobSocket.emit('submit_vote', { roomId, vote: 'roulette' });
+  aliceSocket.emit('start_game', { roomId });
   await rouletteStatePromise;
   console.log('✔ Transition vers "playing_roulette"');
 
@@ -180,6 +174,8 @@ async function runTest() {
 
   // 10. Leader clique sur "Manche suivante" -> reset à 0 et retour à voting
   console.log('\n--- 7. Manche Suivante et Réinitialisation ---');
+  // On réactive plusieurs jeux pour retrouver la phase de vote après le tour.
+  aliceSocket.emit('update_settings', { roomId, settings: { enabledGames: ['roulette', 'blackjack'] } });
   const nextVotingPromise = waitForRoomState(hostSocket, 'voting');
   aliceSocket.emit('end_turn', { roomId });
   const finalRoom = await nextVotingPromise;

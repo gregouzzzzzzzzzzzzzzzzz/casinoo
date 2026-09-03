@@ -94,8 +94,8 @@ export function pickVoteOptions(enabledGames: GameChoice[]): GameChoice[] {
 export const DEFAULT_DERBY_HORSES: DerbyHorse[] = [
   { id: 1, name: 'Éclair Rouge', color: '#ef5350', emoji: '🔴', progress: 0, momentum: 'normal', momentumTimerTicks: 0, isTocard: false },
   { id: 2, name: 'Tornade Bleue', color: '#3b82f6', emoji: '🔵', progress: 0, momentum: 'normal', momentumTimerTicks: 0, isTocard: false },
-  { id: 3, name: 'Galop Vert', color: '#1fff1b', emoji: '🟢', progress: 0, momentum: 'normal', momentumTimerTicks: 0, isTocard: false },
-  { id: 4, name: 'Pégase Jaune', color: '#f4c542', emoji: '🟡', progress: 0, momentum: 'normal', momentumTimerTicks: 0, isTocard: true },
+  { id: 3, name: 'Galop Vert', color: '#5cc963', emoji: '🟢', progress: 0, momentum: 'normal', momentumTimerTicks: 0, isTocard: false },
+  { id: 4, name: 'Pégase Jaune', color: '#ffb629', emoji: '🟡', progress: 0, momentum: 'normal', momentumTimerTicks: 0, isTocard: true },
 ];
 
 export class RoomManager {
@@ -262,13 +262,34 @@ export class RoomManager {
   /**
    * Removes a player from the room by socketId.
    */
-  public removeHost(socketId: string): string | null {
-    const roomId = this.hostSocketToRoomMap.get(socketId);
-    if (!roomId) return null;
-    
-    this.rooms.delete(roomId);
+  public getHostRoomId(socketId: string): string | null {
+    return this.hostSocketToRoomMap.get(socketId) ?? null;
+  }
+
+  public clearHostMapping(socketId: string): void {
     this.hostSocketToRoomMap.delete(socketId);
-    return roomId;
+  }
+
+  /**
+   * Re-attaches a reconnected host socket to its room (page reload, bfcache
+   * restore, network blip) so the room survives brief host disconnections.
+   */
+  public reclaimHost(roomId: string, newSocketId: string): Room | undefined {
+    const room = this.getRoom(roomId);
+    if (!room) return undefined;
+    this.hostSocketToRoomMap.set(newSocketId, room.id);
+    return room;
+  }
+
+  public destroyRoom(roomId: string): boolean {
+    const room = this.rooms.get(roomId.toUpperCase());
+    if (!room) return false;
+    this.rooms.delete(room.id);
+    for (const [sockId, rId] of this.hostSocketToRoomMap.entries()) {
+      if (rId === room.id) this.hostSocketToRoomMap.delete(sockId);
+    }
+    room.players.forEach((p) => this.socketToRoomMap.delete(p.id));
+    return true;
   }
 
   public removePlayer(socketId: string): {
@@ -280,6 +301,7 @@ export class RoomManager {
     allBlackjackBet?: boolean;
     allBlackjackFinished?: boolean;
     allMinesBet?: boolean;
+    allDerbyBet?: boolean;
     minesTurnAdvanced?: boolean;
     allFinalDistributed?: boolean;
   } | null {
@@ -300,6 +322,7 @@ export class RoomManager {
     if (room.crashBets && room.crashBets[socketId]) delete room.crashBets[socketId];
     if (room.blackjackBets && room.blackjackBets[socketId]) delete room.blackjackBets[socketId];
     if (room.minesBets && room.minesBets[socketId]) delete room.minesBets[socketId];
+    if (room.derbyBets && room.derbyBets[socketId]) delete room.derbyBets[socketId];
 
     if (room.leaderId === socketId) {
       if (room.players.length > 0) {
@@ -320,6 +343,12 @@ export class RoomManager {
     const allBlackjackBet = room.state === 'playing_blackjack' ? this.checkAllBlackjackBet(room) : false;
     const allBlackjackFinished = room.state === 'blackjack_playing' ? this.checkAllBlackjackFinished(room) : false;
     const allMinesBet = room.state === 'playing_mines' ? this.checkAllMinesBet(room) : false;
+
+    let allDerbyBet = false;
+    if (room.state === 'playing_derby') {
+      const activeBettors = room.players.filter((p) => p.balance > 0);
+      allDerbyBet = activeBettors.length > 0 && activeBettors.every((p) => Boolean(p.derbyBet && p.derbyBet.amount > 0));
+    }
 
     let minesTurnAdvanced = false;
     if (room.state === 'mines_playing' && room.currentTurnPlayerId === socketId) {
@@ -344,6 +373,7 @@ export class RoomManager {
       allBlackjackBet,
       allBlackjackFinished,
       allMinesBet,
+      allDerbyBet,
       minesTurnAdvanced,
       allFinalDistributed,
     };

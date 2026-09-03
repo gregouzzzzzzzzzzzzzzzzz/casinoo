@@ -83,13 +83,10 @@ async function runTest() {
   console.log('✔ Alice et Bob connectés');
 
   // Lancement de la partie -> voting -> crash
-  const votingStatePromise = waitForRoomState(hostSocket, 'voting');
-  aliceSocket.emit('start_game', { roomId });
-  await votingStatePromise;
-
+  // Fast-track : seul le Krach est activé, pas de phase de vote.
+  aliceSocket.emit('update_settings', { roomId, settings: { enabledGames: ['crash'] } });
   const crashStatePromise = waitForRoomState(hostSocket, 'playing_crash');
-  aliceSocket.emit('submit_vote', { roomId, vote: 'crash' });
-  bobSocket.emit('submit_vote', { roomId, vote: 'crash' });
+  aliceSocket.emit('start_game', { roomId });
   await crashStatePromise;
   console.log('✔ Vote Crash validé');
 

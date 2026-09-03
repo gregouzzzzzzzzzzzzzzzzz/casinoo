@@ -253,7 +253,7 @@ export const RouletteWheelCanvas: React.FC<RouletteWheelCanvasProps> = ({
       ctx.shadowColor = 'rgba(0, 0, 0, 0.65)';
       ctx.shadowBlur = 25;
       ctx.shadowOffsetY = 10;
-      ctx.fillStyle = '#111';
+      ctx.fillStyle = '#16100a';
       ctx.fill();
       ctx.restore();
 

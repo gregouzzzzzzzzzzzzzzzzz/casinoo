@@ -84,13 +84,10 @@ async function runTest() {
 
   // 3. Phase de Vote -> Blackjack
   console.log('\n--- 1. Phase de Vote : Choix du Blackjack ---');
-  const votingStatePromise = waitForRoomState(hostSocket, 'voting');
-  aliceSocket.emit('start_game', { roomId });
-  await votingStatePromise;
-
+  // Fast-track : seul le Blackjack est activé, pas de phase de vote.
+  aliceSocket.emit('update_settings', { roomId, settings: { enabledGames: ['blackjack'] } });
   const bjBettingStatePromise = waitForRoomState(hostSocket, 'playing_blackjack');
-  aliceSocket.emit('submit_vote', { roomId, vote: 'blackjack' });
-  bobSocket.emit('submit_vote', { roomId, vote: 'blackjack' });
+  aliceSocket.emit('start_game', { roomId });
   const bjRoom = await bjBettingStatePromise;
   console.log(`✔ Vote validé -> État: "${bjRoom.state}"`);
 
