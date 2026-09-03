@@ -850,3 +850,97 @@ input[type="range"]::-moz-range-thumb {
   100% { transform: scale(1); }
 }
 
+
+/* ============================================================
+   ROULETTE ANIMATION
+   ============================================================ */
+.roulette-wheel-container {
+  position: relative;
+  width: 250px;
+  height: 250px;
+  margin: 0 auto;
+  border-radius: 50%;
+  padding: 12px;
+  background: #3e2723; /* wood border */
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5), inset 0 4px 10px rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.roulette-wheel {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: conic-gradient(
+    #1fff1b 0deg 9.7deg, 
+    #e53935 9.7deg 29.1deg, #111 29.1deg 48.6deg, 
+    #e53935 48.6deg 68.1deg, #111 68.1deg 87.5deg,
+    #e53935 87.5deg 107deg, #111 107deg 126.4deg,
+    #e53935 126.4deg 145.9deg, #111 145.9deg 165.4deg,
+    #e53935 165.4deg 184.8deg, #111 184.8deg 204.3deg,
+    #e53935 204.3deg 223.7deg, #111 223.7deg 243.2deg,
+    #e53935 243.2deg 262.7deg, #111 262.7deg 282.1deg,
+    #e53935 282.1deg 301.6deg, #111 301.6deg 321deg,
+    #e53935 321deg 340.5deg, #111 340.5deg 360deg
+  );
+  box-shadow: inset 0 0 15px rgba(0,0,0,0.8);
+  border: 4px solid #f4c542;
+}
+
+.roulette-wheel.spinning {
+  animation: spin-wheel 1.5s linear infinite;
+}
+.roulette-wheel.slow-spin {
+  animation: spin-wheel 20s linear infinite;
+}
+
+.roulette-ball-track {
+  position: absolute;
+  top: 18px;
+  left: 18px;
+  right: 18px;
+  bottom: 18px;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.roulette-ball-track.spinning {
+  animation: spin-ball 1s linear infinite;
+}
+.roulette-ball-track.slow-spin {
+  /* hidden or static when just betting */
+  display: none; 
+}
+
+.roulette-ball {
+  position: absolute;
+  top: -7px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 14px;
+  height: 14px;
+  background: radial-gradient(circle at 30% 30%, #fff, #ddd);
+  border-radius: 50%;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.6);
+}
+
+.roulette-center {
+  position: absolute;
+  width: 36px;
+  height: 36px;
+  background: radial-gradient(circle, #f4c542, #b58d18);
+  border-radius: 50%;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.6);
+  z-index: 10;
+}
+
+@keyframes spin-wheel {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes spin-ball {
+  0% { transform: rotate(360deg); }
+  100% { transform: rotate(0deg); }
+}

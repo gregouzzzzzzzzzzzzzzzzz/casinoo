@@ -112,6 +112,17 @@ const PlayingCard: React.FC<PlayingCardProps> = ({ card, size = 'md', hidden = f
   );
 };
 
+// ── Composant Roulette Animé ─────────────────────────────────
+const RouletteWheel = ({ isSpinning }: { isSpinning: boolean }) => (
+  <div className="roulette-wheel-container">
+    <div className={`roulette-wheel ${isSpinning ? 'spinning' : 'slow-spin'}`} />
+    <div className={`roulette-ball-track ${isSpinning ? 'spinning' : 'slow-spin'}`}>
+      <div className="roulette-ball" />
+    </div>
+    <div className="roulette-center" />
+  </div>
+);
+
 // ── Main Component ───────────────────────────────────────────
 export const HostScreen: React.FC = () => {
   const [room, setRoom] = useState<Room | null>(null);
@@ -602,9 +613,11 @@ export const HostScreen: React.FC = () => {
                   <span style={{ color: 'var(--green)' }}>🟢 x36</span>
                 </div>
               </div>
-
-              <div style={{ marginBottom: 16 }}>
-                <ProgressBar value={betCount} max={activeBettors} />
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 24, marginBottom: 24 }}>
+                <RouletteWheel isSpinning={false} />
+                <div style={{ width: '100%' }}>
+                  <ProgressBar value={betCount} max={activeBettors} />
+                </div>
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 8 }}>
@@ -661,7 +674,7 @@ export const HostScreen: React.FC = () => {
               display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 24,
               maxWidth: 520, width: '100%', textAlign: 'center',
             }}>
-              <div className="spin-ring" style={{ width: 80, height: 80 }} />
+              <RouletteWheel isSpinning={true} />
               <div>
                 <div className="label-xs" style={{ marginBottom: 8, color: 'var(--green)' }}>TIRAGE EN COURS</div>
                 <h2 style={{ fontSize: 32, fontWeight: 900, letterSpacing: '-0.02em' }}>
