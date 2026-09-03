@@ -244,7 +244,7 @@ function startDealerTurn(roomId: string) {
 
 io.on('connection', (socket: Socket) => {
   socket.on('create_room', () => {
-    const room = roomManager.createRoom();
+    const room = roomManager.createRoom(socket.id);
     socket.join(room.id);
     socket.emit('room_created', { room });
   });
@@ -635,6 +635,13 @@ io.on('connection', (socket: Socket) => {
   });
 
   socket.on('disconnect', () => {
+    // Si c'est l'hôte qui quitte, on détruit la room et on prévient tout le monde
+    const destroyedRoomId = roomManager.removeHost(socket.id);
+    if (destroyedRoomId) {
+      io.to(destroyedRoomId).emit('room_destroyed');
+      return;
+    }
+
     const removedInfo = roomManager.removePlayer(socket.id);
 
     if (removedInfo) {

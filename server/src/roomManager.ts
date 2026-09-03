@@ -101,6 +101,7 @@ export const DEFAULT_DERBY_HORSES: DerbyHorse[] = [
 export class RoomManager {
   private rooms: Map<string, Room> = new Map();
   private socketToRoomMap: Map<string, string> = new Map();
+  private hostSocketToRoomMap: Map<string, string> = new Map();
 
   /**
    * Generates a random 4-letter uppercase code (e.g., "ABCD").
@@ -117,11 +118,12 @@ export class RoomManager {
   /**
    * Creates a new room with a unique 4-character ID.
    */
-  public createRoom(): Room {
+  public createRoom(hostSocketId: string): Room {
     let roomId = this.generateRoomCode();
     while (this.rooms.has(roomId)) {
       roomId = this.generateRoomCode();
     }
+    this.hostSocketToRoomMap.set(hostSocketId, roomId);
 
     const newRoom: Room = {
       id: roomId,
@@ -260,6 +262,15 @@ export class RoomManager {
   /**
    * Removes a player from the room by socketId.
    */
+  public removeHost(socketId: string): string | null {
+    const roomId = this.hostSocketToRoomMap.get(socketId);
+    if (!roomId) return null;
+    
+    this.rooms.delete(roomId);
+    this.hostSocketToRoomMap.delete(socketId);
+    return roomId;
+  }
+
   public removePlayer(socketId: string): {
     room: Room;
     player: Player;

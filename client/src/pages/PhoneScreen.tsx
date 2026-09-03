@@ -184,6 +184,12 @@ export const PhoneScreen: React.FC = () => {
 
     socket.on('crash_update', handleCrashUpdate);
 
+    socket.on('room_destroyed', () => {
+      setCurrentRoom(null);
+      setJoinedPlayer(null);
+      alert("L'hôte a quitté la partie.");
+    });
+
     socket.on('room_updated', ({ room }: { room: Room }) => {
       setCurrentRoom(room);
       if (socket.id) {
@@ -262,6 +268,7 @@ export const PhoneScreen: React.FC = () => {
     return () => {
       socket.off('room_joined');
       socket.off('crash_update', handleCrashUpdate);
+      socket.off('room_destroyed');
       socket.off('room_updated');
       socket.off('bet_confirmed');
       socket.off('crash_bet_confirmed');
