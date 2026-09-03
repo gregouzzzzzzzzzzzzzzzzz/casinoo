@@ -216,6 +216,12 @@ export const HostScreen: React.FC = () => {
     }
   };
 
+  const handleLeave = () => {
+    socket.disconnect();
+    setRoom(null);
+    socket.connect();
+  };
+
   const totalPlayers = room?.players.length ?? 0;
   const votedCount = room?.votes ? Object.keys(room.votes).length : 0;
   const betCount = room?.bets ? Object.keys(room.bets).length : 0;
@@ -327,6 +333,22 @@ export const HostScreen: React.FC = () => {
             <span className="label-xs" style={{ color: 'var(--text-dim)' }}>
               {phaseSeconds}s
             </span>
+            <button
+              onClick={handleLeave}
+              style={{
+                marginLeft: 12,
+                padding: '6px 12px',
+                borderRadius: 6,
+                border: '1px solid var(--border-strong)',
+                background: 'var(--bg-surface)',
+                color: 'var(--text-secondary)',
+                cursor: 'pointer',
+                fontSize: 12,
+                fontWeight: 600,
+              }}
+            >
+              Quitter
+            </button>
           </div>
         )}
 

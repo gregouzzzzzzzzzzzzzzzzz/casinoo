@@ -289,6 +289,13 @@ export const PhoneScreen: React.FC = () => {
   }, [joinedPlayer?.balance]);
 
   // Actions
+  const handleLeave = () => {
+    socket.disconnect();
+    setCurrentRoom(null);
+    setJoinedPlayer(null);
+    socket.connect();
+  };
+
   const handleJoin = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return setError('Veuillez entrer un pseudo.');
@@ -502,6 +509,22 @@ export const PhoneScreen: React.FC = () => {
                 <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-secondary)', letterSpacing: '0.08em' }}>
                   {currentRoom.id}
                 </span>
+                <button
+                  onClick={handleLeave}
+                  style={{
+                    marginLeft: 4,
+                    padding: '4px 8px',
+                    borderRadius: 4,
+                    background: 'var(--bg-surface)',
+                    border: '1px solid var(--border-strong)',
+                    color: 'var(--text-secondary)',
+                    fontSize: 10,
+                    fontWeight: 700,
+                    cursor: 'pointer'
+                  }}
+                >
+                  Quitter
+                </button>
               </>
             )}
           </div>
