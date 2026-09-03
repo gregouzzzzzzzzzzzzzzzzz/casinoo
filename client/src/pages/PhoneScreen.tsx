@@ -450,10 +450,7 @@ export const PhoneScreen: React.FC = () => {
   const totalPlayersCount = currentRoom?.players.length ?? 0;
   const allPlayersDrank = totalPlayersCount > 0 && drankPlayersCount === totalPlayersCount;
 
-  // Final distribution tally
-  const expectedDistributable = joinedPlayer?.distributableBalance || 0;
-  const currentTotalAllocated = Object.values(finalAllocations).reduce((sum, v) => sum + (v || 0), 0);
-  const isFinalAllocationValid = currentTotalAllocated === expectedDistributable;
+  // Final distribution tally (now handled locally in the UI block)
 
   // Crash calculation
   const myCrashBet = joinedPlayer?.currentCrashBet || (currentRoom?.crashBets && socket.id ? currentRoom.crashBets[socket.id]?.amount : 0) || 0;
@@ -1473,100 +1470,122 @@ export const PhoneScreen: React.FC = () => {
         {/* ═══════════════════════════════════════════════════════ */}
         {/* LE GRAND FINAL : 2. DISTRIBUTION FINALE                 */}
         {/* ═══════════════════════════════════════════════════════ */}
-        {joinedPlayer && currentRoom?.state === 'final_distribution' && (
-          <div className="card animate-in" style={{ padding: '20px 16px' }}>
-            <div className="label-xs" style={{ marginBottom: 6, color: 'var(--gold)' }}>DISTRIBUTION FINALE</div>
-            <h2 style={{ fontSize: 20, fontWeight: 800, marginBottom: 4 }}>Répartis tout ton solde</h2>
-            <p style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 14 }}>
-              Tu dois allouer exactement {expectedDistributable} 🍺 entre tes adversaires.
-            </p>
+        {joinedPlayer && currentRoom?.state === 'final_distribution' && (() => {
+          // Recalculate from room data to be sure we have the latest values
+          const me = currentRoom.players.find(p => p.id === socket.id);
+          const distributable = me?.distributableBalance ?? 0;
+          const others = currentRoom.players.filter(p => p.id !== socket.id);
+          const totalAllocated = Object.values(finalAllocations).reduce((s, v) => s + (v || 0), 0);
+          const isValid = totalAllocated === distributable;
 
-            {joinedPlayer.hasSubmittedFinalDistribution ? (
-              <div style={{ background: 'var(--green-subtle)', borderRadius: 8, padding: 16, textAlign: 'center' }}>
-                <CheckCircle2 size={28} color="var(--green)" style={{ margin: '0 auto 6px' }} />
-                <div style={{ fontWeight: 800, color: 'var(--green)' }}>Distribution validée !</div>
-                <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 4 }}>
-                  En attente des autres joueurs...
+          return (
+            <div className="card animate-in" style={{ padding: '20px 16px' }}>
+              <div className="label-xs" style={{ marginBottom: 6, color: 'var(--gold)' }}>DISTRIBUTION FINALE</div>
+              <h2 style={{ fontSize: 20, fontWeight: 800, marginBottom: 4 }}>Répartis tout ton solde</h2>
+              <p style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 14 }}>
+                Tu dois allouer exactement <strong>{distributable}</strong> 🍺 entre tes adversaires.
+              </p>
+
+              {me?.hasSubmittedFinalDistribution ? (
+                <div style={{ background: 'var(--green-subtle)', borderRadius: 8, padding: 16, textAlign: 'center' }}>
+                  <CheckCircle2 size={28} color="var(--green)" style={{ margin: '0 auto 6px' }} />
+                  <div style={{ fontWeight: 800, color: 'var(--green)' }}>Distribution validée !</div>
+                  <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 4 }}>
+                    En attente des autres joueurs...
+                  </div>
                 </div>
-              </div>
-            ) : otherPlayers.length === 0 || expectedDistributable === 0 ? (
-              <button
-                type="button"
-                onClick={handleFinalDistributionSubmit}
-                className="btn btn-primary btn-full btn-lg"
-              >
-                Valider (0 gorgée à distribuer)
-              </button>
-            ) : (
-              <form onSubmit={handleFinalDistributionSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                  {otherPlayers.map(p => {
-                    const currentAlloc = finalAllocations[p.id] || 0;
-                    return (
-                      <div key={p.id} className="player-row" style={{ padding: '10px 12px', justifyContent: 'space-between' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                          <Avatar name={p.name} size={28} />
-                          <span style={{ fontWeight: 700, fontSize: 13 }}>{p.name}</span>
-                        </div>
-
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                          <button
-                            type="button"
-                            onClick={() => handleFinalAllocationChange(p.id, currentAlloc - 1)}
-                            className="btn btn-secondary btn-sm"
-                            style={{ padding: '6px 10px' }}
-                          >
-                            <Minus size={12} />
-                          </button>
-                          <input
-                            type="number"
-                            min={0}
-                            max={expectedDistributable}
-                            value={currentAlloc}
-                            onChange={e => handleFinalAllocationChange(p.id, parseInt(e.target.value) || 0)}
-                            className="input"
-                            style={{ width: 50, textAlign: 'center', fontWeight: 800, padding: 6 }}
-                          />
-                          <button
-                            type="button"
-                            onClick={() => handleFinalAllocationChange(p.id, currentAlloc + 1)}
-                            className="btn btn-secondary btn-sm"
-                            style={{ padding: '6px 10px' }}
-                          >
-                            <Plus size={12} />
-                          </button>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                <div style={{
-                  background: isFinalAllocationValid ? 'var(--green-subtle)' : 'var(--bg-input)',
-                  border: `1px solid ${isFinalAllocationValid ? 'var(--green)' : 'var(--border-default)'}`,
-                  borderRadius: 6,
-                  padding: '8px 12px',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                }}>
-                  <span style={{ fontSize: 12, fontWeight: 600 }}>Total Alloué</span>
-                  <span style={{ fontSize: 14, fontWeight: 900, color: isFinalAllocationValid ? 'var(--green)' : '#ef5350' }}>
-                    {currentTotalAllocated} / {expectedDistributable} 🍺
-                  </span>
-                </div>
-
+              ) : others.length === 0 || distributable === 0 ? (
                 <button
-                  type="submit"
-                  disabled={!isFinalAllocationValid}
+                  type="button"
+                  onClick={handleFinalDistributionSubmit}
                   className="btn btn-primary btn-full btn-lg"
                 >
-                  Valider la distribution finale 🍻
+                  Valider (0 gorgée à distribuer)
                 </button>
-              </form>
-            )}
-          </div>
-        )}
+              ) : (
+                <form onSubmit={handleFinalDistributionSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                  {/* ── Player allocation rows ── */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    {others.map(p => {
+                      const currentAlloc = finalAllocations[p.id] || 0;
+                      const canDecrease = currentAlloc > 0;
+                      const canIncrease = totalAllocated < distributable;
+                      return (
+                        <div
+                          key={p.id}
+                          className="player-row"
+                          style={{ padding: '10px 12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
+                        >
+                          {/* Name */}
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <Avatar name={p.name} size={28} />
+                            <span style={{ fontWeight: 700, fontSize: 13 }}>{p.name}</span>
+                          </div>
+
+                          {/* Stepper */}
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                            <button
+                              type="button"
+                              onClick={() => handleFinalAllocationChange(p.id, currentAlloc - 1)}
+                              disabled={!canDecrease}
+                              className="btn btn-secondary btn-sm"
+                              style={{ padding: '6px 10px', opacity: canDecrease ? 1 : 0.35 }}
+                            >
+                              <Minus size={12} />
+                            </button>
+                            <span style={{
+                              minWidth: 32,
+                              textAlign: 'center',
+                              fontWeight: 900,
+                              fontSize: 16,
+                              color: currentAlloc > 0 ? 'var(--green)' : 'var(--text-secondary)',
+                            }}>
+                              {currentAlloc}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => handleFinalAllocationChange(p.id, currentAlloc + 1)}
+                              disabled={!canIncrease}
+                              className="btn btn-secondary btn-sm"
+                              style={{ padding: '6px 10px', opacity: canIncrease ? 1 : 0.35 }}
+                            >
+                              <Plus size={12} />
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* ── Running total ── */}
+                  <div style={{
+                    background: isValid ? 'var(--green-subtle)' : 'var(--bg-input)',
+                    border: `1px solid ${isValid ? 'var(--green)' : totalAllocated > distributable ? '#ef5350' : 'var(--border-default)'}`,
+                    borderRadius: 6,
+                    padding: '8px 12px',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                  }}>
+                    <span style={{ fontSize: 12, fontWeight: 600 }}>Total alloué</span>
+                    <span style={{ fontSize: 15, fontWeight: 900, color: isValid ? 'var(--green)' : totalAllocated > distributable ? '#ef5350' : 'var(--text-primary)' }}>
+                      {totalAllocated} / {distributable} 🍺
+                    </span>
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={!isValid}
+                    className="btn btn-primary btn-full btn-lg"
+                    style={{ opacity: isValid ? 1 : 0.5 }}
+                  >
+                    {isValid ? '✅ Valider la distribution finale 🍻' : `Il reste ${distributable - totalAllocated} 🍺 à allouer`}
+                  </button>
+                </form>
+              )}
+            </div>
+          );
+        })()}
 
         {/* ═══════════════════════════════════════════════════════ */}
         {/* LE GRAND FINAL : 3. BILAN ULTIME (final_drinking)       */}
