@@ -137,7 +137,8 @@ function startCrashFlightLoop(roomId: string) {
   let currentMultiplier = 1.00;
   let prevMultiplier = 1.00;
   let tickCount = 0;
-  const MAX_TICKS = 60; // 15 seconds max
+  const TICK_MS = 100;
+  const MAX_TICKS = 150; // 15 seconds max, resolved as a crash
 
   io.to(roomId).emit('crash_update', {
     multiplier: 1.00,
@@ -191,9 +192,10 @@ function startCrashFlightLoop(roomId: string) {
     }
 
     prevMultiplier = currentMultiplier;
-    const delta = (Math.random() * 0.8) - 0.3;
-    let nextMultiplier = Math.round((currentMultiplier + delta) * 100) / 100;
-    nextMultiplier = Math.max(0.10, nextMultiplier);
+    // L'avion monte toujours, de plus en plus vite (courbe façon Aviator).
+    const growthRate = 0.010 + (currentMultiplier - 1) * 0.005;
+    let nextMultiplier = Math.round(currentMultiplier * (1 + growthRate) * 100) / 100;
+    if (nextMultiplier <= currentMultiplier) nextMultiplier = currentMultiplier + 0.01;
 
     if (nextMultiplier >= crashPoint) {
       clearInterval(interval);
@@ -212,15 +214,14 @@ function startCrashFlightLoop(roomId: string) {
     } else {
       currentMultiplier = nextMultiplier;
       room.crashMultiplier = currentMultiplier;
-      const trend = currentMultiplier >= prevMultiplier ? 'up' : 'down';
       io.to(roomId).emit('crash_update', {
         multiplier: currentMultiplier,
         prevMultiplier,
-        trend,
+        trend: 'up',
         crashRound: room.crashRound || 1,
       });
     }
-  }, 250);
+  }, TICK_MS);
 
   crashIntervals.set(roomId, interval);
 }
@@ -261,6 +262,17 @@ io.on('connection', (socket: Socket) => {
     const room = roomManager.createRoom(socket.id);
     socket.join(room.id);
     socket.emit('room_created', { room });
+  });
+
+  // The host explicitly closes its table: destroy at once, no grace period.
+  socket.on('close_room', ({ roomId }: { roomId: string }) => {
+    const owned = roomManager.getHostRoomId(socket.id);
+    const target = (roomId || '').toUpperCase();
+    if (owned !== target) return;
+    roomManager.clearHostMapping(socket.id);
+    if (roomManager.destroyRoom(target)) {
+      io.to(target).emit('room_destroyed');
+    }
   });
 
   // Host screen re-subscribes to its room after a reconnection (page reload,

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { socket } from '../socket';
+import { AviatorCanvas } from '../components/AviatorCanvas';
 import {
   JoinRoomPayload,
   JoinRoomResponse,
@@ -128,6 +129,7 @@ export const PhoneScreen: React.FC = () => {
   const [joinedPlayer, setJoinedPlayer] = useState<Player | null>(null);
   const [currentRoom, setCurrentRoom] = useState<Room | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [showIntro, setShowIntro] = useState(false);
 
   // Voting
   const [myVote, setMyVote] = useState<GameChoice | null>(null);
@@ -141,7 +143,7 @@ export const PhoneScreen: React.FC = () => {
   const [crashBetAmount, setCrashBetAmount] = useState<number>(5);
   const [hasCrashBet, setHasCrashBet] = useState(false);
   const [liveCrashMultiplier, setLiveCrashMultiplier] = useState<number>(1.00);
-  const [crashTrend, setCrashTrend] = useState<'up' | 'down' | 'same'>('same');
+  const [, setCrashTrend] = useState<'up' | 'down' | 'same'>('same');
 
   // Blackjack Betting
   const [blackjackBetAmount, setBlackjackBetAmount] = useState<number>(5);
@@ -741,6 +743,15 @@ export const PhoneScreen: React.FC = () => {
               </div>
             </div>
 
+            <button
+              type="button"
+              onClick={() => setShowIntro(true)}
+              className="btn btn-secondary btn-full"
+              style={{ marginTop: 14 }}
+            >
+              ▶︎ Comment jouer ?
+            </button>
+
             <p style={{ textAlign: 'center', fontSize: 11, color: 'var(--text-dim)', marginTop: 14 }}>
               Un jeu <span style={{ fontFamily: 'var(--font-display)', color: 'rgba(255,182,41,0.55)' }}>SIP SIP STUDIO</span> · À consommer avec modération
             </p>
@@ -1018,7 +1029,7 @@ export const PhoneScreen: React.FC = () => {
               const GAME_DETAILS: Record<string, { emoji: string; name: string; sub: string }> = {
                 mines: { emoji: '💣', name: 'Les Mines', sub: 'Grille piégée 6×6' },
                 blackjack: { emoji: '♠️', name: 'Le Blackjack', sub: 'Battez le croupier' },
-                crash: { emoji: '📈', name: 'Le Krach', sub: 'Vendez avant la chute' },
+                crash: { emoji: '✈️', name: "L'Avion", sub: 'Sautez avant le crash' },
                 roulette: { emoji: '🎡', name: 'La Roulette', sub: 'Rouge, noir ou vert' },
                 derby: { emoji: '🐎', name: 'Le Derby', sub: 'Pariez sur un canasson' },
               };
@@ -1325,7 +1336,7 @@ export const PhoneScreen: React.FC = () => {
         {/* ═══════════════════════════════════════════════════════ */}
         {joinedPlayer && currentRoom?.state === 'playing_crash' && (
           <div className="card animate-in" style={{ padding: '20px 16px' }}>
-            <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 16 }}>Placer votre capital (Crash)</h2>
+            <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 16 }}>Embarquez dans l'avion ✈️</h2>
             {hasCrashBet ? (
               <div style={{ background: 'var(--green-subtle)', borderRadius: 8, padding: 16, textAlign: 'center' }}>
                 <CheckCircle2 size={24} color="var(--green)" style={{ margin: '0 auto 6px' }} />
@@ -1334,27 +1345,36 @@ export const PhoneScreen: React.FC = () => {
             ) : (
               <form onSubmit={handleCrashBetSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
                 <input type="number" min={1} max={maxBet} value={crashBetAmount} onChange={e => setCrashBetAmount(clampBet(parseInt(e.target.value) || 1))} className="input" style={{ textAlign: 'center', fontSize: 18, fontWeight: 700 }} required />
-                <button type="submit" className="btn btn-primary btn-full btn-lg">Investir {crashBetAmount} 💰</button>
+                <button type="submit" className="btn btn-primary btn-full btn-lg">Embarquer avec {crashBetAmount} 💰</button>
               </form>
             )}
           </div>
         )}
 
         {joinedPlayer && currentRoom?.state === 'crash_flying' && (
-          <div className="card animate-in" style={{ padding: '24px 18px', textAlign: 'center', display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <div style={{ fontSize: 56, fontWeight: 700, color: crashTrend === 'up' ? 'var(--green)' : crashTrend === 'down' ? '#f2696d' : 'var(--text-primary)' }}>
-              {(currentRoom.crashMultiplier || liveCrashMultiplier || 1.00).toFixed(2)}x
+          <div className="card animate-in" style={{ padding: '14px 12px 18px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <div style={{ position: 'relative' }}>
+              <AviatorCanvas multiplier={liveCrashMultiplier || 1.00} crashed={false} height={190} />
+              <div style={{
+                position: 'absolute', top: 10, left: 12, pointerEvents: 'none',
+                fontFamily: 'var(--font-display)', fontSize: 38, lineHeight: 1,
+                color: 'var(--yellow)', textShadow: '0 3px 0 var(--orange-deep)',
+              }}>
+                {(liveCrashMultiplier || 1.00).toFixed(2)}x
+              </div>
             </div>
             {joinedPlayer.cashOutMultiplier ? (
-              <div style={{ background: 'var(--green-subtle)', borderRadius: 8, padding: 14 }}>
-                <CheckCircle2 size={28} color="var(--green)" style={{ margin: '0 auto 6px' }} />
-                <div style={{ fontWeight: 700, color: 'var(--green)' }}>Vendu à {joinedPlayer.cashOutMultiplier.toFixed(2)}x ! 🎉</div>
+              <div style={{ background: 'var(--green-subtle)', borderRadius: 14, padding: 14, textAlign: 'center' }}>
+                <div style={{ fontSize: 30 }}>🪂</div>
+                <div style={{ fontWeight: 700, color: 'var(--green)' }}>Sauté à {joinedPlayer.cashOutMultiplier.toFixed(2)}x ! 🎉</div>
               </div>
             ) : myCrashBet > 0 ? (
               <button onClick={handleCashOut} className="btn btn-primary btn-full animate-green-pulse" style={{ fontSize: 18, fontWeight: 700, padding: '18px 20px' }}>
-                VENDRE SES ACTIONS ! (+{currentPotentialReturn - myCrashBet} 💰)
+                🪂 J'ENCAISSE ! (+{currentPotentialReturn - myCrashBet} 💰)
               </button>
-            ) : null}
+            ) : (
+              <div style={{ textAlign: 'center', fontSize: 12, color: 'var(--text-dim)' }}>Regardez l'avion sur le grand écran !</div>
+            )}
           </div>
         )}
 
@@ -1427,7 +1447,7 @@ export const PhoneScreen: React.FC = () => {
               </div>
             )}
 
-            <div className="mines-grid-phone">
+            <div className="mines-board"><div className="mines-grid-phone">
               {Array.from({ length: 36 }).map((_, index) => {
                 const isRevealed = (currentRoom.revealedCells || []).includes(index);
                 const isBomb = isRevealed && Boolean(currentRoom.minesGrid && currentRoom.minesGrid.includes(index));
@@ -1442,11 +1462,11 @@ export const PhoneScreen: React.FC = () => {
                     onClick={() => isClickable && handleMinesRevealCell(index)}
                     className={`mines-cell ${isSafe ? 'mines-cell-safe' : isBomb ? 'mines-cell-bomb' : isClickable ? 'mines-cell-interactive' : 'mines-cell-disabled'}`}
                   >
-                    {isBomb ? '💣' : isSafe ? '💎' : <span style={{ fontSize: 12, opacity: 0.5 }}>{index + 1}</span>}
+                    {isBomb ? '💣' : isSafe ? '💎' : <span className="mines-cell-dot" />}
                   </button>
                 );
               })}
-            </div>
+            </div></div>
 
             {isMyTurnInMines && (joinedPlayer.safeClicks || 0) >= 1 && (
               <button type="button" onClick={handleMinesCashOut} className="btn btn-gold btn-full btn-lg animate-pulse">
@@ -1991,6 +2011,31 @@ export const PhoneScreen: React.FC = () => {
         )}
 
       </div>
+
+      {showIntro && (
+        <div
+          onClick={() => setShowIntro(false)}
+          style={{
+            position: 'fixed', inset: 0, zIndex: 100,
+            background: 'rgba(16, 12, 8, 0.92)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            padding: 12,
+          }}
+        >
+          <div onClick={e => e.stopPropagation()} style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <video
+              src="/intro.mp4"
+              controls
+              autoPlay
+              playsInline
+              style={{ width: '100%', borderRadius: 16, border: '1px solid var(--border-default)' }}
+            />
+            <button onClick={() => setShowIntro(false)} className="btn btn-secondary" style={{ alignSelf: 'center' }}>
+              Fermer
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

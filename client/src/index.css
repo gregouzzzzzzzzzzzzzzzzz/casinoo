@@ -944,10 +944,19 @@ input[type="range"]::-moz-range-thumb {
 }
 
 /* ── LES MINES (GRILLE COMMUNE 6x6) ────────────────────────── */
+.mines-board {
+  background:
+    radial-gradient(ellipse 90% 80% at 50% 0%, rgba(255, 182, 41, 0.05), transparent 65%),
+    #0d0a06;
+  border: 1px solid var(--border-default);
+  border-radius: var(--r-lg);
+  padding: 16px;
+}
+
 .mines-grid-container {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
-  gap: 8px;
+  gap: 10px;
   width: 100%;
   max-width: 520px;
   margin: 0 auto;
@@ -956,7 +965,7 @@ input[type="range"]::-moz-range-thumb {
 .mines-grid-phone {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
-  gap: 6px;
+  gap: 7px;
   width: 100%;
   max-width: 360px;
   margin: 0 auto;
@@ -964,8 +973,11 @@ input[type="range"]::-moz-range-thumb {
 
 .mines-cell {
   aspect-ratio: 1 / 1;
-  background: var(--bg-elevated);
-  border: 1px solid var(--border-default);
+  background:
+    linear-gradient(160deg, rgba(246, 235, 216, 0.10), rgba(246, 235, 216, 0.02) 45%),
+    var(--bg-elevated);
+  border: 1px solid rgba(246, 235, 216, 0.16);
+  border-bottom-color: rgba(0, 0, 0, 0.55);
   border-radius: var(--r-md);
   color: var(--text-primary);
   font-family: var(--font);
@@ -974,9 +986,17 @@ input[type="range"]::-moz-range-thumb {
   justify-content: center;
   font-size: 24px;
   user-select: none;
-  transition: all 0.15s ease;
+  transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
   position: relative;
-  box-shadow: var(--shadow-sm);
+  box-shadow: inset 0 1px 0 rgba(246, 235, 216, 0.10), 0 3px 0 rgba(0, 0, 0, 0.45);
+}
+
+.mines-cell-dot {
+  width: 7px;
+  height: 7px;
+  background: rgba(255, 182, 41, 0.22);
+  border-radius: 2px;
+  transform: rotate(45deg);
 }
 
 .mines-cell-interactive {
@@ -984,50 +1004,72 @@ input[type="range"]::-moz-range-thumb {
 }
 
 .mines-cell-interactive:hover {
-  background: var(--bg-card-hover);
   border-color: var(--yellow);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px var(--yellow-glow);
+  transform: translateY(-3px);
+  box-shadow: inset 0 1px 0 rgba(246, 235, 216, 0.10), 0 6px 0 rgba(201, 106, 13, 0.55), 0 8px 18px var(--yellow-glow);
+}
+
+.mines-cell-interactive:hover .mines-cell-dot {
+  background: var(--yellow);
 }
 
 .mines-cell-interactive:active {
-  transform: translateY(0);
+  transform: translateY(1px);
+  box-shadow: inset 0 1px 0 rgba(246, 235, 216, 0.10), 0 1px 0 rgba(0, 0, 0, 0.45);
 }
 
 .mines-cell-safe {
-  background: #14301a;
-  border-color: var(--green);
-  box-shadow: inset 0 0 15px rgba(92, 201, 99, 0.3), 0 0 15px rgba(92, 201, 99, 0.2);
-  animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  background:
+    radial-gradient(circle at 50% 38%, rgba(92, 201, 99, 0.35), transparent 70%),
+    linear-gradient(160deg, #17381e, #0e2413);
+  border-color: rgba(92, 201, 99, 0.6);
+  border-bottom-color: rgba(92, 201, 99, 0.6);
+  box-shadow: inset 0 0 18px rgba(92, 201, 99, 0.25), 0 0 16px rgba(92, 201, 99, 0.25);
+  animation: cellFlip 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.mines-cell-safe::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: 0 0 22px rgba(92, 201, 99, 0.35);
+  animation: gemGlow 2.2s ease-in-out infinite;
+  pointer-events: none;
 }
 
 .mines-cell-bomb {
-  background: #3b0d0c;
-  border-color: var(--red);
-  box-shadow: inset 0 0 15px rgba(229, 72, 77, 0.4), 0 0 20px rgba(229, 72, 77, 0.4);
-  animation: bombExplode 0.4s ease-out;
+  background:
+    radial-gradient(circle at 50% 42%, rgba(229, 72, 77, 0.45), transparent 72%),
+    linear-gradient(160deg, #3d100f, #200806);
+  border-color: rgba(229, 72, 77, 0.7);
+  border-bottom-color: rgba(229, 72, 77, 0.7);
+  box-shadow: inset 0 0 18px rgba(229, 72, 77, 0.35), 0 0 22px rgba(229, 72, 77, 0.4);
+  animation: bombExplode 0.5s ease-out;
 }
 
 .mines-cell-disabled {
-  opacity: 0.65;
+  opacity: 0.7;
   cursor: not-allowed;
 }
 
-@keyframes popIn {
-  from {
-    transform: scale(0.6);
-    opacity: 0;
-  }
-  to {
-    transform: scale(1);
-    opacity: 1;
-  }
+@keyframes cellFlip {
+  0%   { transform: rotateY(90deg) scale(0.8); opacity: 0; }
+  60%  { transform: rotateY(-12deg) scale(1.06); opacity: 1; }
+  100% { transform: rotateY(0) scale(1); }
+}
+
+@keyframes gemGlow {
+  0%, 100% { opacity: 0.35; }
+  50%      { opacity: 1; }
 }
 
 @keyframes bombExplode {
-  0% { transform: scale(0.8); }
-  50% { transform: scale(1.15); }
-  100% { transform: scale(1); }
+  0%   { transform: scale(0.6) rotate(0deg); }
+  25%  { transform: scale(1.25) rotate(-6deg); }
+  45%  { transform: scale(0.95) rotate(5deg); }
+  65%  { transform: scale(1.08) rotate(-3deg); }
+  100% { transform: scale(1) rotate(0deg); }
 }
 
 /* ============================================================

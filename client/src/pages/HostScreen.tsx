@@ -20,6 +20,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
+import { AviatorCanvas } from '../components/AviatorCanvas';
 import { RouletteWheelCanvas } from '../components/RouletteWheelCanvas';
 
 // ── Helpers ──────────────────────────────────────────────────
@@ -130,12 +131,13 @@ const PlayingCard: React.FC<PlayingCardProps> = ({ card, size = 'md', hidden = f
 export const HostScreen: React.FC = () => {
   const [room, setRoom] = useState<Room | null>(null);
   const [copied, setCopied] = useState(false);
+  const [showIntro, setShowIntro] = useState(false);
   const [isConnected, setIsConnected] = useState(socket.connected);
   const [phaseSeconds, setPhaseSeconds] = useState(0);
 
   // Live fluctuating Crash multiplier
   const [currentMultiplier, setCurrentMultiplier] = useState<number>(1.00);
-  const [trend, setTrend] = useState<'up' | 'down' | 'same'>('same');
+  const [, setTrend] = useState<'up' | 'down' | 'same'>('same');
 
   // Phase timer
   useEffect(() => {
@@ -258,9 +260,16 @@ export const HostScreen: React.FC = () => {
   };
 
   const handleLeave = () => {
+    // Ferme la table courante immédiatement et en ouvre une neuve,
+    // sans que watch_room ne ré-adopte l'ancienne.
+    if (roomIdRef.current) {
+      socket.emit('close_room', { roomId: roomIdRef.current });
+    }
+    roomIdRef.current = null;
     socket.disconnect();
     setRoom(null);
     socket.connect();
+    socket.emit('create_room');
   };
 
   const totalPlayers = room?.players.length ?? 0;
@@ -295,9 +304,9 @@ export const HostScreen: React.FC = () => {
     playing_roulette: 'PRISE DES MISES',
     roulette_spinning: 'TIRAGE ROULETTE',
     roulette_result: 'RÉSULTATS ROULETTE',
-    playing_crash: `KRACH BOURSIER (${room?.crashRound || 1}/3)`,
-    crash_flying: `MARCHÉ EN ÉBULLITION 📈 (${room?.crashRound || 1}/3)`,
-    crash_result: `KRACH BOURSIER 📉 (${room?.crashRound || 1}/3)`,
+    playing_crash: `L'AVION ✈️ · EMBARQUEMENT (${room?.crashRound || 1}/3)`,
+    crash_flying: `L'AVION DÉCOLLE ✈️ (${room?.crashRound || 1}/3)`,
+    crash_result: `CRASH 💥 (${room?.crashRound || 1}/3)`,
     playing_blackjack: 'BLACKJACK (MISES)',
     blackjack_playing: 'BLACKJACK EN COURS ♠',
     blackjack_dealer_turn: 'TOUR DU CROUPIER 🎩',
@@ -435,6 +444,9 @@ export const HostScreen: React.FC = () => {
               <button onClick={handleCopy} className="btn btn-secondary btn-full">
                 {copied ? <Check size={14} color="var(--green)" /> : <Copy size={14} />}
                 {copied ? 'Copié !' : 'Copier le code'}
+              </button>
+              <button onClick={() => setShowIntro(true)} className="btn btn-primary btn-full">
+                ▶︎ Comment jouer ?
               </button>
               <div className="divider" />
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -1109,7 +1121,7 @@ export const HostScreen: React.FC = () => {
             <div className="card" style={{ padding: 20, flex: 1 }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
                 <div>
-                  <div className="label-xs" style={{ marginBottom: 4 }}>KRACH BOURSIER (TRADING CRYPTO)</div>
+                  <div className="label-xs" style={{ marginBottom: 4 }}>L'AVION ✈️ · PRENEZ VOS BILLETS</div>
                   <h2 style={{ fontSize: 22, fontWeight: 700 }}>Investissements en cours 📈 (Manche {room.crashRound || 1}/3)</h2>
                 </div>
               </div>
@@ -1152,20 +1164,105 @@ export const HostScreen: React.FC = () => {
         )}
 
         {room?.state === 'crash_flying' && (
-          <div className="card" style={{ padding: '40px 24px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
-            <div style={{ fontSize: 72, fontWeight: 700, color: trend === 'up' ? 'var(--green)' : '#f2696d' }}>
-              {currentMultiplier.toFixed(2)}x
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16, flex: 1 }}>
+            <div className="card" style={{ padding: 16, position: 'relative', overflow: 'hidden' }}>
+              <AviatorCanvas multiplier={currentMultiplier} crashed={false} height={400} />
+              <div style={{ position: 'absolute', top: 28, left: 30, pointerEvents: 'none' }}>
+                <div className="label-xs" style={{ color: 'var(--yellow)', letterSpacing: '0.12em', marginBottom: 4 }}>
+                  VOL {room.crashRound || 1}/3 · ENCAISSEZ AVANT LE CRASH !
+                </div>
+                <div style={{
+                  fontFamily: 'var(--font-display)', fontSize: 76, lineHeight: 1,
+                  color: 'var(--yellow)', textShadow: '0 4px 0 var(--orange-deep), 0 8px 24px rgba(0,0,0,0.5)',
+                }}>
+                  {currentMultiplier.toFixed(2)}x
+                </div>
+              </div>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 8 }}>
+              {room.players.filter(p => room.crashBets && room.crashBets[p.id]).map(player => {
+                const sold = player.cashOutMultiplier !== null && player.cashOutMultiplier !== undefined;
+                return (
+                  <div key={player.id} className={sold ? 'result-win' : 'player-row'} style={{ padding: '10px 12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <Avatar name={player.name} size={26} />
+                      <span style={{ fontWeight: 700, fontSize: 13 }}>{player.name}</span>
+                    </div>
+                    {sold
+                      ? <span className="badge badge-green">🪂 Sauté à {player.cashOutMultiplier!.toFixed(2)}x</span>
+                      : <span className="badge badge-gold animate-pulse">✈️ En vol</span>}
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}
 
-        {room?.state === 'crash_result' && room.currentCrashResult && (
-          <div className="card" style={{ padding: 24, textAlign: 'center' }}>
-            <h2 style={{ fontSize: 32, fontWeight: 700, color: '#f2696d' }}>
-              📉 KRACH BOURSIER à {room.currentCrashResult.crashPoint.toFixed(2)}x !
-            </h2>
-          </div>
-        )}
+        {room?.state === 'crash_result' && room.currentCrashResult && (() => {
+          const crashWinners = room.currentCrashResult.results.filter(r => r.won);
+          const crashLosers = room.currentCrashResult.results.filter(r => !r.won && r.betAmount > 0);
+          return (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16, flex: 1 }}>
+              <div className="card animate-in" style={{
+                padding: '24px 32px',
+                background: 'radial-gradient(ellipse at 50% 50%, rgba(229, 72, 77, 0.15) 0%, var(--bg-card) 100%)',
+                border: '2px solid #f2696d',
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              }}>
+                <div>
+                  <div className="label-xs" style={{ color: '#f2696d' }}>VOL {room.crashRound || 1}/3</div>
+                  <h1 style={{ fontSize: 36, margin: 0 }}>
+                    💥 CRASH à <span style={{ color: '#f2696d' }}>{room.currentCrashResult.crashPoint.toFixed(2)}x</span> !
+                  </h1>
+                </div>
+                <span style={{ fontSize: 52 }}>🛩️</span>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, flex: 1 }}>
+                <div className="card" style={{ padding: 16 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+                    <TrendingUp size={16} color="var(--green)" />
+                    <span style={{ fontWeight: 700, fontSize: 13 }}>Ont sauté à temps 🪂</span>
+                    <span className="badge badge-green">{crashWinners.length}</span>
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    {crashWinners.map(r => (
+                      <div key={r.playerId} className="result-win" style={{ padding: '8px 12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <Avatar name={r.playerName} size={24} />
+                          <span style={{ fontSize: 13, fontWeight: 700 }}>{r.playerName}</span>
+                        </div>
+                        <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--green)' }}>
+                          {r.cashOutMultiplier?.toFixed(2)}x · {r.netGain >= 0 ? '+' : ''}{r.netGain} 💰
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="card" style={{ padding: 16 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+                    <TrendingDown size={16} color="var(--red)" />
+                    <span style={{ fontWeight: 700, fontSize: 13 }}>Crashés — Gorgées</span>
+                    <span className="badge badge-red">{crashLosers.length}</span>
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    {crashLosers.map(r => (
+                      <div key={r.playerId} className="result-lose" style={{ padding: '8px 12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <Avatar name={r.playerName} size={24} />
+                          <span style={{ fontSize: 13, fontWeight: 700 }}>{r.playerName} 💥</span>
+                        </div>
+                        <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--red)' }}>+{r.sipsToDrink} 🍺</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        })()}
 
         {/* ═══════════════════════════════════════════════════════ */}
         {/* PLAYING BLACKJACK (Mises)                               */}
@@ -1335,7 +1432,7 @@ export const HostScreen: React.FC = () => {
             </div>
 
             <div className="card" style={{ padding: 24, display: 'flex', justifyContent: 'center' }}>
-              <div className="mines-grid-container">
+              <div className="mines-board" style={{ width: '100%', maxWidth: 560, margin: '0 auto' }}><div className="mines-grid-container">
                 {Array.from({ length: 36 }).map((_, index) => {
                   const isRevealed = (room.revealedCells || []).includes(index);
                   const isBomb = isRevealed && Boolean(room.minesGrid && room.minesGrid.includes(index));
@@ -1343,11 +1440,11 @@ export const HostScreen: React.FC = () => {
 
                   return (
                     <div key={index} className={`mines-cell ${isSafe ? 'mines-cell-safe' : isBomb ? 'mines-cell-bomb' : ''}`}>
-                      {isBomb ? '💣' : isSafe ? '💎' : <span style={{ fontSize: 13, opacity: 0.4 }}>{index + 1}</span>}
+                      {isBomb ? '💣' : isSafe ? '💎' : <span className="mines-cell-dot" />}
                     </div>
                   );
                 })}
-              </div>
+              </div></div>
             </div>
           </div>
         )}
@@ -2124,6 +2221,30 @@ export const HostScreen: React.FC = () => {
         )}
 
       </main>
+
+      {showIntro && (
+        <div
+          onClick={() => setShowIntro(false)}
+          style={{
+            position: 'fixed', inset: 0, zIndex: 100,
+            background: 'rgba(16, 12, 8, 0.92)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            padding: 32,
+          }}
+        >
+          <div onClick={e => e.stopPropagation()} style={{ width: 'min(1100px, 100%)', display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <video
+              src="/intro.mp4"
+              controls
+              autoPlay
+              style={{ width: '100%', borderRadius: 20, boxShadow: '0 24px 80px rgba(0,0,0,0.6)', border: '1px solid var(--border-default)' }}
+            />
+            <button onClick={() => setShowIntro(false)} className="btn btn-secondary" style={{ alignSelf: 'center' }}>
+              Fermer
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
