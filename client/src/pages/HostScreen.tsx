@@ -132,6 +132,8 @@ export const HostScreen: React.FC = () => {
   const [room, setRoom] = useState<Room | null>(null);
   const [copied, setCopied] = useState(false);
   const [showIntro, setShowIntro] = useState(false);
+  const [gameIntro, setGameIntro] = useState<string | null>(null);
+  const prevStateRef = useRef<string | null>(null);
   const [isConnected, setIsConnected] = useState(socket.connected);
   const [phaseSeconds, setPhaseSeconds] = useState(0);
 
@@ -152,6 +154,15 @@ export const HostScreen: React.FC = () => {
       setTrend('same');
     }
   }, [room?.state, room?.crashRound]);
+
+  // Vidéo d'explication diffusée à l'entrée dans chaque jeu.
+  const GAME_INTROS: Record<string, string> = {
+    playing_roulette: '/games/roulette.mp4',
+    playing_crash: '/games/avion.mp4',
+    playing_blackjack: '/games/blackjack.mp4',
+    playing_mines: '/games/mines.mp4',
+    playing_derby: '/games/derby.mp4',
+  };
 
   const createdRef = useRef(false);
   const roomIdRef = useRef<string | null>(null);
@@ -185,6 +196,7 @@ export const HostScreen: React.FC = () => {
 
     socket.on('room_created', ({ room }: { room: Room }) => {
       roomIdRef.current = room.id;
+      prevStateRef.current = 'lobby';
       setRoom(room);
     });
 
@@ -200,6 +212,15 @@ export const HostScreen: React.FC = () => {
     socket.on('crash_update', handleCrashUpdate);
 
     socket.on('room_updated', ({ room: updatedRoom }: { room: Room }) => {
+      const cameFrom = prevStateRef.current;
+      if (
+        GAME_INTROS[updatedRoom.state] &&
+        cameFrom !== updatedRoom.state &&
+        (cameFrom === null || cameFrom === 'lobby' || cameFrom === 'voting' || cameFrom === 'drinking_phase')
+      ) {
+        setGameIntro(GAME_INTROS[updatedRoom.state]);
+      }
+      prevStateRef.current = updatedRoom.state;
       setRoom(prev => {
         if (prev && updatedRoom.state === 'lobby' && updatedRoom.players.length > prev.players.length) {
           confetti({ particleCount: 30, spread: 55, origin: { y: 0.8 }, colors: ['#5cc963', '#ffb629'] });
@@ -2221,6 +2242,35 @@ export const HostScreen: React.FC = () => {
         )}
 
       </main>
+
+      {gameIntro && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 90,
+          background: 'rgba(16, 12, 8, 0.94)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          padding: 32,
+        }}>
+          <div style={{ width: 'min(1100px, 100%)', display: 'flex', flexDirection: 'column', gap: 14 }}>
+            <video
+              key={gameIntro}
+              src={gameIntro}
+              autoPlay
+              muted
+              playsInline
+              onEnded={() => setGameIntro(null)}
+              style={{ width: '100%', borderRadius: 20, boxShadow: '0 24px 80px rgba(0,0,0,0.6)', border: '1px solid var(--border-default)' }}
+            />
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <span style={{ fontSize: 14, color: 'var(--text-secondary)' }}>
+                📱 Les mises sont déjà ouvertes sur vos téléphones !
+              </span>
+              <button onClick={() => setGameIntro(null)} className="btn btn-secondary">
+                Passer ▸
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {showIntro && (
         <div

@@ -5,7 +5,8 @@
   "description": "Vidéo d'intro du Casino à Boire (rendu Remotion)",
   "scripts": {
     "studio": "remotion studio src/index.ts",
-    "render": "remotion render src/index.ts CasinoIntro ../client/public/intro.mp4 --codec h264"
+    "render": "remotion render src/index.ts CasinoIntro ../client/public/intro.mp4 --codec h264",
+    "render-games": "remotion render src/index.ts GameRoulette ../client/public/games/roulette.mp4 --codec h264 && remotion render src/index.ts GameAvion ../client/public/games/avion.mp4 --codec h264 && remotion render src/index.ts GameBlackjack ../client/public/games/blackjack.mp4 --codec h264 && remotion render src/index.ts GameMines ../client/public/games/mines.mp4 --codec h264 && remotion render src/index.ts GameDerby ../client/public/games/derby.mp4 --codec h264"
   },
   "dependencies": {
     "@remotion/cli": "^4.0.0",
