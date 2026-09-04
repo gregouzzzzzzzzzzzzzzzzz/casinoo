@@ -88,7 +88,7 @@ const Avatar: React.FC<{ name: string; size?: number }> = ({ name, size = 32 }) 
   <div style={{
     width: size, height: size, borderRadius: 6, flexShrink: 0,
     background: avatarColor(name), display: 'flex', alignItems: 'center',
-    justifyContent: 'center', fontSize: size * 0.44, fontWeight: 800, color: '#fff',
+    justifyContent: 'center', fontSize: size * 0.44, fontWeight: 700, color: '#fff',
   }}>
     {name.charAt(0).toUpperCase()}
   </div>
@@ -487,7 +487,7 @@ export const PhoneScreen: React.FC = () => {
             </div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <span style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-primary)' }}>
+            <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>
               {joinedPlayer.balance}
             </span>
             <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>💰</span>
@@ -535,7 +535,7 @@ export const PhoneScreen: React.FC = () => {
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
               <Crown size={14} color="var(--gold)" />
-              <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: '0.07em', textTransform: 'uppercase', color: 'var(--gold)' }}>
+              <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', color: 'var(--gold)' }}>
                 Contrôles Chef de Table
               </span>
             </div>
@@ -734,6 +734,16 @@ export const PhoneScreen: React.FC = () => {
                 {isLoading ? 'Connexion...' : 'Rejoindre la table'}
               </button>
             </div>
+
+            <div className="marquee-band" aria-hidden="true" style={{ margin: '18px -16px 0' }}>
+              <div className="marquee-track">
+                <span>SANTÉ ✦ TCHIN ✦ CHEERS ✦ SALUD ✦ PROST ✦ SKÅL ✦ KANPAI ✦ SLÁINTE ✦ </span><span>SANTÉ ✦ TCHIN ✦ CHEERS ✦ SALUD ✦ PROST ✦ SKÅL ✦ KANPAI ✦ SLÁINTE ✦ </span>
+              </div>
+            </div>
+
+            <p style={{ textAlign: 'center', fontSize: 11, color: 'var(--text-dim)', marginTop: 14 }}>
+              Un jeu <span style={{ fontFamily: 'var(--font-display)', color: 'rgba(255,182,41,0.55)' }}>SIP SIP STUDIO</span> · À consommer avec modération
+            </p>
           </form>
         )}
 
@@ -747,7 +757,7 @@ export const PhoneScreen: React.FC = () => {
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                   <Avatar name={joinedPlayer.name} size={36} />
                   <div>
-                    <div style={{ fontWeight: 800, fontSize: 16 }}>{joinedPlayer.name}</div>
+                    <div style={{ fontWeight: 700, fontSize: 16 }}>{joinedPlayer.name}</div>
                     <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>
                       Table · <strong style={{ color: 'var(--text-primary)' }}>{currentRoom?.id}</strong>
                     </div>
@@ -793,7 +803,7 @@ export const PhoneScreen: React.FC = () => {
                 <div className="card animate-in" style={{ padding: '18px 16px', display: 'flex', flexDirection: 'column', gap: 14 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     <Sliders size={18} color="var(--gold)" />
-                    <h2 style={{ fontSize: 16, fontWeight: 900, margin: 0 }}>Configuration de la Table</h2>
+                    <h2 style={{ fontSize: 16, fontWeight: 700, margin: 0 }}>Configuration de la Table</h2>
                   </div>
 
                   <div className="divider" />
@@ -812,7 +822,7 @@ export const PhoneScreen: React.FC = () => {
                       >
                         <Minus size={13} />
                       </button>
-                      <span style={{ fontSize: 15, fontWeight: 900, minWidth: 42, textAlign: 'center', color: 'var(--green)' }}>
+                      <span style={{ fontSize: 15, fontWeight: 700, minWidth: 42, textAlign: 'center', color: 'var(--green)' }}>
                         {s.startingBalance} 💰
                       </span>
                       <button
@@ -838,7 +848,7 @@ export const PhoneScreen: React.FC = () => {
                           type="button"
                           onClick={() => handleUpdateSettings({ sipMultiplier: mult })}
                           className={`btn btn-sm ${s.sipMultiplier === mult ? 'btn-red' : 'btn-secondary'}`}
-                          style={{ padding: '5px 10px', fontSize: 12, fontWeight: 800 }}
+                          style={{ padding: '5px 10px', fontSize: 12, fontWeight: 700 }}
                         >
                           ×{mult} 🍺
                         </button>
@@ -860,7 +870,7 @@ export const PhoneScreen: React.FC = () => {
                       >
                         <Minus size={13} />
                       </button>
-                      <span style={{ fontSize: 15, fontWeight: 900, minWidth: 42, textAlign: 'center', color: '#f2696d' }}>
+                      <span style={{ fontSize: 15, fontWeight: 700, minWidth: 42, textAlign: 'center', color: '#f2696d' }}>
                         {s.minesBombCount} 💣
                       </span>
                       <button
@@ -879,7 +889,7 @@ export const PhoneScreen: React.FC = () => {
                       <span style={{ fontSize: 11, color: 'var(--text-secondary)' }}>Max Joueurs</span>
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                         <button type="button" onClick={() => handleUpdateSettings({ maxPlayers: Math.max(2, s.maxPlayers - 1) })} className="btn btn-secondary btn-sm" style={{ padding: '4px 6px' }}><Minus size={11} /></button>
-                        <span style={{ fontWeight: 800, fontSize: 13 }}>{s.maxPlayers}</span>
+                        <span style={{ fontWeight: 700, fontSize: 13 }}>{s.maxPlayers}</span>
                         <button type="button" onClick={() => handleUpdateSettings({ maxPlayers: Math.min(16, s.maxPlayers + 1) })} className="btn btn-secondary btn-sm" style={{ padding: '4px 6px' }}><Plus size={11} /></button>
                       </div>
                     </div>
@@ -888,7 +898,7 @@ export const PhoneScreen: React.FC = () => {
                       <span style={{ fontSize: 11, color: 'var(--text-secondary)' }}>Max Manches</span>
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                         <button type="button" onClick={() => handleUpdateSettings({ maxRounds: Math.max(3, s.maxRounds - 1) })} className="btn btn-secondary btn-sm" style={{ padding: '4px 6px' }}><Minus size={11} /></button>
-                        <span style={{ fontWeight: 800, fontSize: 13 }}>{s.maxRounds} 🏁</span>
+                        <span style={{ fontWeight: 700, fontSize: 13 }}>{s.maxRounds} 🏁</span>
                         <button type="button" onClick={() => handleUpdateSettings({ maxRounds: Math.min(30, s.maxRounds + 1) })} className="btn btn-secondary btn-sm" style={{ padding: '4px 6px' }}><Plus size={11} /></button>
                       </div>
                     </div>
@@ -979,7 +989,7 @@ export const PhoneScreen: React.FC = () => {
         {joinedPlayer && currentRoom?.state === 'voting' && (
           <div className="card animate-in" style={{ padding: '20px 16px' }}>
             <div className="label-xs" style={{ marginBottom: 6 }}>VOTE · MANCHE {currentRoom.currentRound || 1}</div>
-            <h2 style={{ fontSize: 20, fontWeight: 800, marginBottom: 16 }}>Faites votre choix</h2>
+            <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 16 }}>Faites votre choix</h2>
 
             {myVote ? (
               <div style={{
@@ -1005,37 +1015,43 @@ export const PhoneScreen: React.FC = () => {
                 ? currentRoom.currentVoteOptions
                 : (currentRoom.settings?.enabledGames || ['mines', 'blackjack']).slice(0, 2);
 
-              const GAME_DETAILS: Record<string, { label: string; btnClass: string }> = {
-                mines: { label: '💣 Les Mines (Grille 6x6)', btnClass: 'btn-primary' },
-                blackjack: { label: '♠ Le Blackjack (Casino)', btnClass: 'btn-secondary' },
-                crash: { label: '📈 Le Krach Boursier (Trading)', btnClass: 'btn-gold' },
-                roulette: { label: '🎡 La Roulette', btnClass: 'btn-secondary' },
-                derby: { label: '🐎 Le Derby (Course Hippique)', btnClass: 'btn-primary' },
+              const GAME_DETAILS: Record<string, { emoji: string; name: string; sub: string }> = {
+                mines: { emoji: '💣', name: 'Les Mines', sub: 'Grille piégée 6×6' },
+                blackjack: { emoji: '♠️', name: 'Le Blackjack', sub: 'Battez le croupier' },
+                crash: { emoji: '📈', name: 'Le Krach', sub: 'Vendez avant la chute' },
+                roulette: { emoji: '🎡', name: 'La Roulette', sub: 'Rouge, noir ou vert' },
+                derby: { emoji: '🐎', name: 'Le Derby', sub: 'Pariez sur un canasson' },
               };
 
               return (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                  {voteOptions.map((gameKey) => {
-                    const detail = GAME_DETAILS[gameKey] || { label: gameKey, btnClass: 'btn-secondary' };
-                    return (
-                      <button
-                        key={gameKey}
-                        onClick={() => handleVote(gameKey)}
-                        className={`btn ${detail.btnClass} btn-full btn-lg`}
-                        style={{ padding: '16px', fontSize: 16 }}
-                      >
-                        {detail.label}
-                      </button>
-                    );
-                  })}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  <div style={{ position: 'relative', display: 'grid', gridTemplateColumns: voteOptions.length > 1 ? '1fr 1fr' : '1fr', gap: 10 }}>
+                    {voteOptions.map((gameKey) => {
+                      const detail = GAME_DETAILS[gameKey] || { emoji: '🎲', name: gameKey, sub: '' };
+                      return (
+                        <button
+                          key={gameKey}
+                          onClick={() => handleVote(gameKey)}
+                          className="vote-duel-card"
+                        >
+                          <span style={{ fontSize: 44, lineHeight: 1 }}>{detail.emoji}</span>
+                          <span style={{ fontFamily: 'var(--font-display)', fontSize: 17, color: 'var(--text-primary)' }}>{detail.name}</span>
+                          <span style={{ fontSize: 11.5, color: 'var(--text-secondary)', lineHeight: 1.3 }}>{detail.sub}</span>
+                        </button>
+                      );
+                    })}
+                    {voteOptions.length === 2 && (
+                      <span className="vote-vs-badge" aria-hidden="true">VS</span>
+                    )}
+                  </div>
 
                   {canEndGame && (
                     <button
                       onClick={() => handleVote('end_game')}
-                      className="btn btn-red btn-full btn-lg"
-                      style={{ marginTop: 4, padding: '14px' }}
+                      className="btn btn-red btn-full"
+                      style={{ marginTop: 2, padding: '12px' }}
                     >
-                      🛑 TERMINER LA PARTIE
+                      🛑 Terminer la partie
                     </button>
                   )}
                 </div>
@@ -1054,7 +1070,7 @@ export const PhoneScreen: React.FC = () => {
           <div className="card animate-in" style={{ padding: '20px 16px', display: 'flex', flexDirection: 'column', gap: 16 }}>
             <div>
               <div className="label-xs" style={{ marginBottom: 4, color: 'var(--gold)' }}>CASINO ROYALE · ROULETTE</div>
-              <h2 style={{ fontSize: 22, fontWeight: 900, margin: 0 }}>Placez votre mise</h2>
+              <h2 style={{ fontSize: 22, fontWeight: 700, margin: 0 }}>Placez votre mise</h2>
             </div>
 
             {hasBet ? (
@@ -1071,7 +1087,7 @@ export const PhoneScreen: React.FC = () => {
               }}>
                 <CheckCircle2 size={36} color="var(--green)" />
                 <div>
-                  <div style={{ fontWeight: 900, fontSize: 18, color: 'var(--green)' }}>Mise validée !</div>
+                  <div style={{ fontWeight: 700, fontSize: 18, color: 'var(--green)' }}>Mise validée !</div>
                   <div style={{ fontSize: 14, color: 'var(--text-secondary)', marginTop: 4 }}>
                     {betAmount} 💰 placés sur {betColor === 'red' ? '🔴 ROUGE' : betColor === 'black' ? '⚫ NOIR' : '🟢 ZÉRO'}
                   </div>
@@ -1096,7 +1112,7 @@ export const PhoneScreen: React.FC = () => {
                       value={betAmount}
                       onChange={e => setBetAmount(clampBet(parseInt(e.target.value) || 1))}
                       className="input"
-                      style={{ textAlign: 'center', fontSize: 22, fontWeight: 900, flex: 1 }}
+                      style={{ textAlign: 'center', fontSize: 22, fontWeight: 700, flex: 1 }}
                       required
                     />
                     <button type="button" onClick={() => setBetAmount(clampBet(betAmount + 1))} className="btn btn-secondary btn-sm" style={{ padding: '10px 14px' }}>
@@ -1115,7 +1131,7 @@ export const PhoneScreen: React.FC = () => {
                         style={{
                           flex: 1,
                           fontSize: 12,
-                          fontWeight: 800,
+                          fontWeight: 700,
                           padding: '6px 4px',
                           border: betAmount === val ? '1px solid var(--green)' : undefined,
                           color: betAmount === val ? 'var(--green)' : undefined,
@@ -1135,7 +1151,7 @@ export const PhoneScreen: React.FC = () => {
                       type="button"
                       onClick={() => setBetColor('red')}
                       className={`color-btn color-btn-red ${betColor === 'red' ? 'active' : ''}`}
-                      style={{ padding: '16px 8px', fontSize: 15, fontWeight: 900 }}
+                      style={{ padding: '16px 8px', fontSize: 15, fontWeight: 700 }}
                     >
                       🔴 ROUGE (×2)
                     </button>
@@ -1143,7 +1159,7 @@ export const PhoneScreen: React.FC = () => {
                       type="button"
                       onClick={() => setBetColor('black')}
                       className={`color-btn color-btn-black ${betColor === 'black' ? 'active' : ''}`}
-                      style={{ padding: '16px 8px', fontSize: 15, fontWeight: 900 }}
+                      style={{ padding: '16px 8px', fontSize: 15, fontWeight: 700 }}
                     >
                       ⚫ NOIR (×2)
                     </button>
@@ -1152,13 +1168,13 @@ export const PhoneScreen: React.FC = () => {
                     type="button"
                     onClick={() => setBetColor('green')}
                     className={`color-btn color-btn-green-roulette ${betColor === 'green' ? 'active' : ''}`}
-                    style={{ padding: '12px', fontSize: 14, fontWeight: 900 }}
+                    style={{ padding: '12px', fontSize: 14, fontWeight: 700 }}
                   >
                     🟢 LE ZÉRO (×36)
                   </button>
                 </div>
 
-                <button type="submit" className="btn btn-primary btn-full btn-lg" style={{ fontSize: 16, fontWeight: 900, padding: 16 }}>
+                <button type="submit" className="btn btn-primary btn-full btn-lg" style={{ fontSize: 16, fontWeight: 700, padding: 16 }}>
                   Miser {betAmount} 💰 sur {betColor === 'red' ? 'ROUGE' : betColor === 'black' ? 'NOIR' : 'ZÉRO'}
                 </button>
               </form>
@@ -1190,7 +1206,7 @@ export const PhoneScreen: React.FC = () => {
                 <div className="label-xs" style={{ color: 'var(--gold)', letterSpacing: '0.15em', marginBottom: 6 }}>
                   TIRAGE EN DIRECT
                 </div>
-                <h2 style={{ fontSize: 24, fontWeight: 900, margin: 0, color: '#ffffff' }}>
+                <h2 style={{ fontSize: 24, fontWeight: 700, margin: 0, color: '#ffffff' }}>
                   Rien ne va plus !
                 </h2>
                 <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 6 }}>
@@ -1207,7 +1223,7 @@ export const PhoneScreen: React.FC = () => {
                   width: '100%',
                 }}>
                   <div className="label-xs" style={{ marginBottom: 4 }}>VOTRE MISE</div>
-                  <div style={{ fontSize: 16, fontWeight: 800 }}>
+                  <div style={{ fontSize: 16, fontWeight: 700 }}>
                     {myBet.amount} 💰 sur {myBet.color === 'red' ? '🔴 ROUGE' : myBet.color === 'black' ? '⚫ NOIR' : '🟢 ZÉRO'}
                   </div>
                 </div>
@@ -1247,7 +1263,7 @@ export const PhoneScreen: React.FC = () => {
                 background: wc === 'red' ? '#dc2626' : wc === 'black' ? '#18181b' : '#059669',
                 border: '3px solid #ffffff',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: 32, fontWeight: 900, color: '#ffffff',
+                fontSize: 32, fontWeight: 700, color: '#ffffff',
                 boxShadow: '0 6px 20px rgba(0,0,0,0.5)',
               }}>
                 {wn}
@@ -1255,7 +1271,7 @@ export const PhoneScreen: React.FC = () => {
 
               <div>
                 <div className="label-xs" style={{ marginBottom: 4 }}>NUMÉRO TIRÉ</div>
-                <h3 style={{ fontSize: 20, fontWeight: 900, margin: 0 }}>
+                <h3 style={{ fontSize: 20, fontWeight: 700, margin: 0 }}>
                   {wc === 'red' ? '🔴 ROUGE' : wc === 'black' ? '⚫ NOIR' : '🟢 ZÉRO'} ({wn})
                 </h3>
               </div>
@@ -1271,10 +1287,10 @@ export const PhoneScreen: React.FC = () => {
                     width: '100%',
                   }}>
                     <div style={{ fontSize: 32 }}>🎉</div>
-                    <div style={{ fontSize: 20, fontWeight: 900, color: 'var(--green)', marginTop: 4 }}>
+                    <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--green)', marginTop: 4 }}>
                       VICTOIRE !
                     </div>
-                    <div style={{ fontSize: 16, fontWeight: 800, marginTop: 4 }}>
+                    <div style={{ fontSize: 16, fontWeight: 700, marginTop: 4 }}>
                       +{myRound.netGain} 💰 ajoutés à votre solde !
                     </div>
                   </div>
@@ -1287,10 +1303,10 @@ export const PhoneScreen: React.FC = () => {
                     width: '100%',
                   }}>
                     <div style={{ fontSize: 32 }}>🍺</div>
-                    <div style={{ fontSize: 20, fontWeight: 900, color: '#ef4444', marginTop: 4 }}>
+                    <div style={{ fontSize: 20, fontWeight: 700, color: '#ef4444', marginTop: 4 }}>
                       C'EST PERDU !
                     </div>
-                    <div style={{ fontSize: 16, fontWeight: 800, marginTop: 4 }}>
+                    <div style={{ fontSize: 16, fontWeight: 700, marginTop: 4 }}>
                       Vous devez boire {myRound.betAmount} gorgée{myRound.betAmount > 1 ? 's' : ''} !
                     </div>
                   </div>
@@ -1309,7 +1325,7 @@ export const PhoneScreen: React.FC = () => {
         {/* ═══════════════════════════════════════════════════════ */}
         {joinedPlayer && currentRoom?.state === 'playing_crash' && (
           <div className="card animate-in" style={{ padding: '20px 16px' }}>
-            <h2 style={{ fontSize: 20, fontWeight: 800, marginBottom: 16 }}>Placer votre capital (Crash)</h2>
+            <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 16 }}>Placer votre capital (Crash)</h2>
             {hasCrashBet ? (
               <div style={{ background: 'var(--green-subtle)', borderRadius: 8, padding: 16, textAlign: 'center' }}>
                 <CheckCircle2 size={24} color="var(--green)" style={{ margin: '0 auto 6px' }} />
@@ -1317,7 +1333,7 @@ export const PhoneScreen: React.FC = () => {
               </div>
             ) : (
               <form onSubmit={handleCrashBetSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-                <input type="number" min={1} max={maxBet} value={crashBetAmount} onChange={e => setCrashBetAmount(clampBet(parseInt(e.target.value) || 1))} className="input" style={{ textAlign: 'center', fontSize: 18, fontWeight: 800 }} required />
+                <input type="number" min={1} max={maxBet} value={crashBetAmount} onChange={e => setCrashBetAmount(clampBet(parseInt(e.target.value) || 1))} className="input" style={{ textAlign: 'center', fontSize: 18, fontWeight: 700 }} required />
                 <button type="submit" className="btn btn-primary btn-full btn-lg">Investir {crashBetAmount} 💰</button>
               </form>
             )}
@@ -1326,16 +1342,16 @@ export const PhoneScreen: React.FC = () => {
 
         {joinedPlayer && currentRoom?.state === 'crash_flying' && (
           <div className="card animate-in" style={{ padding: '24px 18px', textAlign: 'center', display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <div style={{ fontSize: 56, fontWeight: 900, color: crashTrend === 'up' ? 'var(--green)' : crashTrend === 'down' ? '#f2696d' : 'var(--text-primary)' }}>
+            <div style={{ fontSize: 56, fontWeight: 700, color: crashTrend === 'up' ? 'var(--green)' : crashTrend === 'down' ? '#f2696d' : 'var(--text-primary)' }}>
               {(currentRoom.crashMultiplier || liveCrashMultiplier || 1.00).toFixed(2)}x
             </div>
             {joinedPlayer.cashOutMultiplier ? (
               <div style={{ background: 'var(--green-subtle)', borderRadius: 8, padding: 14 }}>
                 <CheckCircle2 size={28} color="var(--green)" style={{ margin: '0 auto 6px' }} />
-                <div style={{ fontWeight: 800, color: 'var(--green)' }}>Vendu à {joinedPlayer.cashOutMultiplier.toFixed(2)}x ! 🎉</div>
+                <div style={{ fontWeight: 700, color: 'var(--green)' }}>Vendu à {joinedPlayer.cashOutMultiplier.toFixed(2)}x ! 🎉</div>
               </div>
             ) : myCrashBet > 0 ? (
-              <button onClick={handleCashOut} className="btn btn-primary btn-full animate-green-pulse" style={{ fontSize: 18, fontWeight: 900, padding: '18px 20px' }}>
+              <button onClick={handleCashOut} className="btn btn-primary btn-full animate-green-pulse" style={{ fontSize: 18, fontWeight: 700, padding: '18px 20px' }}>
                 VENDRE SES ACTIONS ! (+{currentPotentialReturn - myCrashBet} 💰)
               </button>
             ) : null}
@@ -1347,7 +1363,7 @@ export const PhoneScreen: React.FC = () => {
         {/* ═══════════════════════════════════════════════════════ */}
         {joinedPlayer && currentRoom?.state === 'playing_blackjack' && (
           <div className="card animate-in" style={{ padding: '20px 16px' }}>
-            <h2 style={{ fontSize: 20, fontWeight: 800, marginBottom: 16 }}>Mise Blackjack ♠</h2>
+            <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 16 }}>Mise Blackjack ♠</h2>
             {hasBlackjackBet ? (
               <div style={{ background: 'var(--green-subtle)', borderRadius: 8, padding: 16, textAlign: 'center' }}>
                 <CheckCircle2 size={24} color="var(--green)" style={{ margin: '0 auto 6px' }} />
@@ -1355,7 +1371,7 @@ export const PhoneScreen: React.FC = () => {
               </div>
             ) : (
               <form onSubmit={handleBlackjackBetSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-                <input type="number" min={1} max={maxBet} value={blackjackBetAmount} onChange={e => setBlackjackBetAmount(clampBet(parseInt(e.target.value) || 1))} className="input" style={{ textAlign: 'center', fontSize: 18, fontWeight: 800 }} required />
+                <input type="number" min={1} max={maxBet} value={blackjackBetAmount} onChange={e => setBlackjackBetAmount(clampBet(parseInt(e.target.value) || 1))} className="input" style={{ textAlign: 'center', fontSize: 18, fontWeight: 700 }} required />
                 <button type="submit" className="btn btn-primary btn-full btn-lg">Miser {blackjackBetAmount} 💰</button>
               </form>
             )}
@@ -1364,7 +1380,7 @@ export const PhoneScreen: React.FC = () => {
 
         {joinedPlayer && (currentRoom?.state === 'blackjack_playing' || currentRoom?.state === 'blackjack_dealer_turn') && (
           <div className="card animate-in" style={{ padding: '20px 16px', display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <div style={{ fontSize: 20, fontWeight: 900 }}>Score : {myScore}</div>
+            <div style={{ fontSize: 20, fontWeight: 700 }}>Score : {myScore}</div>
             <div style={{ background: 'var(--bg-input)', borderRadius: 8, padding: 16, display: 'flex', gap: 8, justifyContent: 'center' }}>
               {joinedPlayer.hand?.map((c, i) => <PlayingCard key={i} card={c} size="lg" />)}
             </div>
@@ -1382,7 +1398,7 @@ export const PhoneScreen: React.FC = () => {
         {/* ═══════════════════════════════════════════════════════ */}
         {joinedPlayer && currentRoom?.state === 'playing_mines' && (
           <div className="card animate-in" style={{ padding: '20px 16px' }}>
-            <h2 style={{ fontSize: 20, fontWeight: 800, marginBottom: 16 }}>Mise Les Mines 💣</h2>
+            <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 16 }}>Mise Les Mines 💣</h2>
             {hasMinesBet ? (
               <div style={{ background: 'var(--green-subtle)', borderRadius: 8, padding: 16, textAlign: 'center' }}>
                 <CheckCircle2 size={24} color="var(--green)" style={{ margin: '0 auto 6px' }} />
@@ -1390,7 +1406,7 @@ export const PhoneScreen: React.FC = () => {
               </div>
             ) : (
               <form onSubmit={handleMinesBetSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-                <input type="number" min={1} max={maxBet} value={minesBetAmount} onChange={e => setMinesBetAmount(clampBet(parseInt(e.target.value) || 1))} className="input" style={{ textAlign: 'center', fontSize: 18, fontWeight: 800 }} required />
+                <input type="number" min={1} max={maxBet} value={minesBetAmount} onChange={e => setMinesBetAmount(clampBet(parseInt(e.target.value) || 1))} className="input" style={{ textAlign: 'center', fontSize: 18, fontWeight: 700 }} required />
                 <button type="submit" className="btn btn-primary btn-full btn-lg">Miser {minesBetAmount} 💰</button>
               </form>
             )}
@@ -1402,7 +1418,7 @@ export const PhoneScreen: React.FC = () => {
             {isMyTurnInMines ? (
               <div style={{ background: 'var(--green-subtle)', border: '2px solid var(--green)', borderRadius: 8, padding: 12, textAlign: 'center' }}>
                 <div className="label-xs" style={{ color: 'var(--green)' }}>C'EST TON TOUR !</div>
-                <div style={{ fontSize: 18, fontWeight: 900 }}>Touche une case non découverte 💎</div>
+                <div style={{ fontSize: 18, fontWeight: 700 }}>Touche une case non découverte 💎</div>
               </div>
             ) : (
               <div style={{ background: 'var(--bg-surface)', borderRadius: 8, padding: 12, display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -1446,7 +1462,7 @@ export const PhoneScreen: React.FC = () => {
         {joinedPlayer && currentRoom?.state === 'playing_derby' && (
           <div className="card animate-in" style={{ padding: '20px 16px', display: 'flex', flexDirection: 'column', gap: 14 }}>
             <div className="label-xs" style={{ color: 'var(--gold)' }}>LE DERBY · PARIS HIPPIQUES</div>
-            <h2 style={{ fontSize: 20, fontWeight: 900, margin: 0 }}>Choisis ton champion 🐎</h2>
+            <h2 style={{ fontSize: 20, fontWeight: 700, margin: 0 }}>Choisis ton champion 🐎</h2>
 
             {hasDerbyBet || (joinedPlayer.derbyBet && joinedPlayer.derbyBet.amount > 0) ? (
               <div style={{
@@ -1457,7 +1473,7 @@ export const PhoneScreen: React.FC = () => {
                 display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, textAlign: 'center',
               }}>
                 <CheckCircle2 size={32} color="var(--green)" />
-                <div style={{ fontWeight: 800, fontSize: 16, color: 'var(--green)' }}>Pari Validé !</div>
+                <div style={{ fontWeight: 700, fontSize: 16, color: 'var(--green)' }}>Pari Validé !</div>
                 <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
                   Mise de <strong>{joinedPlayer.derbyBet?.amount || derbyBetAmount} 💰</strong> sur le <strong>{
                     (currentRoom.derbyHorses || [
@@ -1503,7 +1519,7 @@ export const PhoneScreen: React.FC = () => {
                         }}
                       >
                         <span style={{ fontSize: 24 }}>{horse.emoji}</span>
-                        <span style={{ fontSize: 12, fontWeight: 800, color: horse.color, textAlign: 'center' }}>
+                        <span style={{ fontSize: 12, fontWeight: 700, color: horse.color, textAlign: 'center' }}>
                           {horse.name}
                         </span>
                       </button>
@@ -1515,7 +1531,7 @@ export const PhoneScreen: React.FC = () => {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <label className="field-label" style={{ margin: 0 }}>Montant du pari</label>
-                    <span style={{ fontSize: 15, fontWeight: 900, color: 'var(--green)' }}>{derbyBetAmount} 💰</span>
+                    <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--green)' }}>{derbyBetAmount} 💰</span>
                   </div>
 
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -1533,7 +1549,7 @@ export const PhoneScreen: React.FC = () => {
                       value={derbyBetAmount}
                       onChange={e => setDerbyBetAmount(clampBet(parseInt(e.target.value) || 1))}
                       className="input"
-                      style={{ textAlign: 'center', fontSize: 18, fontWeight: 800 }}
+                      style={{ textAlign: 'center', fontSize: 18, fontWeight: 700 }}
                       required
                     />
                     <button
@@ -1577,13 +1593,13 @@ export const PhoneScreen: React.FC = () => {
                 <div className="label-xs" style={{ color: 'var(--gold)', letterSpacing: '0.12em' }}>
                   HIPPODROME EN DIRECT · 1 TOUR UNIQUE (360°)
                 </div>
-                <h2 style={{ fontSize: 24, fontWeight: 900, color: '#ffffff', marginTop: 4 }}>
+                <h2 style={{ fontSize: 24, fontWeight: 700, color: '#ffffff', marginTop: 4 }}>
                   {percent >= 80 ? '⚡ DERNIÈRE LIGNE DROITE !' : percent >= 45 ? 'Mi-course !' : 'La course est lancée ! 🏁'}
                 </h2>
 
                 {chosenHorse ? (
                   <div style={{ marginTop: 10 }}>
-                    <div style={{ fontSize: 18, fontWeight: 900, color: chosenHorse.color }}>
+                    <div style={{ fontSize: 18, fontWeight: 700, color: chosenHorse.color }}>
                       {chosenHorse.emoji} {chosenHorse.name}
                     </div>
 
@@ -1595,7 +1611,7 @@ export const PhoneScreen: React.FC = () => {
                         padding: '6px 10px',
                         marginTop: 8,
                         color: '#fef3c7',
-                        fontWeight: 800,
+                        fontWeight: 700,
                         fontSize: 13,
                         animation: 'pulse 1s infinite',
                       }}>
@@ -1610,7 +1626,7 @@ export const PhoneScreen: React.FC = () => {
                         padding: '6px 10px',
                         marginTop: 8,
                         color: '#fca5a5',
-                        fontWeight: 800,
+                        fontWeight: 700,
                         fontSize: 13,
                       }}>
                         💨 Coup de fatigue... Accroche-toi !
@@ -1667,7 +1683,7 @@ export const PhoneScreen: React.FC = () => {
               </div>
 
               <div>
-                <h2 style={{ fontSize: 22, fontWeight: 900, color: won ? 'var(--green)' : '#f2696d' }}>
+                <h2 style={{ fontSize: 22, fontWeight: 700, color: won ? 'var(--green)' : '#f2696d' }}>
                   {won ? 'PARI GAGNÉ ! 🎉' : 'PARI PERDU...'}
                 </h2>
                 <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 4 }}>
@@ -1679,14 +1695,14 @@ export const PhoneScreen: React.FC = () => {
                 {won ? (
                   <>
                     <span className="label-xs" style={{ color: 'var(--green)' }}>Gains crédités</span>
-                    <div style={{ fontSize: 26, fontWeight: 900, color: 'var(--green)', marginTop: 2 }}>
+                    <div style={{ fontSize: 26, fontWeight: 700, color: 'var(--green)', marginTop: 2 }}>
                       +{myResult?.netGain || 0} 💰
                     </div>
                   </>
                 ) : (
                   <>
                     <span className="label-xs" style={{ color: '#f2696d' }}>Pénalité à boire</span>
-                    <div style={{ fontSize: 26, fontWeight: 900, color: '#f2696d', marginTop: 2 }}>
+                    <div style={{ fontSize: 26, fontWeight: 700, color: '#f2696d', marginTop: 2 }}>
                       +{myResult?.sipsToDrink || 0} 🍺
                     </div>
                   </>
@@ -1718,7 +1734,7 @@ export const PhoneScreen: React.FC = () => {
             </div>
 
             <div>
-              <h2 style={{ fontSize: 24, fontWeight: 900, color: '#ffffff' }}>
+              <h2 style={{ fontSize: 24, fontWeight: 700, color: '#ffffff' }}>
                 Taxe Prélevée : <span style={{ color: '#f2696d' }}>{joinedPlayer.taxRate || 0}%</span>
               </h2>
               <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 4 }}>
@@ -1728,7 +1744,7 @@ export const PhoneScreen: React.FC = () => {
 
             <div style={{ background: 'var(--bg-input)', borderRadius: 8, padding: 14 }}>
               <span className="label-xs" style={{ color: 'var(--green)' }}>Solde restant à distribuer aux autres</span>
-              <div style={{ fontSize: 28, fontWeight: 900, color: 'var(--green)', marginTop: 2 }}>
+              <div style={{ fontSize: 28, fontWeight: 700, color: 'var(--green)', marginTop: 2 }}>
                 {joinedPlayer.distributableBalance || 0} 💰
               </div>
             </div>
@@ -1755,7 +1771,7 @@ export const PhoneScreen: React.FC = () => {
           return (
             <div className="card animate-in" style={{ padding: '20px 16px' }}>
               <div className="label-xs" style={{ marginBottom: 6, color: 'var(--gold)' }}>DISTRIBUTION FINALE</div>
-              <h2 style={{ fontSize: 20, fontWeight: 800, marginBottom: 4 }}>Répartis tout ton solde</h2>
+              <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 4 }}>Répartis tout ton solde</h2>
               <p style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 14 }}>
                 Tu dois allouer exactement <strong>{distributable}</strong> 🍺 entre tes adversaires.
               </p>
@@ -1763,7 +1779,7 @@ export const PhoneScreen: React.FC = () => {
               {me?.hasSubmittedFinalDistribution ? (
                 <div style={{ background: 'var(--green-subtle)', borderRadius: 8, padding: 16, textAlign: 'center' }}>
                   <CheckCircle2 size={28} color="var(--green)" style={{ margin: '0 auto 6px' }} />
-                  <div style={{ fontWeight: 800, color: 'var(--green)' }}>Distribution validée !</div>
+                  <div style={{ fontWeight: 700, color: 'var(--green)' }}>Distribution validée !</div>
                   <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 4 }}>
                     En attente des autres joueurs...
                   </div>
@@ -1810,7 +1826,7 @@ export const PhoneScreen: React.FC = () => {
                             <span style={{
                               minWidth: 32,
                               textAlign: 'center',
-                              fontWeight: 900,
+                              fontWeight: 700,
                               fontSize: 16,
                               color: currentAlloc > 0 ? 'var(--green)' : 'var(--text-secondary)',
                             }}>
@@ -1842,7 +1858,7 @@ export const PhoneScreen: React.FC = () => {
                     alignItems: 'center',
                   }}>
                     <span style={{ fontSize: 12, fontWeight: 600 }}>Total alloué</span>
-                    <span style={{ fontSize: 15, fontWeight: 900, color: isValid ? 'var(--green)' : totalAllocated > distributable ? '#f2696d' : 'var(--text-primary)' }}>
+                    <span style={{ fontSize: 15, fontWeight: 700, color: isValid ? 'var(--green)' : totalAllocated > distributable ? '#f2696d' : 'var(--text-primary)' }}>
                       {totalAllocated} / {distributable} 🍺
                     </span>
                   </div>
@@ -1878,7 +1894,7 @@ export const PhoneScreen: React.FC = () => {
             </div>
 
             <div>
-              <h2 style={{ fontSize: 24, fontWeight: 900, color: joinedPlayer.hasDrank ? 'var(--green)' : '#f2696d' }}>
+              <h2 style={{ fontSize: 24, fontWeight: 700, color: joinedPlayer.hasDrank ? 'var(--green)' : '#f2696d' }}>
                 {joinedPlayer.hasDrank
                   ? 'Santé ultime ! 🍻'
                   : `Tu dois boire ${joinedPlayer.sipsToDrink} gorgée${joinedPlayer.sipsToDrink > 1 ? 's' : ''} !`}
@@ -1905,7 +1921,7 @@ export const PhoneScreen: React.FC = () => {
         {joinedPlayer && currentRoom?.state === 'distribution' && (
           <div className="card animate-in" style={{ padding: '20px 16px' }}>
             <div className="label-xs" style={{ marginBottom: 6 }}>DISTRIBUTION DES GORGÉES</div>
-            <h2 style={{ fontSize: 20, fontWeight: 800, marginBottom: 4 }}>Donnez des gorgées</h2>
+            <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 4 }}>Donnez des gorgées</h2>
 
             {hasSentSips && sentSipsInfo ? (
               <div style={{ background: 'var(--green-subtle)', borderRadius: 8, padding: 14, textAlign: 'center' }}>
@@ -1923,7 +1939,7 @@ export const PhoneScreen: React.FC = () => {
                 </select>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <button type="button" onClick={() => setSipsAmount(Math.max(0, sipsAmount - 1))} className="btn btn-secondary btn-sm"><Minus size={14} /></button>
-                  <input type="number" min={0} max={maxSips} value={sipsAmount} onChange={e => setSipsAmount(Math.max(0, Math.min(maxSips, parseInt(e.target.value) || 0)))} className="input" style={{ textAlign: 'center', fontSize: 18, fontWeight: 800 }} required />
+                  <input type="number" min={0} max={maxSips} value={sipsAmount} onChange={e => setSipsAmount(Math.max(0, Math.min(maxSips, parseInt(e.target.value) || 0)))} className="input" style={{ textAlign: 'center', fontSize: 18, fontWeight: 700 }} required />
                   <button type="button" onClick={() => setSipsAmount(Math.min(maxSips, sipsAmount + 1))} className="btn btn-secondary btn-sm"><Plus size={14} /></button>
                 </div>
                 <button type="submit" disabled={!targetPlayerId || sipsAmount <= 0} className="btn btn-primary btn-full btn-lg">
@@ -1953,7 +1969,7 @@ export const PhoneScreen: React.FC = () => {
                 </div>
 
                 <div>
-                  <h2 style={{ fontSize: 24, fontWeight: 900, color: joinedPlayer.hasDrank ? 'var(--green)' : '#f2696d' }}>
+                  <h2 style={{ fontSize: 24, fontWeight: 700, color: joinedPlayer.hasDrank ? 'var(--green)' : '#f2696d' }}>
                     {joinedPlayer.hasDrank ? 'Santé ! 🍻' : `Tu dois boire ${joinedPlayer.sipsToDrink} gorgée${joinedPlayer.sipsToDrink > 1 ? 's' : ''} !`}
                   </h2>
                 </div>
@@ -1968,7 +1984,7 @@ export const PhoneScreen: React.FC = () => {
             ) : (
               <div style={{ padding: 12 }}>
                 <ShieldCheck size={36} color="var(--green)" style={{ margin: '0 auto 8px' }} />
-                <h2 style={{ fontSize: 22, fontWeight: 900, color: 'var(--green)' }}>Tu es sauf ! 🥳</h2>
+                <h2 style={{ fontSize: 22, fontWeight: 700, color: 'var(--green)' }}>Tu es sauf ! 🥳</h2>
               </div>
             )}
           </div>

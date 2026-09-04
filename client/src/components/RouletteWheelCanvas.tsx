@@ -352,7 +352,7 @@ export const RouletteWheelCanvas: React.FC<RouletteWheelCanvasProps> = ({
         ctx.rotate(midA + Math.PI / 2); // Oriente le texte vers l'extérieur
 
         ctx.fillStyle = '#ffffff';
-        ctx.font = `bold ${Math.round(R * 0.055)}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+        ctx.font = `600 ${Math.round(R * 0.055)}px Fredoka, "Avenir Next", sans-serif`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
@@ -499,7 +499,7 @@ export const RouletteWheelCanvas: React.FC<RouletteWheelCanvasProps> = ({
             color: '#ffffff',
             padding: '6px 16px',
             borderRadius: 20,
-            fontWeight: 900,
+            fontWeight: 700,
             fontSize: 18,
             boxShadow: '0 4px 15px rgba(0,0,0,0.6)',
             letterSpacing: '0.05em',

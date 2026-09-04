@@ -362,7 +362,7 @@ export const HostScreen: React.FC = () => {
               padding: '4px 12px',
               display: 'flex', alignItems: 'center', gap: 8,
             }}>
-              <span style={{ fontWeight: 900, fontSize: 20, letterSpacing: '0.18em', color: 'var(--text-primary)' }}>
+              <span style={{ fontWeight: 700, fontSize: 20, letterSpacing: '0.18em', color: 'var(--text-primary)' }}>
                 {room.id}
               </span>
               <button
@@ -421,7 +421,7 @@ export const HostScreen: React.FC = () => {
         {/* LOBBY                                                   */}
         {/* ═══════════════════════════════════════════════════════ */}
         {(!room || room.state === 'lobby') && (
-          <div style={{ display: 'grid', gridTemplateColumns: '300px 1fr 320px', gap: 16, flex: 1, alignItems: 'start' }}>
+          <div className="lobby-grid" style={{ flex: 1 }}>
             {/* Left Card: Join & Code */}
             <div className="card" style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 16 }}>
               <div>
@@ -437,14 +437,32 @@ export const HostScreen: React.FC = () => {
                 {copied ? 'Copié !' : 'Copier le code'}
               </button>
               <div className="divider" />
-              <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
-                <Crown size={16} color="var(--gold)" style={{ flexShrink: 0, marginTop: 2 }} />
-                <p style={{ fontSize: 12, lineHeight: 1.5, color: 'var(--text-secondary)' }}>
-                  {leaderPlayer
-                    ? <><span style={{ color: 'var(--gold)', fontWeight: 700 }}>{leaderPlayer.name}</span> configure la table et peut lancer la partie.</>
-                    : 'En attente du premier joueur (Chef de Groupe)...'}
-                </p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {[
+                  ['1', 'Ouvrez le site sur votre téléphone'],
+                  ['2', 'Entrez le code et un pseudo'],
+                  ['3', 'Le premier arrivé devient Chef de Table'],
+                ].map(([num, txt]) => (
+                  <div key={num} style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+                    <span style={{
+                      fontFamily: 'var(--font-display)', fontSize: 13,
+                      width: 24, height: 24, borderRadius: '50%', flexShrink: 0,
+                      background: 'var(--yellow)', color: 'var(--text-inverse)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      boxShadow: '0 2px 0 var(--orange-deep)',
+                    }}>{num}</span>
+                    <span style={{ fontSize: 12.5, color: 'var(--text-secondary)' }}>{txt}</span>
+                  </div>
+                ))}
               </div>
+              {leaderPlayer && (
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                  <Crown size={15} color="var(--gold)" style={{ flexShrink: 0 }} />
+                  <p style={{ fontSize: 12, lineHeight: 1.5, color: 'var(--text-secondary)', margin: 0 }}>
+                    <span style={{ color: 'var(--gold)', fontWeight: 600 }}>{leaderPlayer.name}</span> configure la table et lance la partie.
+                  </p>
+                </div>
+              )}
             </div>
 
             {/* Center Card: Players at table */}
@@ -461,9 +479,12 @@ export const HostScreen: React.FC = () => {
 
               {totalPlayers === 0 ? (
                 <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px 0', gap: 8 }}>
-                  <Users size={32} color="var(--text-dim)" />
-                  <p style={{ fontSize: 13, color: 'var(--text-dim)', textAlign: 'center' }}>
-                    Aucun joueur connecté.<br />Partagez le code pour commencer.
+                  <span style={{ fontSize: 44 }} className="animate-bounce">🍻</span>
+                  <p style={{ fontFamily: 'var(--font-display)', fontSize: 18, color: 'var(--text-secondary)', textAlign: 'center', margin: 0 }}>
+                    La table est ouverte !
+                  </p>
+                  <p style={{ fontSize: 13, color: 'var(--text-dim)', textAlign: 'center', maxWidth: 280 }}>
+                    Sortez les téléphones et entrez le code <strong style={{ color: 'var(--yellow)' }}>{room?.id}</strong> pour vous asseoir.
                   </p>
                 </div>
               ) : (
@@ -502,7 +523,7 @@ export const HostScreen: React.FC = () => {
             {/* Right Card: Live Table Settings / Rules */}
             <div className="card animate-in" style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 14 }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <div style={{ fontWeight: 800, fontSize: 14, color: 'var(--text-primary)' }}>
+                <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--text-primary)' }}>
                   ⚙️ Règles de la Table
                 </div>
                 <span className="badge badge-gold">En direct</span>
@@ -511,28 +532,28 @@ export const HostScreen: React.FC = () => {
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 <div style={{ background: 'var(--bg-input)', padding: '10px 12px', borderRadius: 6, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Solde de départ</span>
-                  <span style={{ fontSize: 13, fontWeight: 800, color: 'var(--green)' }}>
+                  <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--green)' }}>
                     {room?.settings?.startingBalance ?? 20} 💰
                   </span>
                 </div>
 
                 <div style={{ background: 'var(--bg-input)', padding: '10px 12px', borderRadius: 6, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Manches Min / Max</span>
-                  <span style={{ fontSize: 13, fontWeight: 800, color: 'var(--text-primary)' }}>
+                  <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>
                     {room?.settings?.minRounds ?? 3} / {room?.settings?.maxRounds ?? 10} 🏁
                   </span>
                 </div>
 
                 <div style={{ background: 'var(--bg-input)', padding: '10px 12px', borderRadius: 6, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Bombes aux Mines</span>
-                  <span style={{ fontSize: 13, fontWeight: 800, color: '#f2696d' }}>
+                  <span style={{ fontSize: 13, fontWeight: 700, color: '#f2696d' }}>
                     {room?.settings?.minesBombCount ?? 7} 💣
                   </span>
                 </div>
 
                 <div style={{ background: 'var(--bg-input)', padding: '10px 12px', borderRadius: 6, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Multiplicateur Gorgées</span>
-                  <span className="badge badge-red" style={{ fontSize: 12, fontWeight: 900 }}>
+                  <span className="badge badge-red" style={{ fontSize: 12, fontWeight: 700 }}>
                     ×{room?.settings?.sipMultiplier ?? 1} 🍺
                   </span>
                 </div>
@@ -580,14 +601,14 @@ export const HostScreen: React.FC = () => {
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
                 <div>
                   <div className="label-xs" style={{ marginBottom: 4 }}>PHASE DE VOTE · MANCHE {room.currentRound || 1}</div>
-                  <h2 style={{ fontSize: 22, fontWeight: 800 }}>Choisissez le prochain jeu</h2>
+                  <h2 style={{ fontSize: 22, fontWeight: 700 }}>Choisissez le prochain jeu</h2>
                 </div>
                 <div style={{ textAlign: 'right', display: 'flex', alignItems: 'center', gap: 14 }}>
                   <span className="badge badge-gold animate-pulse" style={{ fontSize: 13, padding: '6px 12px' }}>
                     ⏱ {Math.max(0, 10 - phaseSeconds)}s
                   </span>
                   <div>
-                    <span style={{ fontSize: 28, fontWeight: 900, color: 'var(--green)' }}>{votedCount}</span>
+                    <span style={{ fontSize: 28, fontWeight: 700, color: 'var(--green)' }}>{votedCount}</span>
                     <span style={{ fontSize: 14, color: 'var(--text-secondary)' }}>/{totalPlayers}</span>
                   </div>
                 </div>
@@ -676,13 +697,13 @@ export const HostScreen: React.FC = () => {
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                     <div>
                       <div className="label-xs" style={{ color: '#86efac', letterSpacing: '0.1em' }}>TAPIS DES MISES</div>
-                      <h2 style={{ fontSize: 24, fontWeight: 900, color: '#ffffff', margin: 0 }}>FAITES VOS JEUX</h2>
+                      <h2 style={{ fontSize: 24, fontWeight: 700, color: '#ffffff', margin: 0 }}>FAITES VOS JEUX</h2>
                     </div>
                     {/* Host quick launch button */}
                     <button
                       onClick={() => socket.emit('start_roulette_spin', { roomId: room.id })}
                       className="btn btn-primary animate-green-pulse"
-                      style={{ padding: '8px 16px', fontSize: 13, fontWeight: 800 }}
+                      style={{ padding: '8px 16px', fontSize: 13, fontWeight: 700 }}
                     >
                       Lancer le tirage 🎡
                     </button>
@@ -701,10 +722,10 @@ export const HostScreen: React.FC = () => {
                       gap: 8,
                     }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span style={{ fontWeight: 900, color: '#34d399', fontSize: 14, letterSpacing: '0.05em' }}>
+                        <span style={{ fontWeight: 700, color: '#34d399', fontSize: 14, letterSpacing: '0.05em' }}>
                           🟢 0 (ZÉRO)
                         </span>
-                        <span className="badge" style={{ background: '#059669', color: '#fff', fontWeight: 900 }}>
+                        <span className="badge" style={{ background: '#059669', color: '#fff', fontWeight: 700 }}>
                           Cote ×36.00
                         </span>
                       </div>
@@ -718,7 +739,7 @@ export const HostScreen: React.FC = () => {
                             borderRadius: 20,
                             padding: '4px 10px',
                             display: 'flex', alignItems: 'center', gap: 6,
-                            fontSize: 12, fontWeight: 800, color: '#fff',
+                            fontSize: 12, fontWeight: 700, color: '#fff',
                             boxShadow: '0 2px 6px rgba(0,0,0,0.4)',
                           }}>
                             <Avatar name={p.name} size={20} />
@@ -744,10 +765,10 @@ export const HostScreen: React.FC = () => {
                         gap: 8,
                       }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <span style={{ fontWeight: 900, color: '#f87171', fontSize: 14, letterSpacing: '0.05em' }}>
+                          <span style={{ fontWeight: 700, color: '#f87171', fontSize: 14, letterSpacing: '0.05em' }}>
                             🔴 ROUGE
                           </span>
-                          <span className="badge" style={{ background: '#dc2626', color: '#fff', fontWeight: 900 }}>
+                          <span className="badge" style={{ background: '#dc2626', color: '#fff', fontWeight: 700 }}>
                             Cote ×2.00
                           </span>
                         </div>
@@ -761,7 +782,7 @@ export const HostScreen: React.FC = () => {
                               borderRadius: 20,
                               padding: '4px 10px',
                               display: 'flex', alignItems: 'center', gap: 6,
-                              fontSize: 12, fontWeight: 800, color: '#fff',
+                              fontSize: 12, fontWeight: 700, color: '#fff',
                               boxShadow: '0 2px 6px rgba(0,0,0,0.4)',
                             }}>
                               <Avatar name={p.name} size={20} />
@@ -785,10 +806,10 @@ export const HostScreen: React.FC = () => {
                         gap: 8,
                       }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <span style={{ fontWeight: 900, color: '#e4e4e7', fontSize: 14, letterSpacing: '0.05em' }}>
+                          <span style={{ fontWeight: 700, color: '#e4e4e7', fontSize: 14, letterSpacing: '0.05em' }}>
                             ⚫ NOIR
                           </span>
-                          <span className="badge" style={{ background: '#27272a', color: '#fff', fontWeight: 900, border: '1px solid #52525b' }}>
+                          <span className="badge" style={{ background: '#27272a', color: '#fff', fontWeight: 700, border: '1px solid #52525b' }}>
                             Cote ×2.00
                           </span>
                         </div>
@@ -802,7 +823,7 @@ export const HostScreen: React.FC = () => {
                               borderRadius: 20,
                               padding: '4px 10px',
                               display: 'flex', alignItems: 'center', gap: 6,
-                              fontSize: 12, fontWeight: 800, color: '#fff',
+                              fontSize: 12, fontWeight: 700, color: '#fff',
                               boxShadow: '0 2px 6px rgba(0,0,0,0.4)',
                             }}>
                               <Avatar name={p.name} size={20} />
@@ -857,7 +878,7 @@ export const HostScreen: React.FC = () => {
                 </div>
                 <h1 style={{
                   fontSize: 34,
-                  fontWeight: 900,
+                  fontWeight: 700,
                   color: '#ffffff',
                   margin: '4px 0 0',
                   letterSpacing: '-0.02em',
@@ -910,7 +931,7 @@ export const HostScreen: React.FC = () => {
                       alignItems: 'center',
                       gap: 8,
                       fontSize: 13,
-                      fontWeight: 800,
+                      fontWeight: 700,
                       color: '#ffffff',
                       boxShadow: '0 4px 10px rgba(0,0,0,0.4)',
                     }}>
@@ -957,7 +978,7 @@ export const HostScreen: React.FC = () => {
                     background: wc === 'red' ? '#dc2626' : wc === 'black' ? '#18181b' : '#059669',
                     border: '3px solid #ffffff',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: 38, fontWeight: 900, color: '#ffffff',
+                    fontSize: 38, fontWeight: 700, color: '#ffffff',
                     boxShadow: '0 8px 25px rgba(0,0,0,0.5)',
                   }}>
                     {wn}
@@ -966,7 +987,7 @@ export const HostScreen: React.FC = () => {
                     <div className="label-xs" style={{ color: winColorStyle.text, letterSpacing: '0.12em' }}>
                       RÉSULTAT OFFICIEL DU TIRAGE
                     </div>
-                    <h1 style={{ fontSize: 36, fontWeight: 900, color: '#ffffff', margin: 0 }}>
+                    <h1 style={{ fontSize: 36, fontWeight: 700, color: '#ffffff', margin: 0 }}>
                       {winColorStyle.emoji} NUMÉRO {wn} {winColorStyle.label} !
                     </h1>
                     <p style={{ color: 'var(--text-secondary)', fontSize: 13, margin: '4px 0 0' }}>
@@ -980,7 +1001,7 @@ export const HostScreen: React.FC = () => {
                     background: winColorStyle.border,
                     color: '#ffffff',
                     fontSize: 16,
-                    fontWeight: 900,
+                    fontWeight: 700,
                     padding: '8px 16px',
                   }}>
                     {wc === 'green' ? 'Cote ×36' : 'Cote ×2'}
@@ -1007,7 +1028,7 @@ export const HostScreen: React.FC = () => {
                 <div className="card" style={{ padding: 18, display: 'flex', flexDirection: 'column' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
                     <TrendingUp size={18} color="var(--green)" />
-                    <span style={{ fontWeight: 800, fontSize: 15 }}>Gagnants</span>
+                    <span style={{ fontWeight: 700, fontSize: 15 }}>Gagnants</span>
                     <span className="badge badge-green">{winners.length}</span>
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 8, overflowY: 'auto', flex: 1 }}>
@@ -1020,12 +1041,12 @@ export const HostScreen: React.FC = () => {
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                           <Avatar name={r.playerName} size={26} />
                           <div>
-                            <div style={{ fontSize: 14, fontWeight: 800 }}>{r.playerName}</div>
+                            <div style={{ fontSize: 14, fontWeight: 700 }}>{r.playerName}</div>
                             <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>Mise : {r.betAmount} 💰</div>
                           </div>
                         </div>
                         <div style={{ textAlign: 'right' }}>
-                          <div style={{ fontSize: 16, fontWeight: 900, color: 'var(--green)' }}>+{r.netGain} 💰</div>
+                          <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--green)' }}>+{r.netGain} 💰</div>
                         </div>
                       </div>
                     ))}
@@ -1036,7 +1057,7 @@ export const HostScreen: React.FC = () => {
                 <div className="card" style={{ padding: 18, display: 'flex', flexDirection: 'column' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
                     <TrendingDown size={18} color="var(--red)" />
-                    <span style={{ fontWeight: 800, fontSize: 15 }}>Perdants — Gorgées</span>
+                    <span style={{ fontWeight: 700, fontSize: 15 }}>Perdants — Gorgées</span>
                     <span className="badge badge-red">{losers.length}</span>
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 8, overflowY: 'auto', flex: 1 }}>
@@ -1049,12 +1070,12 @@ export const HostScreen: React.FC = () => {
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                           <Avatar name={r.playerName} size={26} />
                           <div>
-                            <div style={{ fontSize: 14, fontWeight: 800 }}>{r.playerName}</div>
+                            <div style={{ fontSize: 14, fontWeight: 700 }}>{r.playerName}</div>
                             <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>Mise perdue : {r.betAmount} 💰</div>
                           </div>
                         </div>
                         <div style={{ textAlign: 'right' }}>
-                          <div style={{ fontSize: 16, fontWeight: 900, color: 'var(--red)' }}>+{r.betAmount} 🍺</div>
+                          <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--red)' }}>+{r.betAmount} 🍺</div>
                         </div>
                       </div>
                     ))}
@@ -1089,7 +1110,7 @@ export const HostScreen: React.FC = () => {
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
                 <div>
                   <div className="label-xs" style={{ marginBottom: 4 }}>KRACH BOURSIER (TRADING CRYPTO)</div>
-                  <h2 style={{ fontSize: 22, fontWeight: 800 }}>Investissements en cours 📈 (Manche {room.crashRound || 1}/3)</h2>
+                  <h2 style={{ fontSize: 22, fontWeight: 700 }}>Investissements en cours 📈 (Manche {room.crashRound || 1}/3)</h2>
                 </div>
               </div>
 
@@ -1132,7 +1153,7 @@ export const HostScreen: React.FC = () => {
 
         {room?.state === 'crash_flying' && (
           <div className="card" style={{ padding: '40px 24px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
-            <div style={{ fontSize: 72, fontWeight: 900, color: trend === 'up' ? 'var(--green)' : '#f2696d' }}>
+            <div style={{ fontSize: 72, fontWeight: 700, color: trend === 'up' ? 'var(--green)' : '#f2696d' }}>
               {currentMultiplier.toFixed(2)}x
             </div>
           </div>
@@ -1140,7 +1161,7 @@ export const HostScreen: React.FC = () => {
 
         {room?.state === 'crash_result' && room.currentCrashResult && (
           <div className="card" style={{ padding: 24, textAlign: 'center' }}>
-            <h2 style={{ fontSize: 32, fontWeight: 900, color: '#f2696d' }}>
+            <h2 style={{ fontSize: 32, fontWeight: 700, color: '#f2696d' }}>
               📉 KRACH BOURSIER à {room.currentCrashResult.crashPoint.toFixed(2)}x !
             </h2>
           </div>
@@ -1170,7 +1191,7 @@ export const HostScreen: React.FC = () => {
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
                 <div>
                   <div className="label-xs" style={{ marginBottom: 4 }}>BLACKJACK DU CASINO</div>
-                  <h2 style={{ fontSize: 22, fontWeight: 800 }}>Prise des Mises Blackjack ♠</h2>
+                  <h2 style={{ fontSize: 22, fontWeight: 700 }}>Prise des Mises Blackjack ♠</h2>
                 </div>
               </div>
 
@@ -1217,7 +1238,7 @@ export const HostScreen: React.FC = () => {
         {(room?.state === 'blackjack_playing' || room?.state === 'blackjack_dealer_turn') && (
           <div className="blackjack-table" style={{ flex: 1, padding: 24, display: 'flex', flexDirection: 'column', gap: 20 }}>
             <div style={{ background: 'rgba(0,0,0,0.4)', borderRadius: 12, padding: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div style={{ fontSize: 18, fontWeight: 800, color: '#fff' }}>🎩 Croupier · Score: {dealerScore}</div>
+              <div style={{ fontSize: 18, fontWeight: 700, color: '#fff' }}>🎩 Croupier · Score: {dealerScore}</div>
               <div style={{ display: 'flex', gap: 8 }}>
                 {room.dealerHand?.map((c, i) => <PlayingCard key={i} card={c} size="lg" />)}
               </div>
@@ -1226,7 +1247,7 @@ export const HostScreen: React.FC = () => {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(230px, 1fr))', gap: 12 }}>
               {room.players.map(p => (
                 <div key={p.id} style={{ background: 'rgba(0,0,0,0.5)', borderRadius: 8, padding: 12 }}>
-                  <div style={{ fontWeight: 800, color: '#fff', marginBottom: 8 }}>{p.name} ({calculateHandScore(p.hand)} pts)</div>
+                  <div style={{ fontWeight: 700, color: '#fff', marginBottom: 8 }}>{p.name} ({calculateHandScore(p.hand)} pts)</div>
                   <div style={{ display: 'flex', gap: 6 }}>
                     {p.hand?.map((c, i) => <PlayingCard key={i} card={c} size="md" />)}
                   </div>
@@ -1260,7 +1281,7 @@ export const HostScreen: React.FC = () => {
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
                 <div>
                   <div className="label-xs" style={{ marginBottom: 4 }}>LES MINES (GRILLE COMMUNE 6x6)</div>
-                  <h2 style={{ fontSize: 22, fontWeight: 800 }}>Prise des Mises 💣</h2>
+                  <h2 style={{ fontSize: 22, fontWeight: 700 }}>Prise des Mises 💣</h2>
                 </div>
                 <span className="badge badge-red">{room.settings?.minesBombCount ?? 7} Bombes</span>
               </div>
@@ -1308,7 +1329,7 @@ export const HostScreen: React.FC = () => {
         {room?.state === 'mines_playing' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16, flex: 1 }}>
             <div className="card" style={{ padding: '16px 24px', border: '2px solid var(--green)' }}>
-              <h1 style={{ fontSize: 28, fontWeight: 900, margin: 0 }}>
+              <h1 style={{ fontSize: 28, fontWeight: 700, margin: 0 }}>
                 C'est au tour de <span style={{ color: 'var(--green)' }}>{currentTurnPlayer?.name ?? '...'}</span> !
               </h1>
             </div>
@@ -1355,12 +1376,12 @@ export const HostScreen: React.FC = () => {
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <div>
                   <div className="label-xs" style={{ marginBottom: 4 }}>LE DERBY · HIPPODROME DU CASINO</div>
-                  <h2 style={{ fontSize: 22, fontWeight: 800 }}>Prise des Paris sur les Chevaux 🐎</h2>
+                  <h2 style={{ fontSize: 22, fontWeight: 700 }}>Prise des Paris sur les Chevaux 🐎</h2>
                 </div>
                 <button
                   onClick={() => socket.emit('start_derby_race', { roomId: room.id })}
                   className="btn btn-primary animate-green-pulse"
-                  style={{ padding: '8px 16px', fontSize: 13, fontWeight: 800 }}
+                  style={{ padding: '8px 16px', fontSize: 13, fontWeight: 700 }}
                 >
                   Lancer la course 🏇
                 </button>
@@ -1388,7 +1409,7 @@ export const HostScreen: React.FC = () => {
                     gap: 4,
                   }}>
                     <div style={{ fontSize: 11, color: 'var(--text-secondary)', fontWeight: 700 }}>STALLE #{horse.id}</div>
-                    <div style={{ fontSize: 15, fontWeight: 900, color: horse.color }}>
+                    <div style={{ fontSize: 15, fontWeight: 700, color: horse.color }}>
                       {horse.emoji} {horse.name}
                     </div>
                   </div>
@@ -1453,7 +1474,7 @@ export const HostScreen: React.FC = () => {
                   <div className="label-xs" style={{ color: 'var(--gold)', letterSpacing: '0.12em' }}>
                     HIPPODROME OVALE DU CASINO · 1 TOUR UNIQUE (360°)
                   </div>
-                  <h1 style={{ fontSize: 24, fontWeight: 900, margin: '2px 0 0', color: '#ffffff' }}>
+                  <h1 style={{ fontSize: 24, fontWeight: 700, margin: '2px 0 0', color: '#ffffff' }}>
                     🏇 LA COURSE DU DERBY EST LANCÉE ! 🏁
                   </h1>
                 </div>
@@ -1463,7 +1484,7 @@ export const HostScreen: React.FC = () => {
                     DIRECT LIVE 🏁
                   </span>
                   {leader && (
-                    <div style={{ fontSize: 13, fontWeight: 800, color: leader.color }}>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: leader.color }}>
                       En tête : {leader.emoji} {leader.name} ({Math.min(100, Math.round((leader.progress / 360) * 100))}%)
                     </div>
                   )}
@@ -1588,7 +1609,7 @@ export const HostScreen: React.FC = () => {
                   }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                       <span style={{ fontSize: 13 }}>🏁</span>
-                      <span style={{ fontSize: 13, fontWeight: 900, color: '#ffffff', letterSpacing: '0.05em' }}>
+                      <span style={{ fontSize: 13, fontWeight: 700, color: '#ffffff', letterSpacing: '0.05em' }}>
                         {leader ? (
                           leader.progress >= 260 ? '⚡ DERNIÈRE LIGNE DROITE ! ⚡' : leader.progress >= 160 ? 'MI-COURSE' : 'DÉPART LANCÉ'
                         ) : 'DÉPART'}
@@ -1620,7 +1641,7 @@ export const HostScreen: React.FC = () => {
                           <span style={{ fontSize: 11 }}>{medals[rank]}</span>
                           <span style={{
                             fontSize: 12,
-                            fontWeight: 800,
+                            fontWeight: 700,
                             color: h.color,
                             display: 'flex',
                             alignItems: 'center',
@@ -1640,7 +1661,7 @@ export const HostScreen: React.FC = () => {
                           )}
                           <span style={{
                             fontSize: 11,
-                            fontWeight: 900,
+                            fontWeight: 700,
                             color: isFirst ? 'var(--gold)' : 'rgba(255,255,255,0.85)',
                           }}>
                             {Math.min(100, Math.round((h.progress / 360) * 100))}%
@@ -1683,7 +1704,7 @@ export const HostScreen: React.FC = () => {
                       {/* Pastille Nom/ID bien visible */}
                       <div style={{
                         fontSize: 10,
-                        fontWeight: 900,
+                        fontWeight: 700,
                         color: '#ffffff',
                         background: 'rgba(0, 0, 0, 0.85)',
                         border: isBoosted ? '2px solid #f59e0b' : `1.5px solid ${horse.color}`,
@@ -1739,11 +1760,11 @@ export const HostScreen: React.FC = () => {
                   }}>
                     <div>
                       <div style={{ fontSize: 11, color: 'var(--text-dim)' }}>#{rank + 1} {h.name}</div>
-                      <div style={{ fontSize: 13, fontWeight: 900, color: h.color }}>
+                      <div style={{ fontSize: 13, fontWeight: 700, color: h.color }}>
                         {h.momentum === 'boosted' ? '🔥 En Sprint' : h.momentum === 'fatigued' ? '💨 Fatigue' : 'En course'}
                       </div>
                     </div>
-                    <span style={{ fontSize: 12, fontWeight: 800, color: 'var(--text-secondary)' }}>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)' }}>
                       {Math.min(100, Math.round((h.progress / 360) * 100))}%
                     </span>
                   </div>
@@ -1773,7 +1794,7 @@ export const HostScreen: React.FC = () => {
               }}>
                 <div>
                   <div className="label-xs" style={{ color: winner.color, letterSpacing: '0.1em' }}>VAINQUEUR DU DERBY</div>
-                  <h1 style={{ fontSize: 36, fontWeight: 900, color: '#ffffff', margin: 0 }}>
+                  <h1 style={{ fontSize: 36, fontWeight: 700, color: '#ffffff', margin: 0 }}>
                     🏆 {winner.name} ({winner.emoji}) A GAGNÉ !
                   </h1>
                   <p style={{ color: 'var(--text-secondary)', fontSize: 14, marginTop: 4 }}>
@@ -1781,7 +1802,7 @@ export const HostScreen: React.FC = () => {
                   </p>
                 </div>
 
-                <span className="badge" style={{ background: winner.color, color: '#000', fontSize: 16, fontWeight: 900, padding: '10px 20px' }}>
+                <span className="badge" style={{ background: winner.color, color: '#000', fontSize: 16, fontWeight: 700, padding: '10px 20px' }}>
                   1ÈRE PLACE 🥇
                 </span>
               </div>
@@ -1789,7 +1810,7 @@ export const HostScreen: React.FC = () => {
               {/* Winners & Losers Columns */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, flex: 1 }}>
                 <div className="card" style={{ padding: 20 }}>
-                  <div style={{ fontWeight: 800, fontSize: 16, marginBottom: 12, color: 'var(--green)' }}>
+                  <div style={{ fontWeight: 700, fontSize: 16, marginBottom: 12, color: 'var(--green)' }}>
                     🟢 Parieurs Gagnants ({winnersList.length})
                   </div>
                   {winnersList.length === 0 ? (
@@ -1804,7 +1825,7 @@ export const HostScreen: React.FC = () => {
                             <Avatar name={r.playerName} size={28} />
                             <span style={{ fontWeight: 700, fontSize: 14 }}>{r.playerName}</span>
                           </div>
-                          <span style={{ fontSize: 14, fontWeight: 900, color: 'var(--green)' }}>+{r.netGain} 💰</span>
+                          <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--green)' }}>+{r.netGain} 💰</span>
                         </div>
                       ))}
                     </div>
@@ -1812,7 +1833,7 @@ export const HostScreen: React.FC = () => {
                 </div>
 
                 <div className="card" style={{ padding: 20 }}>
-                  <div style={{ fontWeight: 800, fontSize: 16, marginBottom: 12, color: 'var(--red)' }}>
+                  <div style={{ fontWeight: 700, fontSize: 16, marginBottom: 12, color: 'var(--red)' }}>
                     🔴 Parieurs Perdants ({losersList.length})
                   </div>
                   {losersList.length === 0 ? (
@@ -1827,7 +1848,7 @@ export const HostScreen: React.FC = () => {
                             <Avatar name={r.playerName} size={28} />
                             <span style={{ fontWeight: 700, fontSize: 14 }}>{r.playerName}</span>
                           </div>
-                          <span style={{ fontSize: 14, fontWeight: 900, color: 'var(--red)' }}>+{r.sipsToDrink} 🍺</span>
+                          <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--red)' }}>+{r.sipsToDrink} 🍺</span>
                         </div>
                       ))}
                     </div>
@@ -1854,7 +1875,7 @@ export const HostScreen: React.FC = () => {
             }}>
               <div>
                 <div className="label-xs" style={{ color: '#f2696d', letterSpacing: '0.1em' }}>LE GRAND FINAL</div>
-                <h1 style={{ fontSize: 36, fontWeight: 900, color: '#ffffff', letterSpacing: '-0.02em', margin: 0 }}>
+                <h1 style={{ fontSize: 36, fontWeight: 700, color: '#ffffff', letterSpacing: '-0.02em', margin: 0 }}>
                   💸 LA TAXE FINALE ! 💥
                 </h1>
                 <p style={{ color: 'var(--text-secondary)', fontSize: 14, marginTop: 4 }}>
@@ -1874,11 +1895,11 @@ export const HostScreen: React.FC = () => {
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                       <Avatar name={player.name} size={36} />
                       <div>
-                        <div style={{ fontWeight: 800, fontSize: 15, color: '#ffffff' }}>{player.name}</div>
+                        <div style={{ fontWeight: 700, fontSize: 15, color: '#ffffff' }}>{player.name}</div>
                         <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Solde final : {player.balance} 💰</div>
                       </div>
                     </div>
-                    <span className="badge badge-red" style={{ fontSize: 13, fontWeight: 900 }}>
+                    <span className="badge badge-red" style={{ fontSize: 13, fontWeight: 700 }}>
                       -{player.taxRate || 0}%
                     </span>
                   </div>
@@ -1888,14 +1909,14 @@ export const HostScreen: React.FC = () => {
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
                     <div style={{ background: 'var(--bg-input)', padding: '8px 10px', borderRadius: 6 }}>
                       <div className="label-xs" style={{ color: '#f2696d' }}>Taxe (À boire)</div>
-                      <div style={{ fontSize: 18, fontWeight: 900, color: '#f2696d' }}>
+                      <div style={{ fontSize: 18, fontWeight: 700, color: '#f2696d' }}>
                         {player.personalTaxSips || 0} 🍺
                       </div>
                     </div>
 
                     <div style={{ background: 'var(--bg-input)', padding: '8px 10px', borderRadius: 6 }}>
                       <div className="label-xs" style={{ color: 'var(--green)' }}>À distribuer</div>
-                      <div style={{ fontSize: 18, fontWeight: 900, color: 'var(--green)' }}>
+                      <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--green)' }}>
                         {player.distributableBalance || 0} 💰
                       </div>
                     </div>
@@ -1929,7 +1950,7 @@ export const HostScreen: React.FC = () => {
             <div className="card animate-in" style={{ padding: '20px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
                 <div className="label-xs" style={{ color: 'var(--gold)' }}>LE GRAND FINAL</div>
-                <h2 style={{ fontSize: 26, fontWeight: 900 }}>Distribution Finale des Gorgées 🍻</h2>
+                <h2 style={{ fontSize: 26, fontWeight: 700 }}>Distribution Finale des Gorgées 🍻</h2>
                 <p style={{ color: 'var(--text-secondary)', fontSize: 13, marginTop: 4 }}>
                   Chaque joueur répartit l'intégralité de son solde distribuable aux autres joueurs.
                 </p>
@@ -1954,7 +1975,7 @@ export const HostScreen: React.FC = () => {
                       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                         <Avatar name={player.name} size={32} />
                         <div>
-                          <div style={{ fontWeight: 800, fontSize: 14 }}>{player.name}</div>
+                          <div style={{ fontWeight: 700, fontSize: 14 }}>{player.name}</div>
                           <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>
                             Solde distribuable : {player.distributableBalance || 0} 💰
                           </div>
@@ -1990,7 +2011,7 @@ export const HostScreen: React.FC = () => {
             }}>
               <div>
                 <div className="label-xs" style={{ color: 'var(--green)', letterSpacing: '0.1em' }}>LE GRAND BILAN</div>
-                <h1 style={{ fontSize: 38, fontWeight: 900, color: '#ffffff', letterSpacing: '-0.02em', margin: 0 }}>
+                <h1 style={{ fontSize: 38, fontWeight: 700, color: '#ffffff', letterSpacing: '-0.02em', margin: 0 }}>
                   🏆 L'ADDITION ULTIME ! 🍻
                 </h1>
                 <p style={{ color: 'var(--text-secondary)', fontSize: 14, marginTop: 4 }}>
@@ -2020,7 +2041,7 @@ export const HostScreen: React.FC = () => {
                       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                         <Avatar name={player.name} size={38} />
                         <div>
-                          <div style={{ fontWeight: 800, fontSize: 15 }}>{player.name}</div>
+                          <div style={{ fontWeight: 700, fontSize: 15 }}>{player.name}</div>
                           <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>
                             Taxe: {player.personalTaxSips || 0} 🍺 · Reçu: {Math.max(0, sips - (player.personalTaxSips || 0))} 🍺
                           </div>
@@ -2028,7 +2049,7 @@ export const HostScreen: React.FC = () => {
                       </div>
 
                       <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4 }}>
-                        <div style={{ color: sips > 0 ? '#f2696d' : 'var(--green)', fontWeight: 900, fontSize: 18 }}>
+                        <div style={{ color: sips > 0 ? '#f2696d' : 'var(--green)', fontWeight: 700, fontSize: 18 }}>
                           {sips} 🍺
                         </div>
                         {hasFinished ? (
@@ -2081,7 +2102,7 @@ export const HostScreen: React.FC = () => {
             </div>
 
             <div className="card" style={{ padding: 20, flex: 1 }}>
-              <h2 style={{ fontSize: 24, fontWeight: 800, marginBottom: 16 }}>L'Addition ! 🍻</h2>
+              <h2 style={{ fontSize: 24, fontWeight: 700, marginBottom: 16 }}>L'Addition ! 🍻</h2>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 12 }}>
                 {room.players.map((player: Player) => (
                   <div key={player.id} className={player.hasDrank ? 'result-win' : 'result-lose'} style={{ padding: 14, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -2090,7 +2111,7 @@ export const HostScreen: React.FC = () => {
                       <div style={{ fontWeight: 700 }}>{player.name}</div>
                     </div>
                     <div style={{ textAlign: 'right' }}>
-                      <div style={{ fontWeight: 800, color: (player.sipsToDrink || 0) > 0 ? '#f2696d' : 'var(--green)' }}>
+                      <div style={{ fontWeight: 700, color: (player.sipsToDrink || 0) > 0 ? '#f2696d' : 'var(--green)' }}>
                         {player.sipsToDrink || 0} 🍺
                       </div>
                       {player.hasDrank ? <span className="badge badge-green">A bu</span> : <span className="badge badge-red">En train de boire</span>}
