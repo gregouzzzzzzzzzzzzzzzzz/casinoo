@@ -1072,8 +1072,65 @@ export const PhoneScreen: React.FC = () => {
         )}
 
         {/* ═══════════════════════════════════════════════════════ */}
-        {/* PLAYING ROULETTE                                        */}
+        {/* TUTORIAL IN PROGRESS (ATTENTE DU DIDACTICIEL TV)          */}
         {/* ═══════════════════════════════════════════════════════ */}
+        {joinedPlayer && currentRoom?.state === 'showing_tutorial' && (
+          <div className="card animate-in" style={{ padding: '32px 20px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 18 }}>
+            <div style={{
+              width: 76,
+              height: 76,
+              borderRadius: '50%',
+              background: 'rgba(255, 182, 41, 0.15)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: 38,
+              boxShadow: '0 0 24px rgba(255, 182, 41, 0.25)',
+            }}>
+              🎬
+            </div>
+
+            <div>
+              <div className="label-xs" style={{ color: 'var(--gold)', letterSpacing: 2, marginBottom: 6, fontSize: 13 }}>
+                DIDACTICIEL DU JEU
+              </div>
+              <h2 style={{ fontSize: 24, fontWeight: 800, margin: '0 0 8px 0', color: 'var(--text-primary)' }}>
+                Regardez l'écran TV !
+              </h2>
+              <p style={{ margin: 0, fontSize: 15, color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+                Explication des règles du jeu en vidéo sur le grand écran.<br />
+                <strong style={{ color: 'var(--gold)' }}>La partie commencera dès la fin de la vidéo.</strong>
+              </p>
+            </div>
+
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 10,
+              background: 'var(--surface-hover)',
+              padding: '10px 18px',
+              borderRadius: 24,
+              border: '1px solid var(--border-default)',
+              fontSize: 13,
+              color: 'var(--text-secondary)'
+            }}>
+              <span className="spinner" style={{ width: 14, height: 14, borderWidth: 2 }} />
+              Préparation de la manche...
+            </div>
+
+            {isLeader && (
+              <button
+                type="button"
+                onClick={() => socket.emit('end_tutorial', { roomId: currentRoom.id })}
+                className="btn btn-secondary btn-sm"
+                style={{ marginTop: 8 }}
+              >
+                Passer le didacticiel pour tous ▸
+              </button>
+            )}
+          </div>
+        )}
+
         {/* ═══════════════════════════════════════════════════════ */}
         {/* PLAYING ROULETTE (Mise avec jetons rapides)              */}
         {/* ═══════════════════════════════════════════════════════ */}

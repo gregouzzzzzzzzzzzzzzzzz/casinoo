@@ -155,6 +155,8 @@ export class RoomManager {
       derbyBets: {},
       revealedCells: [],
       distributions: [],
+      playedTutorials: [],
+      pendingGame: null,
     };
 
     this.rooms.set(roomId, newRoom);
@@ -388,9 +390,9 @@ export class RoomManager {
   }
 
   /**
-   * Helper to transition directly to a chosen game.
+   * Lance directement la logique et l'état de jeu normal (playing_mines, etc.).
    */
-  public transitionToGameChoice(roomId: string, choice: GameChoice): Room | undefined {
+  public launchGame(roomId: string, choice: GameChoice): Room | undefined {
     switch (choice) {
       case 'roulette':
         return this.transitionToRoulette(roomId);
@@ -402,12 +404,54 @@ export class RoomManager {
         return this.transitionToMines(roomId);
       case 'derby':
         return this.transitionToDerby(roomId);
-      case 'end_game':
-        return this.startFinalTax(roomId);
       default:
-        // Choix non reconnu : ne rien faire plutôt que de lancer les Mines par défaut.
         return undefined;
     }
+  }
+
+  /**
+   * Sélectionne un mini-jeu :
+   * - Vérifie s'il est dans playedTutorials.
+   * - Si NON : Change l'état de la partie en 'showing_tutorial'. Ajoute ce jeu dans playedTutorials.
+   *   N'initialise pas encore les timers ou la logique de jeu.
+   * - Si OUI : Saute l'étape du tutoriel et passe directement à l'état de jeu normal en l'initialisant.
+   */
+  public transitionToGameChoice(roomId: string, choice: GameChoice): Room | undefined {
+    const room = this.getRoom(roomId);
+    if (!room) return undefined;
+
+    if (choice === 'end_game') {
+      return this.startFinalTax(roomId);
+    }
+
+    if (!room.playedTutorials) {
+      room.playedTutorials = [];
+    }
+
+    // Le tutoriel n'a pas encore été vu pour ce jeu
+    if (!room.playedTutorials.includes(choice)) {
+      room.playedTutorials.push(choice);
+      room.state = 'showing_tutorial';
+      room.pendingGame = choice;
+      return room;
+    }
+
+    // Déjà vu : transition directe vers le jeu normal
+    return this.launchGame(roomId, choice);
+  }
+
+  /**
+   * Fait basculer la Room de l'état "tutoriel" à l'état "jeu en cours" et démarre la mécanique.
+   */
+  public endTutorial(roomId: string): Room | undefined {
+    const room = this.getRoom(roomId);
+    if (!room || room.state !== 'showing_tutorial' || !room.pendingGame) {
+      return undefined;
+    }
+
+    const nextGame = room.pendingGame;
+    room.pendingGame = null;
+    return this.launchGame(roomId, nextGame);
   }
 
   /**
@@ -541,6 +585,9 @@ export class RoomManager {
   ): { success: boolean; room?: Room; allBet: boolean; error?: string } {
     const room = this.getRoom(roomId);
     if (!room) return { success: false, allBet: false, error: 'Room non trouvée' };
+    if (room.state === 'showing_tutorial') {
+      return { success: false, allBet: false, error: "Le tutoriel est en cours d'explication" };
+    }
     if (room.state !== 'playing_roulette') {
       return { success: false, allBet: false, error: "La prise des paris n'est pas en cours" };
     }
@@ -711,6 +758,9 @@ export class RoomManager {
   ): { success: boolean; room?: Room; allCrashBet: boolean; error?: string } {
     const room = this.getRoom(roomId);
     if (!room) return { success: false, allCrashBet: false, error: 'Room non trouvée' };
+    if (room.state === 'showing_tutorial') {
+      return { success: false, allCrashBet: false, error: "Le tutoriel est en cours d'explication" };
+    }
     if (room.state !== 'playing_crash') {
       return { success: false, allCrashBet: false, error: "La prise des mises du Crash n'est pas en cours" };
     }
@@ -929,6 +979,9 @@ export class RoomManager {
   ): { success: boolean; room?: Room; allBlackjackBet: boolean; error?: string } {
     const room = this.getRoom(roomId);
     if (!room) return { success: false, allBlackjackBet: false, error: 'Room non trouvée' };
+    if (room.state === 'showing_tutorial') {
+      return { success: false, allBlackjackBet: false, error: "Le tutoriel est en cours d'explication" };
+    }
     if (room.state !== 'playing_blackjack') {
       return { success: false, allBlackjackBet: false, error: "La prise des mises du Blackjack n'est pas en cours" };
     }
@@ -1204,6 +1257,9 @@ export class RoomManager {
   ): { success: boolean; room?: Room; allMinesBet: boolean; error?: string } {
     const room = this.getRoom(roomId);
     if (!room) return { success: false, allMinesBet: false, error: 'Room non trouvée' };
+    if (room.state === 'showing_tutorial') {
+      return { success: false, allMinesBet: false, error: "Le tutoriel est en cours d'explication" };
+    }
     if (room.state !== 'playing_mines') {
       return { success: false, allMinesBet: false, error: "La prise des mises des Mines n'est pas en cours" };
     }
@@ -1462,6 +1518,9 @@ export class RoomManager {
   ): { success: boolean; room?: Room; allDerbyBet: boolean; error?: string } {
     const room = this.getRoom(roomId);
     if (!room) return { success: false, allDerbyBet: false, error: 'Room non trouvée' };
+    if (room.state === 'showing_tutorial') {
+      return { success: false, allDerbyBet: false, error: "Le tutoriel est en cours d'explication" };
+    }
     if (room.state !== 'playing_derby') {
       return { success: false, allDerbyBet: false, error: "La prise de pari du Derby n'est pas active" };
     }
@@ -1825,6 +1884,8 @@ export class RoomManager {
     room.winningHorseId = null;
     room.currentDerbyResult = undefined;
     room.distributions = [];
+    room.playedTutorials = [];
+    room.pendingGame = null;
 
     room.players.forEach((p) => {
       p.balance = startBal;

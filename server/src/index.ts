@@ -362,6 +362,34 @@ io.on('connection', (socket: Socket) => {
   });
 
   /* =====================================================================
+   * DIDACTICIELS / TUTORIELS
+   * ===================================================================== */
+
+  socket.on('end_tutorial', ({ roomId }: { roomId: string }) => {
+    if (!roomId) return;
+    const room = roomManager.endTutorial(roomId);
+    if (room) {
+      io.to(roomId).emit('room_updated', { room });
+    }
+  });
+
+  socket.on('finish_tutorial', ({ roomId }: { roomId: string }) => {
+    if (!roomId) return;
+    const room = roomManager.endTutorial(roomId);
+    if (room) {
+      io.to(roomId).emit('room_updated', { room });
+    }
+  });
+
+  socket.on('skip_tutorial', ({ roomId }: { roomId: string }) => {
+    if (!roomId) return;
+    const room = roomManager.endTutorial(roomId);
+    if (room) {
+      io.to(roomId).emit('room_updated', { room });
+    }
+  });
+
+  /* =====================================================================
    * LA ROULETTE
    * ===================================================================== */
 

@@ -132,7 +132,6 @@ export const HostScreen: React.FC = () => {
   const [room, setRoom] = useState<Room | null>(null);
   const [copied, setCopied] = useState(false);
   const [showIntro, setShowIntro] = useState(false);
-  const [gameIntro, setGameIntro] = useState<string | null>(null);
   const prevStateRef = useRef<string | null>(null);
   const [isConnected, setIsConnected] = useState(socket.connected);
   const [phaseSeconds, setPhaseSeconds] = useState(0);
@@ -155,49 +154,38 @@ export const HostScreen: React.FC = () => {
     }
   }, [room?.state, room?.crashRound]);
 
-  // Vidéo d'explication diffusée à l'entrée dans chaque jeu.
-  const GAME_INTROS: Record<string, string> = {
-    playing_roulette: '/games/roulette.mp4',
-    playing_crash: '/games/avion.mp4',
-    playing_blackjack: '/games/blackjack.mp4',
-    playing_mines: '/games/mines.mp4',
-    playing_derby: '/games/derby.mp4',
-  };
-
-  // Suivi des tutoriels déjà visionnés au cours de la partie entière (sessionStorage + ref)
-  const seenGameIntrosRef = useRef<Set<string>>(new Set());
-
-  const isIntroAlreadySeen = (roomId: string | undefined, gameState: string): boolean => {
-    if (seenGameIntrosRef.current.has(gameState)) return true;
-    if (!roomId) return false;
-    try {
-      const raw = sessionStorage.getItem(`seen_intros_${roomId}`);
-      if (raw) {
-        const set: string[] = JSON.parse(raw);
-        if (set.includes(gameState)) {
-          seenGameIntrosRef.current.add(gameState);
-          return true;
-        }
-      }
-    } catch {}
-    return false;
-  };
-
-  const markIntroAsSeen = (roomId: string | undefined, gameState: string) => {
-    seenGameIntrosRef.current.add(gameState);
-    if (!roomId) return;
-    try {
-      const list = Array.from(seenGameIntrosRef.current);
-      sessionStorage.setItem(`seen_intros_${roomId}`, JSON.stringify(list));
-    } catch {}
-  };
-
-  const resetSeenIntros = (roomId: string | undefined) => {
-    seenGameIntrosRef.current.clear();
-    if (!roomId) return;
-    try {
-      sessionStorage.removeItem(`seen_intros_${roomId}`);
-    } catch {}
+  // Vidéos et règles d'explication du didacticiel pour chaque mini-jeu
+  const GAME_TUTORIAL_INFO: Record<string, { title: string; subtitle: string; video: string; summary: string }> = {
+    roulette: {
+      title: 'La Roulette Royale',
+      subtitle: '🔴 Rouge (x2) · ⚫ Noir (x2) · 🟢 Zéro (x14)',
+      video: '/games/roulette.mp4',
+      summary: 'Misez sur votre couleur favorite. La bille tourne : ceux qui ont bon doublent leurs jetons, les perdants boivent leur mise en gorgées !',
+    },
+    crash: {
+      title: "L'Avion (Crash)",
+      subtitle: '✈️ Le multiplicateur monte... Jusqu\'au crash fatal !',
+      video: '/games/avion.mp4',
+      summary: 'Embarquez dans le vol et regardez la cote grimper en temps réel. Sautez en parachute pour sécuriser vos gains avant l\'explosion !',
+    },
+    blackjack: {
+      title: 'Le Blackjack 21',
+      subtitle: '♠️ Tirez ou restez · Battez la banque sans dépasser 21',
+      video: '/games/blackjack.mp4',
+      summary: 'Rapprochez-vous de 21 le plus possible. Si vous battez le croupier sans dépasser, vous remportez le double de votre mise !',
+    },
+    mines: {
+      title: 'Les Mines',
+      subtitle: '💎 Déterrez des gemmes · 💣 Évitez les 7 bombes',
+      video: '/games/mines.mp4',
+      summary: 'Grille commune de 36 cases. Chaque diamant trouvé augmente le multiplicateur. Encaissez à tout moment ou risquez l\'explosion !',
+    },
+    derby: {
+      title: 'Le Derby Hippique',
+      subtitle: '🐎 4 chevaux en folie sur l\'hippodrome',
+      video: '/games/derby.mp4',
+      summary: 'Choisissez votre cheval champion. Suivez la course palpitante sur le grand écran : le premier à franchir la ligne fait gagner ses parieurs !',
+    },
   };
 
   const createdRef = useRef(false);
@@ -258,24 +246,6 @@ export const HostScreen: React.FC = () => {
         roomIdRef.current = updatedRoom.id;
       }
 
-      // Si retour ou démarrage dans le lobby, réinitialiser la mémoire des tutoriels pour la prochaine partie
-      if (updatedRoom.state === 'lobby') {
-        resetSeenIntros(updatedRoom.id);
-      }
-
-      const cameFrom = prevStateRef.current;
-      const introVideo = GAME_INTROS[updatedRoom.state];
-
-      // Afficher le tutoriel uniquement la 1ère fois qu'un mini-jeu démarre dans toute la partie
-      if (
-        introVideo &&
-        cameFrom !== updatedRoom.state &&
-        !isIntroAlreadySeen(updatedRoom.id, updatedRoom.state) &&
-        (cameFrom === null || cameFrom === 'lobby' || cameFrom === 'voting' || cameFrom === 'drinking_phase')
-      ) {
-        markIntroAsSeen(updatedRoom.id, updatedRoom.state);
-        setGameIntro(introVideo);
-      }
       prevStateRef.current = updatedRoom.state;
       setRoom(prev => {
         if (prev && updatedRoom.state === 'lobby' && updatedRoom.players.length > prev.players.length) {
@@ -378,6 +348,7 @@ export const HostScreen: React.FC = () => {
   const stateLabel: Record<string, string> = {
     lobby: 'SALON D\'ATTENTE',
     voting: `VOTE MANCHE ${room?.currentRound || 1}`,
+    showing_tutorial: 'DIDACTICIEL DU JEU 🎬',
     playing_roulette: 'PRISE DES MISES',
     roulette_spinning: 'TIRAGE ROULETTE',
     roulette_result: 'RÉSULTATS ROULETTE',
@@ -856,6 +827,96 @@ export const HostScreen: React.FC = () => {
             </div>
           </div>
         )}
+
+        {/* ═══════════════════════════════════════════════════════ */}
+        {/* SHOWING TUTORIAL (VIDÉO DU DIDACTICIEL DU MINI-JEU)      */}
+        {/* ═══════════════════════════════════════════════════════ */}
+        {room?.state === 'showing_tutorial' && (() => {
+          const gameKey = (room.pendingGame || 'roulette') as string;
+          const info = GAME_TUTORIAL_INFO[gameKey] || GAME_TUTORIAL_INFO.roulette;
+
+          return (
+            <div className="card animate-in" style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 20,
+              padding: '24px 32px',
+              maxWidth: 1100,
+              margin: '0 auto',
+              width: '100%',
+              background: 'linear-gradient(135deg, var(--bg-surface) 0%, rgba(255, 182, 41, 0.08) 100%)',
+              border: '2px solid rgba(255, 182, 41, 0.4)',
+              boxShadow: '0 12px 40px rgba(0,0,0,0.6)',
+              borderRadius: 24,
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <span className="badge badge-gold" style={{ fontSize: 13, padding: '6px 14px', letterSpacing: '0.08em' }}>
+                    🎬 DIDACTICIEL
+                  </span>
+                  <div>
+                    <h2 style={{ fontSize: 26, fontWeight: 800, margin: 0, color: 'var(--yellow)' }}>
+                      {info.title}
+                    </h2>
+                    <div style={{ fontSize: 14, color: 'var(--text-secondary)', marginTop: 2 }}>
+                      {info.subtitle}
+                    </div>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => socket.emit('end_tutorial', { roomId: room.id })}
+                  className="btn btn-primary"
+                  style={{
+                    padding: '12px 24px',
+                    fontSize: 15,
+                    fontWeight: 700,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 8,
+                    borderRadius: 12,
+                    boxShadow: '0 4px 14px rgba(255,182,41,0.3)',
+                  }}
+                >
+                  <span>Passer / Lancer le jeu ▸</span>
+                </button>
+              </div>
+
+              <div style={{ width: '100%', borderRadius: 18, overflow: 'hidden', border: '1px solid var(--border-default)', background: '#000', boxShadow: '0 8px 32px rgba(0,0,0,0.8)' }}>
+                <video
+                  key={info.video}
+                  src={info.video}
+                  autoPlay
+                  muted
+                  playsInline
+                  onEnded={() => socket.emit('end_tutorial', { roomId: room.id })}
+                  style={{ width: '100%', maxHeight: '60vh', objectFit: 'contain', display: 'block' }}
+                />
+              </div>
+
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                width: '100%',
+                background: 'var(--bg-input)',
+                padding: '14px 20px',
+                borderRadius: 14,
+                border: '1px solid var(--border-subtle)',
+              }}>
+                <div style={{ fontSize: 14, color: 'var(--text-secondary)', maxWidth: '75%', lineHeight: 1.4 }}>
+                  💡 <strong>Règles :</strong> {info.summary}
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, color: 'var(--yellow)', fontSize: 13, fontWeight: 600 }}>
+                  <span className="spinner" style={{ width: 14, height: 14, borderWidth: 2 }} />
+                  <span>Le jeu démarre à la fin de la vidéo</span>
+                </div>
+              </div>
+            </div>
+          );
+        })()}
 
         {/* ═══════════════════════════════════════════════════════ */}
         {/* PLAYING ROULETTE (Phase de mise & Tapis de Casino)      */}
@@ -2574,35 +2635,6 @@ export const HostScreen: React.FC = () => {
         )}
 
       </main>
-
-      {gameIntro && (
-        <div style={{
-          position: 'fixed', inset: 0, zIndex: 90,
-          background: 'rgba(16, 12, 8, 0.94)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          padding: 32,
-        }}>
-          <div style={{ width: 'min(1100px, 100%)', display: 'flex', flexDirection: 'column', gap: 14 }}>
-            <video
-              key={gameIntro}
-              src={gameIntro}
-              autoPlay
-              muted
-              playsInline
-              onEnded={() => setGameIntro(null)}
-              style={{ width: '100%', borderRadius: 20, boxShadow: '0 24px 80px rgba(0,0,0,0.6)', border: '1px solid var(--border-default)' }}
-            />
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <span style={{ fontSize: 14, color: 'var(--text-secondary)' }}>
-                📱 Les mises sont déjà ouvertes sur vos téléphones !
-              </span>
-              <button onClick={() => setGameIntro(null)} className="btn btn-secondary">
-                Passer ▸
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {showIntro && (
         <div

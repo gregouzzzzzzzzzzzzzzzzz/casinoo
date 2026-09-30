@@ -47,6 +47,7 @@ export interface Player {
 export type RoomState =
   | 'lobby'
   | 'voting'
+  | 'showing_tutorial'
   | 'playing_roulette'
   | 'roulette_spinning'
   | 'roulette_result'
@@ -241,6 +242,9 @@ export interface Room {
   derbyBets?: Record<string, { horseId: number; amount: number }>;
   currentDerbyResult?: DerbyRoundResult;
   distributions?: SipDistribution[];
+  // Didacticiels / Tutoriels synchronisés:
+  playedTutorials?: string[];
+  pendingGame?: GameChoice | null;
 }
 
 export interface JoinRoomPayload {
@@ -330,4 +334,12 @@ export interface ConfirmDrankPayload {
 export interface UpdateSettingsPayload {
   roomId: string;
   settings: Partial<RoomSettings>;
+}
+
+export interface EndTutorialPayload {
+  roomId: string;
+}
+
+export interface FinishTutorialPayload {
+  roomId: string;
 }
