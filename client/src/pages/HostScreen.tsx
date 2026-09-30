@@ -164,6 +164,42 @@ export const HostScreen: React.FC = () => {
     playing_derby: '/games/derby.mp4',
   };
 
+  // Suivi des tutoriels déjà visionnés au cours de la partie entière (sessionStorage + ref)
+  const seenGameIntrosRef = useRef<Set<string>>(new Set());
+
+  const isIntroAlreadySeen = (roomId: string | undefined, gameState: string): boolean => {
+    if (seenGameIntrosRef.current.has(gameState)) return true;
+    if (!roomId) return false;
+    try {
+      const raw = sessionStorage.getItem(`seen_intros_${roomId}`);
+      if (raw) {
+        const set: string[] = JSON.parse(raw);
+        if (set.includes(gameState)) {
+          seenGameIntrosRef.current.add(gameState);
+          return true;
+        }
+      }
+    } catch {}
+    return false;
+  };
+
+  const markIntroAsSeen = (roomId: string | undefined, gameState: string) => {
+    seenGameIntrosRef.current.add(gameState);
+    if (!roomId) return;
+    try {
+      const list = Array.from(seenGameIntrosRef.current);
+      sessionStorage.setItem(`seen_intros_${roomId}`, JSON.stringify(list));
+    } catch {}
+  };
+
+  const resetSeenIntros = (roomId: string | undefined) => {
+    seenGameIntrosRef.current.clear();
+    if (!roomId) return;
+    try {
+      sessionStorage.removeItem(`seen_intros_${roomId}`);
+    } catch {}
+  };
+
   const createdRef = useRef(false);
   const roomIdRef = useRef<string | null>(null);
 
@@ -221,13 +257,24 @@ export const HostScreen: React.FC = () => {
       if (updatedRoom?.id) {
         roomIdRef.current = updatedRoom.id;
       }
+
+      // Si retour ou démarrage dans le lobby, réinitialiser la mémoire des tutoriels pour la prochaine partie
+      if (updatedRoom.state === 'lobby') {
+        resetSeenIntros(updatedRoom.id);
+      }
+
       const cameFrom = prevStateRef.current;
+      const introVideo = GAME_INTROS[updatedRoom.state];
+
+      // Afficher le tutoriel uniquement la 1ère fois qu'un mini-jeu démarre dans toute la partie
       if (
-        GAME_INTROS[updatedRoom.state] &&
+        introVideo &&
         cameFrom !== updatedRoom.state &&
+        !isIntroAlreadySeen(updatedRoom.id, updatedRoom.state) &&
         (cameFrom === null || cameFrom === 'lobby' || cameFrom === 'voting' || cameFrom === 'drinking_phase')
       ) {
-        setGameIntro(GAME_INTROS[updatedRoom.state]);
+        markIntroAsSeen(updatedRoom.id, updatedRoom.state);
+        setGameIntro(introVideo);
       }
       prevStateRef.current = updatedRoom.state;
       setRoom(prev => {
