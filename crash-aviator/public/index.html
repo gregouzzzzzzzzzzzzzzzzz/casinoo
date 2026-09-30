@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aviator Crash - Multijoueur Temps Réel</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&family=JetBrains+Mono:wght@700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="app-container">
+    <!-- BARRE SUPÉRIEURE (HEADER) -->
+    <header class="header">
+      <div class="header-left">
+        <div class="logo">
+          <span class="logo-icon">🚀</span>
+          <span class="logo-text">AVIATOR<span class="highlight">CRASH</span></span>
+        </div>
+        <div class="provably-fair-badge" id="provablyFairBadge" title="Système Provably Fair sécurisé par cryptographie">
+          <span class="shield-icon">🛡️</span>
+          <span>SHA-256:</span>
+          <code id="displayHash">Chargement...</code>
+        </div>
+      </div>
+
+      <div class="header-right">
+        <div class="players-online">
+          <span class="pulse-dot"></span>
+          <span id="onlineCount">1</span> en ligne
+        </div>
+        <div class="user-profile">
+          <span id="playerUsername" class="username">Pilote</span>
+          <div class="balance-box">
+            <span class="balance-label">SOLDE</span>
+            <span id="playerBalance" class="balance-value">1 000.00 €</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- HISTORIQUE DES DERNIERS CRASHS -->
+    <div class="history-bar" id="historyBar">
+      <!-- Les badges d'historique s'injectent ici -->
+    </div>
+
+    <!-- ZONE PRINCIPALE DE JEU -->
+    <main class="main-content">
+      <!-- COLONNE GAUCHE / CENTRALE : CANVAS & CONTRÔLES -->
+      <section class="game-area">
+        <!-- CONTENEUR DU GRAPHIQUE CANVAS -->
+        <div class="canvas-wrapper">
+          <canvas id="crashCanvas" width="900" height="480"></canvas>
+          
+          <!-- OVERLAY MULTIPLICATEUR & STATUTS -->
+          <div class="overlay-center" id="overlayCenter">
+            <!-- Phase Mise -->
+            <div id="countdownBox" class="countdown-box">
+              <div class="countdown-spinner"></div>
+              <div class="countdown-text">PROCHAIN VOL DANS</div>
+              <div id="countdownTimer" class="countdown-timer">10.0s</div>
+              <div class="progress-track">
+                <div id="countdownProgress" class="progress-bar"></div>
+              </div>
+            </div>
+
+            <!-- Multiplicateur en direct pendant le vol -->
+            <div id="multiplierDisplay" class="multiplier-display hidden">
+              <span id="multiplierValue">1.00x</span>
+            </div>
+
+            <!-- Message d'écrasement -->
+            <div id="crashedBox" class="crashed-box hidden">
+              <div class="crashed-title">CRASHED</div>
+              <div id="crashedAtValue" class="crashed-multiplier">@ 1.00x</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PANNEAU DE CONTRÔLE DE LA MISE -->
+        <div class="bet-controls">
+          <div class="bet-input-group">
+            <label for="betAmount">MONTANT DE LA MISE (€)</label>
+            <div class="input-wrapper">
+              <input type="number" id="betAmount" value="10" min="1" step="1">
+              <span class="currency-tag">€</span>
+            </div>
+            <div class="quick-buttons">
+              <button class="btn-quick" data-val="10">+10</button>
+              <button class="btn-quick" data-val="50">+50</button>
+              <button class="btn-quick" data-val="100">+100</button>
+              <button class="btn-quick" data-action="half">½</button>
+              <button class="btn-quick" data-action="double">2×</button>
+              <button class="btn-quick" data-action="max">MAX</button>
+            </div>
+          </div>
+
+          <!-- BOUTON D'ACTION PRINCIPAL DYNAMIQUE -->
+          <div class="action-btn-container">
+            <button id="mainActionButton" class="btn-action btn-bet">
+              <span class="btn-primary-text">PLACER LA MISE</span>
+              <span class="btn-sub-text">Attente du décollage</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- COLONNE DROITE : JOUEURS ET MISES EN DIRECT -->
+      <aside class="sidebar">
+        <div class="sidebar-header">
+          <h3>PARIS EN DIRECT</h3>
+          <span class="badge" id="activeBetsCount">0 paris</span>
+        </div>
+
+        <div class="sidebar-table-header">
+          <span>Joueur</span>
+          <span>Mise</span>
+          <span>Gain / Statut</span>
+        </div>
+
+        <div class="bets-list" id="betsList">
+          <div class="empty-state">En attente de mises...</div>
+        </div>
+
+        <!-- SECTION PROVABLY FAIR / VÉRIFICATION -->
+        <div class="provably-fair-box">
+          <div class="pf-title">🛡️ SÉCURITÉ PROVABLY FAIR</div>
+          <div class="pf-field">
+            <span class="pf-label">Hash SHA-256 (Pré-déterminé) :</span>
+            <input type="text" id="pfHashInput" readonly>
+          </div>
+          <div class="pf-field" id="pfSeedContainer">
+            <span class="pf-label">Seed Révélé (Post-crash) :</span>
+            <input type="text" id="pfSeedInput" placeholder="Sera révélé après le crash..." readonly>
+          </div>
+          <div id="pfVerifyResult" class="pf-verify-text"></div>
+        </div>
+      </aside>
+    </main>
+  </div>
+
+  <!-- Socket.io client -->
+  <script src="/socket.io/socket.io.js"></script>
+  <!-- Script principal -->
+  <script src="app.js"></script>
+</body>
+</html>

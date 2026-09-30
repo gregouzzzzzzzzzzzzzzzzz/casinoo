@@ -17,6 +17,7 @@ const getBackendUrl = (): string => {
 
 export const socket: Socket = io(getBackendUrl(), {
   autoConnect: true,
-  reconnectionAttempts: 10,
+  reconnectionAttempts: Infinity,
   reconnectionDelay: 1000,
+  reconnectionDelayMax: 3000,
 });

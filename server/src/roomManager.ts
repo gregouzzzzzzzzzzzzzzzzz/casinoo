@@ -119,6 +119,14 @@ export class RoomManager {
    * Creates a new room with a unique 4-character ID.
    */
   public createRoom(hostSocketId: string): Room {
+    const existingRoomId = this.hostSocketToRoomMap.get(hostSocketId);
+    if (existingRoomId) {
+      const existing = this.rooms.get(existingRoomId);
+      if (existing && existing.state === 'lobby') {
+        return existing;
+      }
+    }
+
     let roomId = this.generateRoomCode();
     while (this.rooms.has(roomId)) {
       roomId = this.generateRoomCode();

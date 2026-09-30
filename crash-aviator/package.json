@@ -1,0 +1,14 @@
+{
+  "name": "crash-multiplayer-game",
+  "version": "1.0.0",
+  "description": "Jeu de Crash multijoueur temps réel (type Aviator) avec Node.js, Socket.io, Canvas et Provably Fair",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "socket.io": "^4.7.5"
+  }
+}

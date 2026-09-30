@@ -170,13 +170,18 @@ export const HostScreen: React.FC = () => {
   useEffect(() => {
     // The shared socket often connects before this component mounts.
     setIsConnected(socket.connected);
-    socket.on('connect', () => {
-      setIsConnected(true);
-      // After a reconnection (bfcache restore, wifi blip) the socket lost its
-      // room membership: reclaim the room before the server's grace expires.
+
+    const requestRoom = () => {
       if (roomIdRef.current) {
         socket.emit('watch_room', { roomId: roomIdRef.current });
+      } else {
+        socket.emit('create_room');
       }
+    };
+
+    socket.on('connect', () => {
+      setIsConnected(true);
+      requestRoom();
     });
     socket.on('disconnect', () => setIsConnected(false));
 
@@ -187,11 +192,12 @@ export const HostScreen: React.FC = () => {
       socket.emit('create_room');
     });
 
-    // Guard against React StrictMode double-effect creating two rooms
-    // (the second create_room would leave the first room as a zombie).
+    // Request room on mount if socket is already connected
     if (!createdRef.current) {
       createdRef.current = true;
-      socket.emit('create_room');
+      if (socket.connected) {
+        requestRoom();
+      }
     }
 
     socket.on('room_created', ({ room }: { room: Room }) => {
@@ -212,6 +218,9 @@ export const HostScreen: React.FC = () => {
     socket.on('crash_update', handleCrashUpdate);
 
     socket.on('room_updated', ({ room: updatedRoom }: { room: Room }) => {
+      if (updatedRoom?.id) {
+        roomIdRef.current = updatedRoom.id;
+      }
       const cameFrom = prevStateRef.current;
       if (
         GAME_INTROS[updatedRoom.state] &&
@@ -451,161 +460,290 @@ export const HostScreen: React.FC = () => {
         {/* LOBBY                                                   */}
         {/* ═══════════════════════════════════════════════════════ */}
         {(!room || room.state === 'lobby') && (
-          <div className="lobby-grid" style={{ flex: 1 }}>
-            {/* Left Card: Join & Code */}
-            <div className="card" style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 16 }}>
-              <div>
-                <div className="label-xs" style={{ marginBottom: 8 }}>REJOINDRE SUR SMARTPHONE</div>
-                <div style={{ display: 'flex', justifyContent: 'center' }}>
-                  <div className="room-code" style={{ width: '100%' }}>
-                    <span className="room-code-text">{room?.id ?? '....'}</span>
-                  </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 20, flex: 1 }}>
+            
+            {/* ── BANDEAU HAUT TV : CODE DE CONNEXION GÉANT ET TRÈS VISIBLE ── */}
+            <div
+              className="card animate-in"
+              style={{
+                padding: '24px 36px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                flexWrap: 'wrap',
+                gap: 24,
+                background: 'linear-gradient(135deg, var(--bg-surface) 0%, rgba(255, 182, 41, 0.12) 100%)',
+                border: '2px solid rgba(255, 182, 41, 0.5)',
+                boxShadow: '0 8px 30px rgba(0,0,0,0.5), 0 0 25px rgba(255, 182, 41, 0.15)',
+              }}
+            >
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxWidth: 620 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <span className="badge badge-gold" style={{ fontSize: 12, letterSpacing: '0.08em' }}>
+                    📱 REJOINDRE LA TABLE
+                  </span>
+                  {!isConnected && (
+                    <span className="badge badge-red" style={{ fontSize: 12 }}>
+                      ⚠️ CONNEXION AU SERVEUR...
+                    </span>
+                  )}
                 </div>
-              </div>
-              <button onClick={handleCopy} className="btn btn-secondary btn-full">
-                {copied ? <Check size={14} color="var(--green)" /> : <Copy size={14} />}
-                {copied ? 'Copié !' : 'Copier le code'}
-              </button>
-              <button onClick={() => setShowIntro(true)} className="btn btn-primary btn-full">
-                ▶︎ Comment jouer ?
-              </button>
-              <div className="divider" />
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                {[
-                  ['1', 'Ouvrez le site sur votre téléphone'],
-                  ['2', 'Entrez le code et un pseudo'],
-                  ['3', 'Le premier arrivé devient Chef de Table'],
-                ].map(([num, txt]) => (
-                  <div key={num} style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-                    <span style={{
-                      fontFamily: 'var(--font-display)', fontSize: 13,
-                      width: 24, height: 24, borderRadius: '50%', flexShrink: 0,
-                      background: 'var(--yellow)', color: 'var(--text-inverse)',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      boxShadow: '0 2px 0 var(--orange-deep)',
-                    }}>{num}</span>
-                    <span style={{ fontSize: 12.5, color: 'var(--text-secondary)' }}>{txt}</span>
-                  </div>
-                ))}
-              </div>
-              {leaderPlayer && (
-                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                  <Crown size={15} color="var(--gold)" style={{ flexShrink: 0 }} />
-                  <p style={{ fontSize: 12, lineHeight: 1.5, color: 'var(--text-secondary)', margin: 0 }}>
-                    <span style={{ color: 'var(--gold)', fontWeight: 600 }}>{leaderPlayer.name}</span> configure la table et lance la partie.
-                  </p>
-                </div>
-              )}
-            </div>
-
-            {/* Center Card: Players at table */}
-            <div className="card" style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 12 }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <Users size={15} color="var(--text-secondary)" />
-                  <span style={{ fontWeight: 700, fontSize: 14 }}>Joueurs à table</span>
-                </div>
-                <span className="badge badge-green">
-                  {totalPlayers} / {room?.settings?.maxPlayers || 8} joueur{totalPlayers > 1 ? 's' : ''}
-                </span>
+                <h1
+                  style={{
+                    fontFamily: 'var(--font-display)',
+                    fontSize: 'clamp(26px, 3.2vw, 42px)',
+                    color: 'var(--text-primary)',
+                    margin: 0,
+                    lineHeight: 1.2,
+                  }}
+                >
+                  Rejoignez la partie avec le code :
+                </h1>
+                <p style={{ margin: 0, fontSize: 15, color: 'var(--text-secondary)' }}>
+                  Ouvrez l'application sur smartphone et saisissez ce code pour entrer dans la salle.
+                </p>
               </div>
 
-              {totalPlayers === 0 ? (
-                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px 0', gap: 8 }}>
-                  <span style={{ fontSize: 44 }} className="animate-bounce">🍻</span>
-                  <p style={{ fontFamily: 'var(--font-display)', fontSize: 18, color: 'var(--text-secondary)', textAlign: 'center', margin: 0 }}>
-                    La table est ouverte !
-                  </p>
-                  <p style={{ fontSize: 13, color: 'var(--text-dim)', textAlign: 'center', maxWidth: 280 }}>
-                    Sortez les téléphones et entrez le code <strong style={{ color: 'var(--yellow)' }}>{room?.id}</strong> pour vous asseoir.
-                  </p>
-                </div>
-              ) : (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 8 }}>
-                  {room!.players.map((player: Player) => {
-                    const isLeader = room!.leaderId === player.id;
-                    return (
-                      <div key={player.id} className="player-row animate-in" style={{ gap: 8 }}>
-                        <div style={{ position: 'relative', flexShrink: 0 }}>
-                          <Avatar name={player.name} size={32} />
-                          {isLeader && (
-                            <div style={{
-                              position: 'absolute', top: -5, right: -5,
-                              background: 'var(--gold)', borderRadius: 3,
-                              width: 14, height: 14, display: 'flex',
-                              alignItems: 'center', justifyContent: 'center',
-                            }}>
-                              <Crown size={9} color="var(--bg-base)" />
-                            </div>
-                          )}
-                        </div>
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ fontWeight: 700, fontSize: 13, display: 'flex', alignItems: 'center', gap: 4 }}>
-                            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{player.name}</span>
-                          </div>
-                          <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>💰 {player.balance} jetons</div>
-                        </div>
-                        {isLeader && <span className="badge badge-gold">CHEF</span>}
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-
-            {/* Right Card: Live Table Settings / Rules */}
-            <div className="card animate-in" style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 14 }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--text-primary)' }}>
-                  ⚙️ Règles de la Table
-                </div>
-                <span className="badge badge-gold">En direct</span>
-              </div>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                <div style={{ background: 'var(--bg-input)', padding: '10px 12px', borderRadius: 6, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Solde de départ</span>
-                  <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--green)' }}>
-                    {room?.settings?.startingBalance ?? 20} 💰
-                  </span>
-                </div>
-
-                <div style={{ background: 'var(--bg-input)', padding: '10px 12px', borderRadius: 6, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Manches Min / Max</span>
-                  <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>
-                    {room?.settings?.minRounds ?? 3} / {room?.settings?.maxRounds ?? 10} 🏁
-                  </span>
-                </div>
-
-                <div style={{ background: 'var(--bg-input)', padding: '10px 12px', borderRadius: 6, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Bombes aux Mines</span>
-                  <span style={{ fontSize: 13, fontWeight: 700, color: '#f2696d' }}>
-                    {room?.settings?.minesBombCount ?? 7} 💣
-                  </span>
-                </div>
-
-                <div style={{ background: 'var(--bg-input)', padding: '10px 12px', borderRadius: 6, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Multiplicateur Gorgées</span>
-                  <span className="badge badge-red" style={{ fontSize: 12, fontWeight: 700 }}>
-                    ×{room?.settings?.sipMultiplier ?? 1} 🍺
-                  </span>
-                </div>
-
-                <div style={{ background: 'var(--bg-input)', padding: '10px 12px', borderRadius: 6, display: 'flex', flexDirection: 'column', gap: 6 }}>
-                  <span style={{ fontSize: 11, color: 'var(--text-secondary)', fontWeight: 600 }}>JEUX ACTIVÉS</span>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
-                    {(room?.settings?.enabledGames || ['mines', 'blackjack', 'crash', 'roulette']).map((game) => (
-                      <span key={game} className="badge badge-surface" style={{ fontSize: 10, padding: '3px 7px' }}>
-                        {game === 'mines' && '💣 Mines'}
-                        {game === 'blackjack' && '♠ Blackjack'}
-                        {game === 'crash' && '📈 Krach'}
-                        {game === 'roulette' && '🎡 Roulette'}
-                        {game === 'derby' && '🐎 Derby'}
+              {/* Bloc Code Géant TV */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                <div
+                  className="room-code"
+                  style={{
+                    padding: '16px 40px',
+                    borderRadius: 18,
+                    background: 'var(--bg-input)',
+                    border: '3px solid var(--gold)',
+                    boxShadow: '0 6px 0 var(--orange-deep), 0 0 35px rgba(255, 182, 41, 0.3)',
+                    minWidth: 260,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  {room?.id ? (
+                    <span
+                      className="room-code-text"
+                      style={{
+                        fontSize: 'clamp(52px, 5.5vw, 76px)',
+                        letterSpacing: '0.22em',
+                        textIndent: '0.22em',
+                        color: 'var(--yellow)',
+                        textShadow: '0 4px 0 var(--orange-deep)',
+                      }}
+                    >
+                      {room.id}
+                    </span>
+                  ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+                      <span
+                        className="room-code-text"
+                        style={{
+                          fontSize: 'clamp(36px, 4vw, 48px)',
+                          letterSpacing: '0.15em',
+                          color: 'var(--yellow)',
+                          opacity: 0.6,
+                          animation: 'pulse 1.5s infinite',
+                        }}
+                      >
+                        ....
                       </span>
-                    ))}
+                      <span style={{ fontSize: 11, color: 'var(--gold)', fontWeight: 700 }}>
+                        {isConnected ? 'Génération du code...' : 'Connexion au serveur...'}
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  <button
+                    onClick={handleCopy}
+                    className="btn btn-secondary"
+                    style={{
+                      height: 52,
+                      padding: '0 20px',
+                      fontSize: 14,
+                      fontWeight: 700,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 8,
+                      borderRadius: 12,
+                    }}
+                    title="Copier le code"
+                  >
+                    {copied ? <Check size={18} color="var(--green)" /> : <Copy size={18} />}
+                    <span>{copied ? 'Copié !' : 'Copier'}</span>
+                  </button>
+
+                  <button
+                    onClick={() => setShowIntro(true)}
+                    className="btn btn-primary"
+                    style={{
+                      height: 52,
+                      padding: '0 20px',
+                      fontSize: 14,
+                      fontWeight: 700,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 8,
+                      borderRadius: 12,
+                    }}
+                  >
+                    ▶︎ Comment jouer ?
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* ── CONTENU DU LOBBY : JOUEURS ET RÈGLES ── */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: 20, flex: 1, alignItems: 'start' }}>
+              
+              {/* Colonne Gauche : Joueurs + 3 Étapes */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                
+                {/* Carte Joueurs à table */}
+                <div className="card" style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 16 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                      <Users size={18} color="var(--text-secondary)" />
+                      <span style={{ fontWeight: 700, fontSize: 16 }}>Joueurs à table</span>
+                    </div>
+                    <span className="badge badge-green" style={{ fontSize: 13, padding: '4px 12px' }}>
+                      {totalPlayers} / {room?.settings?.maxPlayers || 8} joueur{totalPlayers > 1 ? 's' : ''}
+                    </span>
+                  </div>
+
+                  {totalPlayers === 0 ? (
+                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px 0', gap: 8 }}>
+                      <span style={{ fontSize: 48 }} className="animate-bounce">🍻</span>
+                      <p style={{ fontFamily: 'var(--font-display)', fontSize: 20, color: 'var(--text-secondary)', textAlign: 'center', margin: 0 }}>
+                        La table est ouverte !
+                      </p>
+                      <p style={{ fontSize: 14, color: 'var(--text-dim)', textAlign: 'center', maxWidth: 360, lineHeight: 1.5 }}>
+                        Sortez les téléphones et entrez le code <strong style={{ color: 'var(--yellow)', fontSize: 18 }}>{room?.id || '....'}</strong> pour vous asseoir.
+                      </p>
+                    </div>
+                  ) : (
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 10 }}>
+                      {room!.players.map((player: Player) => {
+                        const isLeader = room!.leaderId === player.id;
+                        return (
+                          <div key={player.id} className="player-row animate-in" style={{ gap: 10, padding: '10px 14px' }}>
+                            <div style={{ position: 'relative', flexShrink: 0 }}>
+                              <Avatar name={player.name} size={36} />
+                              {isLeader && (
+                                <div style={{
+                                  position: 'absolute', top: -5, right: -5,
+                                  background: 'var(--gold)', borderRadius: 3,
+                                  width: 15, height: 15, display: 'flex',
+                                  alignItems: 'center', justifyContent: 'center',
+                                }}>
+                                  <Crown size={10} color="var(--bg-base)" />
+                                </div>
+                              )}
+                            </div>
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <div style={{ fontWeight: 700, fontSize: 14, display: 'flex', alignItems: 'center', gap: 4 }}>
+                                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{player.name}</span>
+                              </div>
+                              <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>💰 {player.balance} jetons</div>
+                            </div>
+                            {isLeader && <span className="badge badge-gold">CHEF</span>}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  <div className="divider" />
+                  
+                  {/* Instructions 3 étapes + Chef de Groupe */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16 }}>
+                    <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+                      {[
+                        ['1', 'Ouvrez le site sur smartphone'],
+                        ['2', 'Entrez le code et un pseudo'],
+                        ['3', 'Le premier devient Chef de Table'],
+                      ].map(([num, txt]) => (
+                        <div key={num} style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                          <span style={{
+                            fontFamily: 'var(--font-display)', fontSize: 12,
+                            width: 22, height: 22, borderRadius: '50%', flexShrink: 0,
+                            background: 'var(--yellow)', color: 'var(--text-inverse)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            boxShadow: '0 2px 0 var(--orange-deep)',
+                          }}>{num}</span>
+                          <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>{txt}</span>
+                        </div>
+                      ))}
+                    </div>
+
+                    {leaderPlayer && (
+                      <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                        <Crown size={16} color="var(--gold)" style={{ flexShrink: 0 }} />
+                        <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
+                          <strong style={{ color: 'var(--gold)' }}>{leaderPlayer.name}</strong> configure et lance la partie.
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
+
+              {/* Colonne Droite : Règles de la Table */}
+              <div className="card animate-in" style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 14 }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <div style={{ fontWeight: 700, fontSize: 15, color: 'var(--text-primary)' }}>
+                    ⚙️ Règles de la Table
+                  </div>
+                  <span className="badge badge-gold">En direct</span>
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  <div style={{ background: 'var(--bg-input)', padding: '10px 12px', borderRadius: 6, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Solde de départ</span>
+                    <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--green)' }}>
+                      {room?.settings?.startingBalance ?? 20} 💰
+                    </span>
+                  </div>
+
+                  <div style={{ background: 'var(--bg-input)', padding: '10px 12px', borderRadius: 6, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Manches Min / Max</span>
+                    <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>
+                      {room?.settings?.minRounds ?? 3} / {room?.settings?.maxRounds ?? 10} 🏁
+                    </span>
+                  </div>
+
+                  <div style={{ background: 'var(--bg-input)', padding: '10px 12px', borderRadius: 6, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Bombes aux Mines</span>
+                    <span style={{ fontSize: 13, fontWeight: 700, color: '#f2696d' }}>
+                      {room?.settings?.minesBombCount ?? 7} 💣
+                    </span>
+                  </div>
+
+                  <div style={{ background: 'var(--bg-input)', padding: '10px 12px', borderRadius: 6, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Multiplicateur Gorgées</span>
+                    <span className="badge badge-red" style={{ fontSize: 12, fontWeight: 700 }}>
+                      ×{room?.settings?.sipMultiplier ?? 1} 🍺
+                    </span>
+                  </div>
+
+                  <div style={{ background: 'var(--bg-input)', padding: '10px 12px', borderRadius: 6, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    <span style={{ fontSize: 11, color: 'var(--text-secondary)', fontWeight: 700 }}>JEUX ACTIVÉS</span>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+                      {(room?.settings?.enabledGames || ['mines', 'blackjack', 'crash', 'roulette']).map((game) => (
+                        <span key={game} className="badge badge-surface" style={{ fontSize: 10, padding: '3px 7px' }}>
+                          {game === 'mines' && '💣 Mines'}
+                          {game === 'blackjack' && '♠ Blackjack'}
+                          {game === 'crash' && '✈️ L\'Avion'}
+                          {game === 'roulette' && '🎡 Roulette'}
+                          {game === 'derby' && '🐎 Derby'}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
             </div>
           </div>
         )}
