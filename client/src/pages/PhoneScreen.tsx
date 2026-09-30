@@ -114,9 +114,9 @@ const PlayingCard: React.FC<PlayingCardProps> = ({ card, size = 'md', hidden = f
 
   return (
     <div className={`playing-card ${colorClass} ${sizeClass}`}>
-      <div style={{ fontSize: size === 'lg' ? 16 : size === 'sm' ? 10 : 12, lineHeight: 1 }}>{card.value}</div>
-      <div style={{ fontSize: size === 'lg' ? 24 : size === 'sm' ? 14 : 18, textAlign: 'center', lineHeight: 1 }}>{card.suit}</div>
-      <div style={{ fontSize: size === 'lg' ? 16 : size === 'sm' ? 10 : 12, textAlign: 'right', lineHeight: 1 }}>{card.value}</div>
+      <div style={{ fontSize: size === 'lg' ? 22 : size === 'sm' ? 13 : 16, lineHeight: 1, fontWeight: 900 }}>{card.value}</div>
+      <div style={{ fontSize: size === 'lg' ? 38 : size === 'sm' ? 20 : 28, textAlign: 'center', lineHeight: 1 }}>{card.suit}</div>
+      <div style={{ fontSize: size === 'lg' ? 22 : size === 'sm' ? 13 : 16, textAlign: 'right', lineHeight: 1, fontWeight: 900 }}>{card.value}</div>
     </div>
   );
 };
@@ -1108,13 +1108,13 @@ export const PhoneScreen: React.FC = () => {
                 </div>
               </div>
             ) : (
-              <form onSubmit={handleRouletteBetSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <form onSubmit={handleRouletteBetSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
                 {/* Montant de la mise avec stepper et jetons rapides */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                  <div className="label-xs">MONTANT DU JETON (MAX: {maxBet} 💰)</div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <button type="button" onClick={() => setBetAmount(clampBet(betAmount - 1))} className="btn btn-secondary btn-sm" style={{ padding: '10px 14px' }}>
-                      <Minus size={16} />
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  <div className="label-xs" style={{ fontSize: 12 }}>MONTANT DU JETON (MAX: {maxBet} 💰)</div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <button type="button" onClick={() => setBetAmount(clampBet(betAmount - 1))} className="btn btn-secondary" style={{ minWidth: 54, minHeight: 54, padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <Minus size={22} />
                     </button>
                     <input
                       type="number"
@@ -1123,11 +1123,11 @@ export const PhoneScreen: React.FC = () => {
                       value={betAmount}
                       onChange={e => setBetAmount(clampBet(parseInt(e.target.value) || 1))}
                       className="input"
-                      style={{ textAlign: 'center', fontSize: 22, fontWeight: 700, flex: 1 }}
+                      style={{ textAlign: 'center', fontSize: 26, fontWeight: 900, minHeight: 54, flex: 1 }}
                       required
                     />
-                    <button type="button" onClick={() => setBetAmount(clampBet(betAmount + 1))} className="btn btn-secondary btn-sm" style={{ padding: '10px 14px' }}>
-                      <Plus size={16} />
+                    <button type="button" onClick={() => setBetAmount(clampBet(betAmount + 1))} className="btn btn-secondary" style={{ minWidth: 54, minHeight: 54, padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <Plus size={22} />
                     </button>
                   </div>
 
@@ -1138,13 +1138,14 @@ export const PhoneScreen: React.FC = () => {
                         key={idx}
                         type="button"
                         onClick={() => setBetAmount(clampBet(val))}
-                        className="btn btn-secondary btn-sm"
+                        className="btn btn-secondary"
                         style={{
                           flex: 1,
-                          fontSize: 12,
-                          fontWeight: 700,
-                          padding: '6px 4px',
-                          border: betAmount === val ? '1px solid var(--green)' : undefined,
+                          fontSize: 14,
+                          fontWeight: 800,
+                          minHeight: 46,
+                          padding: '8px 4px',
+                          border: betAmount === val ? '2px solid var(--green)' : undefined,
                           color: betAmount === val ? 'var(--green)' : undefined,
                         }}
                       >
@@ -1155,14 +1156,14 @@ export const PhoneScreen: React.FC = () => {
                 </div>
 
                 {/* Choix de la couleur */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  <div className="label-xs">CHOISISSEZ VOTRE COULEUR</div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  <div className="label-xs" style={{ fontSize: 12 }}>CHOISISSEZ VOTRE COULEUR</div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                     <button
                       type="button"
                       onClick={() => setBetColor('red')}
                       className={`color-btn color-btn-red ${betColor === 'red' ? 'active' : ''}`}
-                      style={{ padding: '16px 8px', fontSize: 15, fontWeight: 700 }}
+                      style={{ minHeight: 68, fontSize: 'clamp(1.1rem, 4vw, 1.35rem)', fontWeight: 800, borderRadius: 14 }}
                     >
                       🔴 ROUGE (×2)
                     </button>
@@ -1170,7 +1171,7 @@ export const PhoneScreen: React.FC = () => {
                       type="button"
                       onClick={() => setBetColor('black')}
                       className={`color-btn color-btn-black ${betColor === 'black' ? 'active' : ''}`}
-                      style={{ padding: '16px 8px', fontSize: 15, fontWeight: 700 }}
+                      style={{ minHeight: 68, fontSize: 'clamp(1.1rem, 4vw, 1.35rem)', fontWeight: 800, borderRadius: 14 }}
                     >
                       ⚫ NOIR (×2)
                     </button>
@@ -1179,13 +1180,13 @@ export const PhoneScreen: React.FC = () => {
                     type="button"
                     onClick={() => setBetColor('green')}
                     className={`color-btn color-btn-green-roulette ${betColor === 'green' ? 'active' : ''}`}
-                    style={{ padding: '12px', fontSize: 14, fontWeight: 700 }}
+                    style={{ minHeight: 56, fontSize: 'clamp(1rem, 3.8vw, 1.25rem)', fontWeight: 800, borderRadius: 14 }}
                   >
                     🟢 LE ZÉRO (×36)
                   </button>
                 </div>
 
-                <button type="submit" className="btn btn-primary btn-full btn-lg" style={{ fontSize: 16, fontWeight: 700, padding: 16 }}>
+                <button type="submit" className="btn btn-primary btn-massive-action" style={{ minHeight: 70, fontSize: 'clamp(1.2rem, 4.5vw, 1.45rem)' }}>
                   Miser {betAmount} 💰 sur {betColor === 'red' ? 'ROUGE' : betColor === 'black' ? 'NOIR' : 'ZÉRO'}
                 </button>
               </form>
@@ -1344,36 +1345,36 @@ export const PhoneScreen: React.FC = () => {
               </div>
             ) : (
               <form onSubmit={handleCrashBetSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-                <input type="number" min={1} max={maxBet} value={crashBetAmount} onChange={e => setCrashBetAmount(clampBet(parseInt(e.target.value) || 1))} className="input" style={{ textAlign: 'center', fontSize: 18, fontWeight: 700 }} required />
-                <button type="submit" className="btn btn-primary btn-full btn-lg">Embarquer avec {crashBetAmount} 💰</button>
+                <input type="number" min={1} max={maxBet} value={crashBetAmount} onChange={e => setCrashBetAmount(clampBet(parseInt(e.target.value) || 1))} className="input" style={{ textAlign: 'center', fontSize: 22, fontWeight: 800, minHeight: 52 }} required />
+                <button type="submit" className="btn btn-primary btn-massive-action" style={{ minHeight: 68, fontSize: '1.35rem' }}>Embarquer avec {crashBetAmount} 💰</button>
               </form>
             )}
           </div>
         )}
 
         {joinedPlayer && currentRoom?.state === 'crash_flying' && (
-          <div className="card animate-in" style={{ padding: '14px 12px 18px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div className="card animate-in" style={{ padding: '14px 12px 18px', display: 'flex', flexDirection: 'column', gap: 14 }}>
             <div style={{ position: 'relative' }}>
-              <AviatorCanvas multiplier={liveCrashMultiplier || 1.00} crashed={false} height={190} />
+              <AviatorCanvas multiplier={liveCrashMultiplier || 1.00} crashed={false} height={200} />
               <div style={{
                 position: 'absolute', top: 10, left: 12, pointerEvents: 'none',
-                fontFamily: 'var(--font-display)', fontSize: 38, lineHeight: 1,
+                fontFamily: 'var(--font-display)', fontSize: 44, lineHeight: 1,
                 color: 'var(--yellow)', textShadow: '0 3px 0 var(--orange-deep)',
               }}>
                 {(liveCrashMultiplier || 1.00).toFixed(2)}x
               </div>
             </div>
             {joinedPlayer.cashOutMultiplier ? (
-              <div style={{ background: 'var(--green-subtle)', borderRadius: 14, padding: 14, textAlign: 'center' }}>
-                <div style={{ fontSize: 30 }}>🪂</div>
-                <div style={{ fontWeight: 700, color: 'var(--green)' }}>Sauté à {joinedPlayer.cashOutMultiplier.toFixed(2)}x ! 🎉</div>
+              <div style={{ background: 'var(--green-subtle)', borderRadius: 14, padding: 16, textAlign: 'center' }}>
+                <div style={{ fontSize: 32 }}>🪂</div>
+                <div style={{ fontWeight: 800, fontSize: 18, color: 'var(--green)' }}>Sauté à {joinedPlayer.cashOutMultiplier.toFixed(2)}x ! 🎉</div>
               </div>
             ) : myCrashBet > 0 ? (
-              <button onClick={handleCashOut} className="btn btn-primary btn-full animate-green-pulse" style={{ fontSize: 18, fontWeight: 700, padding: '18px 20px' }}>
+              <button onClick={handleCashOut} className="btn btn-primary btn-massive-action animate-green-pulse" style={{ minHeight: 76, fontSize: 'clamp(1.3rem, 5vw, 1.65rem)' }}>
                 🪂 J'ENCAISSE ! (+{currentPotentialReturn - myCrashBet} 💰)
               </button>
             ) : (
-              <div style={{ textAlign: 'center', fontSize: 12, color: 'var(--text-dim)' }}>Regardez l'avion sur le grand écran !</div>
+              <div style={{ textAlign: 'center', fontSize: 13, color: 'var(--text-dim)', padding: '8px 0' }}>Regardez l'avion sur le grand écran !</div>
             )}
           </div>
         )}
@@ -1391,8 +1392,8 @@ export const PhoneScreen: React.FC = () => {
               </div>
             ) : (
               <form onSubmit={handleBlackjackBetSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-                <input type="number" min={1} max={maxBet} value={blackjackBetAmount} onChange={e => setBlackjackBetAmount(clampBet(parseInt(e.target.value) || 1))} className="input" style={{ textAlign: 'center', fontSize: 18, fontWeight: 700 }} required />
-                <button type="submit" className="btn btn-primary btn-full btn-lg">Miser {blackjackBetAmount} 💰</button>
+                <input type="number" min={1} max={maxBet} value={blackjackBetAmount} onChange={e => setBlackjackBetAmount(clampBet(parseInt(e.target.value) || 1))} className="input" style={{ textAlign: 'center', fontSize: 22, fontWeight: 800, minHeight: 52 }} required />
+                <button type="submit" className="btn btn-primary btn-massive-action" style={{ minHeight: 68, fontSize: '1.35rem' }}>Miser {blackjackBetAmount} 💰</button>
               </form>
             )}
           </div>
@@ -1400,14 +1401,14 @@ export const PhoneScreen: React.FC = () => {
 
         {joinedPlayer && (currentRoom?.state === 'blackjack_playing' || currentRoom?.state === 'blackjack_dealer_turn') && (
           <div className="card animate-in" style={{ padding: '20px 16px', display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <div style={{ fontSize: 20, fontWeight: 700 }}>Score : {myScore}</div>
-            <div style={{ background: 'var(--bg-input)', borderRadius: 8, padding: 16, display: 'flex', gap: 8, justifyContent: 'center' }}>
+            <div style={{ fontSize: 22, fontWeight: 800 }}>Score : {myScore}</div>
+            <div style={{ background: 'var(--bg-input)', borderRadius: 10, padding: 16, display: 'flex', gap: 8, justifyContent: 'center' }}>
               {joinedPlayer.hand?.map((c, i) => <PlayingCard key={i} card={c} size="lg" />)}
             </div>
             {currentRoom.state === 'blackjack_playing' && isPlaying && (
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-                <button onClick={handleBlackjackHit} className="btn btn-primary btn-full btn-lg"><PlusCircle size={20} /> TIRER</button>
-                <button onClick={handleBlackjackStand} className="btn btn-secondary btn-full btn-lg"><Hand size={20} /> RESTER</button>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                <button onClick={handleBlackjackHit} className="btn btn-primary btn-massive-action" style={{ minHeight: 74, fontSize: '1.35rem' }}><PlusCircle size={24} /> TIRER</button>
+                <button onClick={handleBlackjackStand} className="btn btn-secondary btn-massive-action" style={{ minHeight: 74, fontSize: '1.35rem' }}><Hand size={24} /> RESTER</button>
               </div>
             )}
           </div>
@@ -1426,8 +1427,8 @@ export const PhoneScreen: React.FC = () => {
               </div>
             ) : (
               <form onSubmit={handleMinesBetSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-                <input type="number" min={1} max={maxBet} value={minesBetAmount} onChange={e => setMinesBetAmount(clampBet(parseInt(e.target.value) || 1))} className="input" style={{ textAlign: 'center', fontSize: 18, fontWeight: 700 }} required />
-                <button type="submit" className="btn btn-primary btn-full btn-lg">Miser {minesBetAmount} 💰</button>
+                <input type="number" min={1} max={maxBet} value={minesBetAmount} onChange={e => setMinesBetAmount(clampBet(parseInt(e.target.value) || 1))} className="input" style={{ textAlign: 'center', fontSize: 22, fontWeight: 800, minHeight: 52 }} required />
+                <button type="submit" className="btn btn-primary btn-massive-action" style={{ minHeight: 68, fontSize: '1.35rem' }}>Miser {minesBetAmount} 💰</button>
               </form>
             )}
           </div>
@@ -1469,8 +1470,8 @@ export const PhoneScreen: React.FC = () => {
             </div></div>
 
             {isMyTurnInMines && (joinedPlayer.safeClicks || 0) >= 1 && (
-              <button type="button" onClick={handleMinesCashOut} className="btn btn-gold btn-full btn-lg animate-pulse">
-                <Lock size={18} /> SÉCURISER SES GAINS (+{joinedPlayer.safeClicks} 💰)
+              <button type="button" onClick={handleMinesCashOut} className="btn btn-gold btn-massive-action animate-pulse" style={{ minHeight: 74, fontSize: '1.35rem' }}>
+                <Lock size={20} /> SÉCURISER SES GAINS (+{joinedPlayer.safeClicks} 💰)
               </button>
             )}
           </div>
@@ -1548,19 +1549,19 @@ export const PhoneScreen: React.FC = () => {
                 </div>
 
                 {/* Amount Slider / Input */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <label className="field-label" style={{ margin: 0 }}>Montant du pari</label>
-                    <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--green)' }}>{derbyBetAmount} 💰</span>
+                    <label className="field-label" style={{ margin: 0, fontSize: 13 }}>Montant du pari</label>
+                    <span style={{ fontSize: 18, fontWeight: 900, color: 'var(--green)' }}>{derbyBetAmount} 💰</span>
                   </div>
 
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                     <button
                       type="button"
                       onClick={() => setDerbyBetAmount(prev => clampBet(prev - 1))}
-                      className="btn btn-secondary btn-sm" style={{ padding: '8px 12px' }}
+                      className="btn btn-secondary" style={{ minWidth: 54, minHeight: 54, padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                     >
-                      <Minus size={14} />
+                      <Minus size={22} />
                     </button>
                     <input
                       type="number"
@@ -1569,20 +1570,20 @@ export const PhoneScreen: React.FC = () => {
                       value={derbyBetAmount}
                       onChange={e => setDerbyBetAmount(clampBet(parseInt(e.target.value) || 1))}
                       className="input"
-                      style={{ textAlign: 'center', fontSize: 18, fontWeight: 700 }}
+                      style={{ textAlign: 'center', fontSize: 26, fontWeight: 900, minHeight: 54, flex: 1 }}
                       required
                     />
                     <button
                       type="button"
                       onClick={() => setDerbyBetAmount(prev => clampBet(prev + 1))}
-                      className="btn btn-secondary btn-sm" style={{ padding: '8px 12px' }}
+                      className="btn btn-secondary" style={{ minWidth: 54, minHeight: 54, padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                     >
-                      <Plus size={14} />
+                      <Plus size={22} />
                     </button>
                   </div>
                 </div>
 
-                <button type="submit" className="btn btn-primary btn-full btn-lg">
+                <button type="submit" className="btn btn-primary btn-massive-action" style={{ minHeight: 70, fontSize: '1.35rem' }}>
                   Parier {derbyBetAmount} 💰 (Cote ×3.00)
                 </button>
               </form>
@@ -1927,9 +1928,9 @@ export const PhoneScreen: React.FC = () => {
             </div>
 
             {!joinedPlayer.hasDrank && joinedPlayer.sipsToDrink > 0 && (
-              <button onClick={handleConfirmDrank} className="btn btn-primary btn-full btn-lg" style={{ fontSize: 16, padding: '14px 20px' }}>
-                <Beer size={20} />
-                <span>J'ai tout bu ! 🍻</span>
+              <button onClick={handleConfirmDrank} className="btn btn-primary btn-massive-action" style={{ minHeight: 76, fontSize: 'clamp(1.3rem, 5vw, 1.6rem)' }}>
+                <Beer size={28} />
+                <span>J'AI TOUT BU ! 🍻</span>
               </button>
             )}
           </div>
@@ -1957,12 +1958,12 @@ export const PhoneScreen: React.FC = () => {
                 <select value={targetPlayerId} onChange={e => setTargetPlayerId(e.target.value)} className="select" required>
                   {otherPlayers.map(p => <option key={p.id} value={p.id} style={{ background: '#241a0e' }}>{p.name} ({p.balance} 💰)</option>)}
                 </select>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <button type="button" onClick={() => setSipsAmount(Math.max(0, sipsAmount - 1))} className="btn btn-secondary btn-sm"><Minus size={14} /></button>
-                  <input type="number" min={0} max={maxSips} value={sipsAmount} onChange={e => setSipsAmount(Math.max(0, Math.min(maxSips, parseInt(e.target.value) || 0)))} className="input" style={{ textAlign: 'center', fontSize: 18, fontWeight: 700 }} required />
-                  <button type="button" onClick={() => setSipsAmount(Math.min(maxSips, sipsAmount + 1))} className="btn btn-secondary btn-sm"><Plus size={14} /></button>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <button type="button" onClick={() => setSipsAmount(Math.max(0, sipsAmount - 1))} className="btn btn-secondary" style={{ minWidth: 50, minHeight: 50, padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Minus size={20} /></button>
+                  <input type="number" min={0} max={maxSips} value={sipsAmount} onChange={e => setSipsAmount(Math.max(0, Math.min(maxSips, parseInt(e.target.value) || 0)))} className="input" style={{ textAlign: 'center', fontSize: 24, fontWeight: 800, minHeight: 50 }} required />
+                  <button type="button" onClick={() => setSipsAmount(Math.min(maxSips, sipsAmount + 1))} className="btn btn-secondary" style={{ minWidth: 50, minHeight: 50, padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Plus size={20} /></button>
                 </div>
-                <button type="submit" disabled={!targetPlayerId || sipsAmount <= 0} className="btn btn-primary btn-full btn-lg">
+                <button type="submit" disabled={!targetPlayerId || sipsAmount <= 0} className="btn btn-primary btn-massive-action" style={{ minHeight: 68, fontSize: '1.25rem' }}>
                   Envoyer {sipsAmount} 🍺 à {otherPlayers.find(p => p.id === targetPlayerId)?.name ?? '...'}
                 </button>
               </form>
@@ -1980,24 +1981,24 @@ export const PhoneScreen: React.FC = () => {
             {joinedPlayer.sipsToDrink > 0 ? (
               <>
                 <div style={{
-                  width: 56, height: 56, borderRadius: '50%',
+                  width: 64, height: 64, borderRadius: '50%',
                   background: joinedPlayer.hasDrank ? 'var(--green-subtle)' : 'var(--red-subtle)',
-                  border: `2px solid ${joinedPlayer.hasDrank ? 'var(--green)' : 'var(--red)'}`,
+                  border: `3px solid ${joinedPlayer.hasDrank ? 'var(--green)' : 'var(--red)'}`,
                   display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto',
                 }}>
-                  {joinedPlayer.hasDrank ? <CheckCircle2 size={32} color="var(--green)" /> : <Beer size={32} color="var(--red)" />}
+                  {joinedPlayer.hasDrank ? <CheckCircle2 size={36} color="var(--green)" /> : <Beer size={36} color="var(--red)" />}
                 </div>
 
                 <div>
-                  <h2 style={{ fontSize: 24, fontWeight: 700, color: joinedPlayer.hasDrank ? 'var(--green)' : '#f2696d' }}>
+                  <h2 style={{ fontSize: 26, fontWeight: 800, color: joinedPlayer.hasDrank ? 'var(--green)' : '#f2696d' }}>
                     {joinedPlayer.hasDrank ? 'Santé ! 🍻' : `Tu dois boire ${joinedPlayer.sipsToDrink} gorgée${joinedPlayer.sipsToDrink > 1 ? 's' : ''} !`}
                   </h2>
                 </div>
 
                 {!joinedPlayer.hasDrank && (
-                  <button onClick={handleConfirmDrank} className="btn btn-primary btn-full btn-lg" style={{ fontSize: 16, padding: '14px 20px' }}>
-                    <Beer size={20} />
-                    <span>J'ai fini de boire 🍻</span>
+                  <button onClick={handleConfirmDrank} className="btn btn-primary btn-massive-action" style={{ minHeight: 76, fontSize: 'clamp(1.3rem, 5vw, 1.6rem)' }}>
+                    <Beer size={28} />
+                    <span>J'AI FINI DE BOIRE 🍻</span>
                   </button>
                 )}
               </>

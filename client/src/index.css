@@ -6,57 +6,57 @@
    ============================================================ */
 
 :root {
-  /* ── Backgrounds (noir chaud) ────────────────────────────── */
-  --bg-base:       #100c08;
-  --bg-surface:    #191209;
-  --bg-card:       #191209;
-  --bg-card-hover: #241a0e;
-  --bg-elevated:   #241a0e;
-  --bg-input:      #0c0906;
+  /* ── Backgrounds (noir profond & contraste élevé) ───────── */
+  --bg-base:       #080b11;
+  --bg-surface:    #0f1523;
+  --bg-card:       #121929;
+  --bg-card-hover: #1a2338;
+  --bg-elevated:   #1a243a;
+  --bg-input:      #0a0e17;
 
-  /* ── Borders ─────────────────────────────────────────────── */
-  --border-default: rgba(246, 235, 216, 0.14);
-  --border-subtle:  rgba(246, 235, 216, 0.08);
-  --border-strong:  rgba(246, 235, 216, 0.22);
-  --border-focus:   #ffb629;
+  /* ── Borders (très lisibles) ────────────────────────────── */
+  --border-default: rgba(255, 255, 255, 0.18);
+  --border-subtle:  rgba(255, 255, 255, 0.10);
+  --border-strong:  rgba(255, 255, 255, 0.30);
+  --border-focus:   #facc15;
 
-  /* ── Brand (jaune bubble Sip Sip) ────────────────────────── */
-  --yellow:        #ffb629;
-  --orange:        #ef8511;
-  --orange-deep:   #c96a0d;
-  --cream:         #f6ebd8;
-  --brown:         #6b3a1f;
-  --yellow-glow:   rgba(255, 182, 41, 0.22);
-  --yellow-subtle: rgba(255, 182, 41, 0.12);
+  /* ── Brand (jaune éclatant & or) ────────────────────────── */
+  --yellow:        #facc15;
+  --orange:        #f97316;
+  --orange-deep:   #c2410c;
+  --cream:         #ffffff;
+  --brown:         #78350f;
+  --yellow-glow:   rgba(250, 204, 21, 0.35);
+  --yellow-subtle: rgba(250, 204, 21, 0.16);
 
-  /* ── Semantic Colors ─────────────────────────────────────── */
-  --green:          #5cc963;
-  --green-dark:     #47b04e;
-  --green-darker:   #2f8a36;
-  --green-glow:     rgba(92, 201, 99, 0.20);
-  --green-subtle:   rgba(92, 201, 99, 0.12);
-  --green-muted:    rgba(92, 201, 99, 0.07);
+  /* ── Semantic Colors (tranchées & nettes) ────────────────── */
+  --green:          #22c55e;
+  --green-dark:     #16a34a;
+  --green-darker:   #15803d;
+  --green-glow:     rgba(34, 197, 94, 0.35);
+  --green-subtle:   rgba(34, 197, 94, 0.18);
+  --green-muted:    rgba(34, 197, 94, 0.10);
 
-  --red:            #e5484d;
-  --red-shadow:     #8c2429;
-  --red-glow:       rgba(229, 72, 77, 0.20);
-  --red-subtle:     rgba(229, 72, 77, 0.10);
+  --red:            #ef4444;
+  --red-shadow:     #991b1b;
+  --red-glow:       rgba(239, 68, 68, 0.35);
+  --red-subtle:     rgba(239, 68, 68, 0.18);
 
-  --gold:           #ffb629;
-  --gold-subtle:    rgba(255, 182, 41, 0.12);
-  --gold-glow:      rgba(255, 182, 41, 0.22);
+  --gold:           #f59e0b;
+  --gold-subtle:    rgba(245, 158, 11, 0.18);
+  --gold-glow:      rgba(245, 158, 11, 0.35);
 
-  --blue:           #4d9de0;
-  --blue-subtle:    rgba(77, 157, 224, 0.12);
+  --blue:           #3b82f6;
+  --blue-subtle:    rgba(59, 130, 246, 0.18);
 
-  /* ── Text ────────────────────────────────────────────────── */
-  --text-primary:   #f6ebd8;
-  --text-secondary: rgba(246, 235, 216, 0.62);
-  --text-dim:       rgba(246, 235, 216, 0.35);
-  --text-inverse:   #100c08;
+  /* ── Text (blanc pur & contrastes forts) ─────────────────── */
+  --text-primary:   #ffffff;
+  --text-secondary: #94a3b8;
+  --text-dim:       #64748b;
+  --text-inverse:   #080b11;
 
   /* ── Typography ──────────────────────────────────────────── */
-  --font: 'Fredoka', 'Avenir Next', 'Trebuchet MS', sans-serif;
+  --font: 'Fredoka', 'Inter', -apple-system, sans-serif;
   --font-display: 'Titan One', 'Fredoka', sans-serif;
 
   /* ── Radii ───────────────────────────────────────────────── */
@@ -68,11 +68,11 @@
   --r-full: 9999px;
 
   /* ── Shadows ─────────────────────────────────────────────── */
-  --shadow-sm:  0 2px 6px rgba(0,0,0,0.4);
-  --shadow-md:  0 6px 16px rgba(0,0,0,0.5);
-  --shadow-lg:  0 12px 28px rgba(0,0,0,0.6);
-  --shadow-sticker: 6px 6px 0 rgba(0, 0, 0, 0.4);
-  --shadow-green: 0 0 20px var(--green-glow);
+  --shadow-sm:  0 2px 6px rgba(0,0,0,0.5);
+  --shadow-md:  0 6px 16px rgba(0,0,0,0.6);
+  --shadow-lg:  0 14px 32px rgba(0,0,0,0.7);
+  --shadow-sticker: 4px 4px 0 rgba(0, 0, 0, 0.6);
+  --shadow-green: 0 0 25px var(--green-glow);
 }
 
 /* ── Reset ─────────────────────────────────────────────────── */
@@ -88,14 +88,9 @@ html {
 
 body {
   font-family: var(--font);
-  font-size: 14px;
-  line-height: 1.5;
+  font-size: clamp(16px, 1.15vw, 19px);
+  line-height: 1.45;
   background-color: var(--bg-base);
-  background-image:
-    radial-gradient(ellipse 80% 55% at 50% -10%, rgba(255, 182, 41, 0.07), transparent 70%),
-    radial-gradient(ellipse 60% 45% at 85% 108%, rgba(239, 133, 17, 0.05), transparent 70%),
-    radial-gradient(ellipse 130% 100% at 50% 50%, transparent 60%, rgba(0, 0, 0, 0.35) 100%);
-  background-attachment: fixed;
   color: var(--text-primary);
   min-height: 100vh;
   min-height: 100dvh;
@@ -882,17 +877,28 @@ input[type="range"]::-moz-range-thumb {
   overflow: hidden;
 }
 
+/* ── BLACKJACK CASINO FELT & PLAYING CARDS (Massif & Ultra-Lisible) ─── */
+.blackjack-table {
+  background: radial-gradient(ellipse at 50% 25%, #0e4828 0%, #082d18 55%, #04170d 100%);
+  border: 3px solid rgba(250, 204, 21, 0.45);
+  box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.85), var(--shadow-lg);
+  border-radius: var(--r-xl);
+  position: relative;
+  overflow: hidden;
+}
+
 .playing-card {
-  width: 52px;
-  height: 74px;
-  background: #fdf8ee;
-  border-radius: 8px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(0, 0, 0, 0.1);
+  width: clamp(72px, 8vw, 92px);
+  height: clamp(104px, 12vw, 134px);
+  background: #ffffff;
+  border: 2px solid #000000;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6), inset 0 0 0 1px rgba(0, 0, 0, 0.2);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: 4px 6px;
-  font-weight: 700;
+  padding: 8px 10px;
+  font-weight: 900;
   user-select: none;
   animation: cardDeal 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   flex-shrink: 0;
@@ -900,42 +906,42 @@ input[type="range"]::-moz-range-thumb {
 }
 
 .playing-card-lg {
-  width: 68px;
-  height: 96px;
-  padding: 6px 8px;
-  border-radius: 10px;
+  width: clamp(88px, 11vw, 116px);
+  height: clamp(128px, 16vw, 170px);
+  padding: 10px 12px;
+  border-radius: 14px;
 }
 
 .playing-card-sm {
-  width: 40px;
-  height: 56px;
-  padding: 3px 4px;
-  border-radius: 6px;
+  width: clamp(52px, 6.5vw, 68px);
+  height: clamp(76px, 9.5vw, 98px);
+  padding: 5px 6px;
+  border-radius: 8px;
 }
 
 .playing-card-red {
-  color: #d33a3f;
+  color: #dc2626;
 }
 
 .playing-card-black {
-  color: #241a0e;
+  color: #09090b;
 }
 
 .card-back {
   background: repeating-linear-gradient(
     45deg,
-    var(--orange),
-    var(--orange) 5px,
-    var(--orange-deep) 5px,
-    var(--orange-deep) 10px
+    #ea580c,
+    #ea580c 8px,
+    #9a3412 8px,
+    #9a3412 16px
   );
-  border: 2px solid var(--cream);
+  border: 3px solid #ffffff;
 }
 
 @keyframes cardDeal {
   from {
     opacity: 0;
-    transform: translateY(-12px) scale(0.9);
+    transform: translateY(-16px) scale(0.85);
   }
   to {
     opacity: 1;
@@ -943,59 +949,55 @@ input[type="range"]::-moz-range-thumb {
   }
 }
 
-/* ── LES MINES (GRILLE COMMUNE 6x6) ────────────────────────── */
+/* ── LES MINES (GRILLE COMMUNE 6x6 MASSIVE) ─────────────────── */
 .mines-board {
-  background:
-    radial-gradient(ellipse 90% 80% at 50% 0%, rgba(255, 182, 41, 0.05), transparent 65%),
-    #0d0a06;
-  border: 1px solid var(--border-default);
-  border-radius: var(--r-lg);
-  padding: 16px;
+  background: #090d16;
+  border: 2px solid var(--border-default);
+  border-radius: var(--r-xl);
+  padding: clamp(16px, 2.5vw, 28px);
 }
 
 .mines-grid-container {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
-  gap: 10px;
+  gap: clamp(8px, 1.5vw, 14px);
   width: 100%;
-  max-width: 520px;
+  max-width: 760px;
   margin: 0 auto;
 }
 
 .mines-grid-phone {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
-  gap: 7px;
+  gap: 8px;
   width: 100%;
-  max-width: 360px;
+  max-width: 420px;
   margin: 0 auto;
 }
 
 .mines-cell {
   aspect-ratio: 1 / 1;
-  background:
-    linear-gradient(160deg, rgba(246, 235, 216, 0.10), rgba(246, 235, 216, 0.02) 45%),
-    var(--bg-elevated);
-  border: 1px solid rgba(246, 235, 216, 0.16);
-  border-bottom-color: rgba(0, 0, 0, 0.55);
+  background: var(--bg-elevated);
+  border: 2px solid rgba(255, 255, 255, 0.16);
+  border-bottom: 4px solid rgba(0, 0, 0, 0.7);
   border-radius: var(--r-md);
-  color: var(--text-primary);
+  color: #ffffff;
   font-family: var(--font);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 24px;
+  font-size: clamp(28px, 4vw, 42px);
   user-select: none;
   transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
   position: relative;
-  box-shadow: inset 0 1px 0 rgba(246, 235, 216, 0.10), 0 3px 0 rgba(0, 0, 0, 0.45);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
 }
 
 .mines-cell-dot {
-  width: 7px;
-  height: 7px;
-  background: rgba(255, 182, 41, 0.22);
-  border-radius: 2px;
+  width: clamp(8px, 1.2vw, 14px);
+  height: clamp(8px, 1.2vw, 14px);
+  background: var(--yellow);
+  border-radius: 3px;
   transform: rotate(45deg);
 }
 
@@ -1005,51 +1007,33 @@ input[type="range"]::-moz-range-thumb {
 
 .mines-cell-interactive:hover {
   border-color: var(--yellow);
-  transform: translateY(-3px);
-  box-shadow: inset 0 1px 0 rgba(246, 235, 216, 0.10), 0 6px 0 rgba(201, 106, 13, 0.55), 0 8px 18px var(--yellow-glow);
-}
-
-.mines-cell-interactive:hover .mines-cell-dot {
-  background: var(--yellow);
+  transform: translateY(-4px) scale(1.04);
+  box-shadow: 0 8px 20px var(--yellow-glow);
 }
 
 .mines-cell-interactive:active {
-  transform: translateY(1px);
-  box-shadow: inset 0 1px 0 rgba(246, 235, 216, 0.10), 0 1px 0 rgba(0, 0, 0, 0.45);
+  transform: translateY(2px) scale(0.96);
+  box-shadow: none;
 }
 
 .mines-cell-safe {
-  background:
-    radial-gradient(circle at 50% 38%, rgba(92, 201, 99, 0.35), transparent 70%),
-    linear-gradient(160deg, #17381e, #0e2413);
-  border-color: rgba(92, 201, 99, 0.6);
-  border-bottom-color: rgba(92, 201, 99, 0.6);
-  box-shadow: inset 0 0 18px rgba(92, 201, 99, 0.25), 0 0 16px rgba(92, 201, 99, 0.25);
-  animation: cellFlip 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-.mines-cell-safe::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  box-shadow: 0 0 22px rgba(92, 201, 99, 0.35);
-  animation: gemGlow 2.2s ease-in-out infinite;
-  pointer-events: none;
+  background: linear-gradient(160deg, #15803d, #14532d);
+  border-color: #22c55e;
+  border-bottom: 4px solid #166534;
+  box-shadow: 0 0 25px rgba(34, 197, 94, 0.45);
+  animation: cellFlip 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .mines-cell-bomb {
-  background:
-    radial-gradient(circle at 50% 42%, rgba(229, 72, 77, 0.45), transparent 72%),
-    linear-gradient(160deg, #3d100f, #200806);
-  border-color: rgba(229, 72, 77, 0.7);
-  border-bottom-color: rgba(229, 72, 77, 0.7);
-  box-shadow: inset 0 0 18px rgba(229, 72, 77, 0.35), 0 0 22px rgba(229, 72, 77, 0.4);
+  background: linear-gradient(160deg, #b91c1c, #7f1d1d);
+  border-color: #ef4444;
+  border-bottom: 4px solid #991b1b;
+  box-shadow: 0 0 30px rgba(239, 68, 68, 0.55);
   animation: bombExplode 0.5s ease-out;
 }
 
 .mines-cell-disabled {
-  opacity: 0.7;
+  opacity: 0.65;
   cursor: not-allowed;
 }
 
@@ -1175,3 +1159,65 @@ input[type="range"]::-moz-range-thumb {
   .marquee-track { animation: none; transform: none; }
   .progress-fill::after { animation: none; }
 }
+
+/* ============================================================
+   MODE DISTANCE & AFFICHAGE SALON (LISIBILITÉ MAXIMALE SUR TV)
+   ============================================================ */
+
+/* Multiplicateur Crash Géant */
+.tv-multiplier-huge {
+  font-family: var(--font-display);
+  font-size: clamp(4.5rem, 11vw, 9rem);
+  line-height: 1;
+  color: var(--yellow);
+  text-shadow: 0 4px 0 var(--orange-deep), 0 0 45px var(--yellow-glow);
+  letter-spacing: -0.02em;
+}
+
+/* Titres & Bannières TV massifs */
+.tv-title-giant {
+  font-size: clamp(2rem, 4.5vw, 3.8rem);
+  font-weight: 900;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+}
+
+.tv-banner-massive {
+  padding: clamp(20px, 3vw, 36px) clamp(24px, 4vw, 48px);
+  border-radius: var(--r-xl);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.7);
+}
+
+/* Badges de score et valeurs vitales */
+.tv-score-badge {
+  font-family: var(--font-mono);
+  font-size: clamp(1.8rem, 3.2vw, 2.8rem);
+  font-weight: 900;
+  min-width: clamp(54px, 5vw, 76px);
+  min-height: clamp(54px, 5vw, 76px);
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Contrôles tactiles massifs pour téléphones */
+.btn-massive-action {
+  width: 100%;
+  min-height: 68px;
+  font-size: clamp(1.25rem, 4.5vw, 1.6rem);
+  font-weight: 900;
+  border-radius: 18px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.btn-massive-action:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
