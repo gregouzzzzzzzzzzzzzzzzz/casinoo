@@ -22,6 +22,7 @@ import {
 import confetti from 'canvas-confetti';
 import { AviatorCanvas } from '../components/AviatorCanvas';
 import { RouletteWheelCanvas } from '../components/RouletteWheelCanvas';
+import { DerbyTutorial } from '../components/DerbyTutorial';
 
 // ── Helpers ──────────────────────────────────────────────────
 const AVATAR_COLORS = [
@@ -749,7 +750,7 @@ export const HostScreen: React.FC = () => {
                   <div style={{ background: 'var(--bg-input)', padding: '10px 12px', borderRadius: 6, display: 'flex', flexDirection: 'column', gap: 6 }}>
                     <span style={{ fontSize: 11, color: 'var(--text-secondary)', fontWeight: 700 }}>JEUX ACTIVÉS</span>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
-                      {(room?.settings?.enabledGames || ['mines', 'blackjack', 'crash', 'roulette']).map((game) => (
+                      {(room?.settings?.enabledGames || ['mines', 'blackjack', 'crash', 'roulette', 'derby']).map((game) => (
                         <span key={game} className="badge badge-surface" style={{ fontSize: 10, padding: '3px 7px' }}>
                           {game === 'mines' && '💣 Mines'}
                           {game === 'blackjack' && '♠ Blackjack'}
@@ -833,6 +834,15 @@ export const HostScreen: React.FC = () => {
         {/* ═══════════════════════════════════════════════════════ */}
         {room?.state === 'showing_tutorial' && (() => {
           const gameKey = (room.pendingGame || 'roulette') as string;
+          if (gameKey === 'derby') {
+            return (
+              <DerbyTutorial
+                roomId={room.id}
+                onEndTutorial={() => socket.emit('end_tutorial', { roomId: room.id })}
+              />
+            );
+          }
+
           const info = GAME_TUTORIAL_INFO[gameKey] || GAME_TUTORIAL_INFO.roulette;
 
           return (

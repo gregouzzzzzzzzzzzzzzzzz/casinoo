@@ -795,11 +795,11 @@ export const PhoneScreen: React.FC = () => {
                 maxPlayers: 8,
                 minesBombCount: 7,
                 sipMultiplier: 1,
-                enabledGames: ['mines', 'blackjack', 'crash', 'roulette'] as GameChoice[],
+                enabledGames: ['mines', 'blackjack', 'crash', 'roulette', 'derby'] as GameChoice[],
               };
 
               const toggleGame = (game: GameChoice) => {
-                const currentList = s.enabledGames || ['mines', 'blackjack', 'crash', 'roulette'];
+                const currentList = s.enabledGames || ['mines', 'blackjack', 'crash', 'roulette', 'derby'];
                 let nextList: GameChoice[];
                 if (currentList.includes(game)) {
                   if (currentList.length === 1) return; // keep at least 1 game

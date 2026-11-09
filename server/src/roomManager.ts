@@ -187,7 +187,7 @@ export class RoomManager {
       maxPlayers: newSettings.maxPlayers ?? room.settings?.maxPlayers ?? 8,
       minesBombCount: newSettings.minesBombCount ?? room.settings?.minesBombCount ?? 7,
       sipMultiplier: newSettings.sipMultiplier ?? room.settings?.sipMultiplier ?? 1,
-      enabledGames: newSettings.enabledGames || room.settings?.enabledGames || ['mines', 'blackjack', 'crash', 'roulette'],
+      enabledGames: newSettings.enabledGames || room.settings?.enabledGames || ['mines', 'blackjack', 'crash', 'roulette', 'derby'],
     };
 
     // Update players' balance in lobby if startingBalance changed
@@ -465,7 +465,7 @@ export class RoomManager {
     if (room.state !== 'lobby') return { success: false, error: 'La partie est déjà lancée' };
     if (room.players.length === 0) return { success: false, error: 'Impossible de lancer une partie sans joueur' };
 
-    const enabled = room.settings?.enabledGames || ['mines', 'blackjack', 'crash', 'roulette'];
+    const enabled = room.settings?.enabledGames || ['mines', 'blackjack', 'crash', 'roulette', 'derby'];
     if (enabled.length === 1) {
       const updated = this.transitionToGameChoice(roomId, enabled[0]);
       return { success: true, room: updated, fastTrack: true };
